@@ -167,6 +167,14 @@
     @apply font-sans;
     -webkit-text-size-adjust: 100%;
     -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+    /* O cabeçalho fixo (64px) não cobre o elemento focado nem âncoras. */
+    scroll-padding-top: 5rem;
+  }
+  [role="dialog"],
+  [data-slot="sheet-content"],
+  [data-slot="popover-content"] {
+    overscroll-behavior: contain;
   }
   body {
     @apply bg-background text-foreground antialiased;

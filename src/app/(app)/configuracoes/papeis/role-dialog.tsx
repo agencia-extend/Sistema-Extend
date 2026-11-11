@@ -54,10 +54,10 @@ export function RoleDialog({ role }: { role?: { id: string; name: string; descri
         </DialogHeader>
         <form id="role-form" onSubmit={onSubmit} noValidate className="grid gap-4">
           <FormField label="Nome" error={form.formState.errors.name?.message} required>
-            <Input placeholder="Ex.: Estagiário de design" {...form.register("name")} />
+            <Input placeholder="Ex.: Estagiário de design…" {...form.register("name")} />
           </FormField>
           <FormField label="Descrição" optional error={form.formState.errors.description?.message}>
-            <Textarea rows={3} placeholder="Quem usa este papel e o que faz" {...form.register("description")} />
+            <Textarea rows={3} placeholder="Quem usa este papel e o que faz…" {...form.register("description")} />
           </FormField>
         </form>
         <DialogFooter>

@@ -27,7 +27,7 @@ export function ProfileForm({ fullName, phone, jobTitle, sectors }: { fullName: 
         <Input autoComplete="name" {...form.register("fullName")} />
       </FormField>
       <FormField label="Celular (WhatsApp)" optional hint="Com DDD. Usado para avisos da equipe." error={form.formState.errors.phone?.message}>
-        <Input type="tel" inputMode="tel" autoComplete="tel-national" placeholder="41 99999-0000" {...form.register("phone")} />
+        <Input type="tel" inputMode="tel" autoComplete="tel-national" placeholder="41 99999-0000…" {...form.register("phone")} />
       </FormField>
       <dl className="grid gap-1 text-sm">
         <dt className="text-muted-foreground">Cargo e setores (definidos pelo administrador)</dt>

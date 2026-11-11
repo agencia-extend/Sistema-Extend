@@ -60,7 +60,7 @@ export function AccessForm({
           )}
         />
         <FormField label="Cargo" optional error={form.formState.errors.jobTitle?.message}>
-          <Input placeholder="Ex.: Editora de vídeo" disabled={disabled} {...form.register("jobTitle")} />
+          <Input placeholder="Ex.: Editora de vídeo…" disabled={disabled} {...form.register("jobTitle")} />
         </FormField>
       </div>
       <Controller
