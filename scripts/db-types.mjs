@@ -5,7 +5,7 @@ import { loadEnv, required } from "./env.mjs";
 
 loadEnv();
 const url = required("SUPABASE_DB_URL");
-const out = execSync(`npx -y supabase@latest gen types typescript --db-url "${url}" --schema public`, {
+const out = execSync(`npx -y supabase@latest gen types typescript --remote="${url}" --schema public`, {
   encoding: "utf8",
   stdio: ["ignore", "pipe", "inherit"],
   maxBuffer: 20 * 1024 * 1024,

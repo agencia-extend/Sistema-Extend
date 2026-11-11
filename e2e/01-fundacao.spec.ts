@@ -24,7 +24,7 @@ let editorId = "";
 async function login(page: Page, email: string, password: string) {
   await page.goto("/login");
   await page.getByLabel("E-mail").fill(email);
-  await page.getByLabel("Senha", { exact: true }).fill(password);
+  await page.getByLabel(/^Senha/).fill(password);
   await page.getByRole("button", { name: "Entrar" }).click();
   await page.waitForURL("**/inicio**");
 }

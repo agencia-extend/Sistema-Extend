@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { PERMISSION_KEYS, SCOPES } from "@/domain/permissions";
+import { PERMISSION_KEYS } from "@/domain/permissions";
 
 export const uuid = z.uuid("Identificador inválido.");
 
@@ -24,7 +24,7 @@ export const updateUserAccessSchema = z.object({
 });
 
 const permissionKey = z.enum(PERMISSION_KEYS);
-const scope = z.enum(SCOPES as [string, ...string[]]);
+const scope = z.enum(["own", "clients", "sector", "all"]);
 
 export const overrideSchema = z.object({
   userId: uuid,
