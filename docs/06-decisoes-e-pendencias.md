@@ -19,7 +19,7 @@
 - Chaves VAPID em variáveis de ambiente (como em `docs/04`), não no banco.
 
 ## Pendências da etapa 01
-- **Supabase da Extend:** autenticar o MCP `supabase-extend` (`/mcp`) com a conta Google da Extend e criar o projeto `extend-dev` (sa-east-1). Sem isso as migrations não foram aplicadas e o roteiro de teste E2E não rodou.
+- **Supabase da Extend:** autenticar o MCP `supabase` (projeto `iuqcpcrpnwwquxxbleyw`, em `.mcp.json`) com a conta Google da Extend via `claude /mcp` num terminal comum. Sem isso as migrations não foram aplicadas e o roteiro de teste E2E não rodou.
 - **Vercel da Extend:** criar o projeto (região gru1) e as variáveis de ambiente; depois rodar `scripts/configure-jobs.mjs`.
 - **RF-PER-10 (reatribuir demandas ao desativar):** o acesso já é removido na hora; a reatribuição entra na etapa 03, quando as tarefas existirem.
 - **Convite com clientes iniciais (RF-PER-02):** a coluna `invitations.client_ids` existe; a escolha na tela entra na etapa 02.
