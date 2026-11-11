@@ -1,0 +1,207 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./shadcn-base.css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Identidade Extend (docs/07-identidade-visual.md)
+ *  - Azul elétrico #1D8AE6 é a cor de ação; no claro escurecemos para #1570C4
+ *    (texto branco com contraste AA); no escuro clareamos para #4FA4F0.
+ *  - A barra lateral é sempre "noite" (#0A1220), nos dois temas: o sistema
+ *    se reconhece por ela.
+ *  - Dourado (#FFB800 → #F7931E) só em destaques pontuais, nunca em texto pequeno.
+ *  - Títulos em Outfit, texto em Inter, números com algarismos tabulares.
+ */
+
+@theme inline {
+  --font-sans: var(--font-inter), "Inter", system-ui, sans-serif;
+  --font-heading: var(--font-outfit), "Outfit", system-ui, sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-surface: var(--surface);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-neutral-status: var(--neutral-status);
+  --color-neutral-soft: var(--neutral-soft);
+  --color-gold: var(--gold);
+
+  --color-night: var(--night);
+  --color-night-raised: var(--night-raised);
+  --color-night-line: var(--night-line);
+  --color-night-text: var(--night-text);
+  --color-night-dim: var(--night-dim);
+
+  --color-sidebar: var(--night);
+  --color-sidebar-foreground: var(--night-text);
+  --color-sidebar-primary: var(--brand);
+  --color-sidebar-primary-foreground: #ffffff;
+  --color-sidebar-accent: var(--night-raised);
+  --color-sidebar-accent-foreground: var(--night-text);
+  --color-sidebar-border: var(--night-line);
+  --color-sidebar-ring: var(--brand);
+
+  --color-brand: var(--brand);
+
+  /* Raios 8 / 14 / 24 */
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
+  --radius-xl: 14px;
+  --radius-2xl: 14px;
+  --radius-3xl: 24px;
+  --radius-4xl: 24px;
+}
+
+:root {
+  color-scheme: light;
+  --radius: 8px;
+  --brand: #1d8ae6;
+
+  --background: #f3f6fa;
+  --surface: #ffffff;
+  --foreground: #0e1726;
+  --card: #ffffff;
+  --card-foreground: #0e1726;
+  --popover: #ffffff;
+  --popover-foreground: #0e1726;
+  --primary: #1570c4;
+  --primary-foreground: #ffffff;
+  --secondary: #e8eef6;
+  --secondary-foreground: #0e1726;
+  --muted: #edf1f7;
+  --muted-foreground: #526175;
+  --accent: #e3effc;
+  --accent-foreground: #0d4f8f;
+  --destructive: #c42121;
+  --border: #dbe3ee;
+  --input: #c3cfdd;
+  --ring: #1d8ae6;
+
+  --success: #157a3c;
+  --success-soft: #e3f4ea;
+  --warning: #9a5b00;
+  --warning-soft: #fdf2dc;
+  --danger: #c42121;
+  --danger-soft: #fdeaea;
+  --info: #1570c4;
+  --info-soft: #e3effc;
+  --neutral-status: #5b6778;
+  --neutral-soft: #eceff3;
+  --gold: #f7a21e;
+
+  --night: #0a1220;
+  --night-raised: #142036;
+  --night-line: rgb(255 255 255 / 0.08);
+  --night-text: #e6edf6;
+  --night-dim: #8d9bb0;
+}
+
+.dark {
+  color-scheme: dark;
+  --background: #030406;
+  --surface: #0d121e;
+  --foreground: #f8fafc;
+  --card: #0d121e;
+  --card-foreground: #f8fafc;
+  --popover: #111827;
+  --popover-foreground: #f8fafc;
+  --primary: #4fa4f0;
+  --primary-foreground: #031024;
+  --secondary: #172033;
+  --secondary-foreground: #f8fafc;
+  --muted: #121a2a;
+  --muted-foreground: #94a3b8;
+  --accent: #10233d;
+  --accent-foreground: #b9dafb;
+  --destructive: #f87171;
+  --border: rgb(255 255 255 / 0.09);
+  --input: rgb(255 255 255 / 0.16);
+  --ring: #4fa4f0;
+
+  --success: #4ade80;
+  --success-soft: #0f2a1b;
+  --warning: #fbbf24;
+  --warning-soft: #2e2208;
+  --danger: #f87171;
+  --danger-soft: #331414;
+  --info: #4fa4f0;
+  --info-soft: #10233d;
+  --neutral-status: #94a3b8;
+  --neutral-soft: #1a2232;
+  --gold: #ffb800;
+
+  --night: #070b14;
+  --night-raised: #121b2c;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    @apply font-sans;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv11", "ss01";
+  }
+  h1,
+  h2,
+  h3,
+  .font-heading {
+    font-family: var(--font-heading);
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer utilities {
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+  .pb-safe {
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .gold-rule {
+    background: linear-gradient(90deg, #ffb800, #f7931e);
+  }
+}
