@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv } from "@/lib/env";
 import { applyRememberChoice, clearRememberChoice } from "@/lib/auth/remember";
-import { clientIp, RATE_LIMIT_MESSAGE, withinRateLimit } from "@/lib/rate-limit";
+import { clientIp, isRateLimited, RATE_LIMIT_MESSAGE, withinRateLimit } from "@/lib/rate-limit";
 import { fail, ok, type ActionResult } from "@/domain/shared/result";
 import { loginSchema, newPasswordSchema, resetRequestSchema } from "./schemas";
 
@@ -25,15 +25,11 @@ export async function login(raw: unknown): Promise<ActionResult<null>> {
   if (!parsed.success) return fail("validation", "Revise os campos destacados.", fieldErrors(parsed.error.issues));
   const { email, password, remember, next } = parsed.data;
 
-  // Bloqueio temporário: 5 tentativas por e-mail e 20 por IP a cada 15 minutos.
+  // Bloqueio temporário: 5 tentativas ERRADAS por e-mail e 20 por IP a cada 15 minutos.
   const ip = await clientIp();
-  const [byEmail, byIp] = await Promise.all([
-    withinRateLimit(`login:${email}`, 5, 900),
-    withinRateLimit(`login-ip:${ip}`, 20, 900),
-  ]);
-  if (!byEmail || !byIp) {
-    return fail("business_rule", "Muitas tentativas de login. Por segurança, aguarde 15 minutos e tente de novo.");
-  }
+  const LOCKED = "Muitas tentativas de login. Por segurança, aguarde 15 minutos e tente de novo.";
+  const [emailLocked, ipLocked] = await Promise.all([isRateLimited(`login:${email}`, 5, 900), isRateLimited(`login-ip:${ip}`, 20, 900)]);
+  if (emailLocked || ipLocked) return fail("business_rule", LOCKED);
 
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -41,6 +37,7 @@ export async function login(raw: unknown): Promise<ActionResult<null>> {
     if (error?.message?.toLowerCase().includes("fetch failed")) {
       return fail("network", "Sem conexão com o servidor. Verifique sua internet e tente novamente.");
     }
+    await Promise.all([withinRateLimit(`login:${email}`, 5, 900), withinRateLimit(`login-ip:${ip}`, 20, 900)]);
     return fail("validation", "E-mail ou senha incorretos.");
   }
 

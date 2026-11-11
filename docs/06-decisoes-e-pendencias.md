@@ -50,3 +50,16 @@
 - [ ] Manual de marca (se houver) — já temos logos e cores do site.
 - [ ] Lista de clientes ativos com serviços e responsáveis (para a carga inicial).
 - [ ] Grupo(s) de WhatsApp internos para relatórios e alertas.
+
+## Decisões da etapa 02 (11/11/2026)
+- Ficha de onboarding semeada com as seções do RF-ONB-01 e editável em Configurações → Onboarding (versões; fichas em andamento passam para o modelo novo, respostas mantidas por chave). A lista de perguntas da Jacque substitui a semente quando chegar.
+- Aviso de cliente novo: por padrão, todas as pessoas com papel Coordenação de conteúdo e Gerente de tráfego; lista ajustável.
+- Demandas do mês: prazos distribuídos pelo mês, às 18h de São Paulo (ex.: 4 vídeos → fim de cada semana). Responsável = pessoa marcada no setor do serviço.
+- Prazo dos itens do checklist = fim do dia (23:59 em São Paulo), N dias após o fechamento.
+- Concluir onboarding exige: perguntas obrigatórias, checklist completo e ao menos uma pessoa marcada na equipe do cliente.
+- Visibilidade "do meu setor" para clientes = cliente com serviço vigente de um setor da pessoa, ou com alguém do setor marcado.
+- Arquivos: anexos leves (até 10 MB) no Storage privado `anexos`; vídeos são recusados com orientação para usar o Drive (decisão D1 ainda aberta para a integração com o Drive).
+- Login: o bloqueio temporário conta só tentativas erradas (5 por e-mail, 20 por IP em 15 min).
+
+## Pendências da etapa 02
+- Planilha real "Controle de clientes": o importador adivinha as colunas pelo cabeçalho; validar com a planilha da Jacque.

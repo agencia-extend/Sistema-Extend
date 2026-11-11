@@ -25,6 +25,380 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"client_accounts": {
+                  Row: {
+                    "client_id": string,"created_at": string,"id": string,"kind": string,"label": string | null,"value": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"id"?: string,"kind": string,"label"?: string | null,"value": string
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"id"?: string,"kind"?: string,"label"?: string | null,"value"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_accounts_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_contacts": {
+                  Row: {
+                    "client_id": string,"created_at": string,"email": string | null,"id": string,"is_primary": boolean,"name": string,"phone": string | null,"role": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"email"?: string | null,"id"?: string,"is_primary"?: boolean,"name": string,"phone"?: string | null,"role"?: string | null
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"email"?: string | null,"id"?: string,"is_primary"?: boolean,"name"?: string,"phone"?: string | null,"role"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_contacts_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_files": {
+                  Row: {
+                    "category": string,"client_id": string,"created_at": string,"id": string,"meeting_id": string | null,"mime_type": string | null,"name": string,"size_bytes": number | null,"storage_path": string,"uploaded_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "category"?: string,"client_id": string,"created_at"?: string,"id"?: string,"meeting_id"?: string | null,"mime_type"?: string | null,"name": string,"size_bytes"?: number | null,"storage_path": string,"uploaded_by"?: string | null
+                  }
+                  Update: {
+                    "category"?: string,"client_id"?: string,"created_at"?: string,"id"?: string,"meeting_id"?: string | null,"mime_type"?: string | null,"name"?: string,"size_bytes"?: number | null,"storage_path"?: string,"uploaded_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_files_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_files_meeting_id_fkey"
+      columns: ["meeting_id"]
+isOneToOne: false
+      referencedRelation: "client_meetings"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_files_uploaded_by_fkey"
+      columns: ["uploaded_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_ideas": {
+                  Row: {
+                    "body": string | null,"client_id": string,"converted_task_id": string | null,"created_at": string,"created_by": string | null,"id": string,"link": string | null,"tags": (string)[],"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body"?: string | null,"client_id": string,"converted_task_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"id"?: string,"link"?: string | null,"tags"?: (string)[],"title": string
+                  }
+                  Update: {
+                    "body"?: string | null,"client_id"?: string,"converted_task_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"id"?: string,"link"?: string | null,"tags"?: (string)[],"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_ideas_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_ideas_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_imports": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"file_name": string,"id": string,"organization_id": string,"row_count": number,"undone_at": string | null,"undone_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"file_name": string,"id"?: string,"organization_id": string,"row_count"?: number,"undone_at"?: string | null,"undone_by"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"file_name"?: string,"id"?: string,"organization_id"?: string,"row_count"?: number,"undone_at"?: string | null,"undone_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_imports_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_imports_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_imports_undone_by_fkey"
+      columns: ["undone_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_meetings": {
+                  Row: {
+                    "client_id": string,"created_at": string,"created_by": string | null,"held_at": string,"id": string,"kind": string,"link": string | null,"participant_ids": (string)[],"summary": string | null,"title": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"created_by"?: string | null,"held_at": string,"id"?: string,"kind"?: string,"link"?: string | null,"participant_ids"?: (string)[],"summary"?: string | null,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"created_by"?: string | null,"held_at"?: string,"id"?: string,"kind"?: string,"link"?: string | null,"participant_ids"?: (string)[],"summary"?: string | null,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_meetings_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_meetings_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_members": {
+                  Row: {
+                    "client_id": string,"created_at": string,"created_by": string | null,"is_default": boolean,"profile_id": string,"sector_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"created_by"?: string | null,"is_default"?: boolean,"profile_id": string,"sector_id": string
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"created_by"?: string | null,"is_default"?: boolean,"profile_id"?: string,"sector_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_members_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_members_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_members_sector_id_fkey"
+      columns: ["sector_id"]
+isOneToOne: false
+      referencedRelation: "sectors"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_onboarding": {
+                  Row: {
+                    "answers": NonNullable<Json>,"client_id": string,"completed_at": string | null,"completed_by": string | null,"form_id": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "answers"?: NonNullable<Json>,"client_id": string,"completed_at"?: string | null,"completed_by"?: string | null,"form_id": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "answers"?: NonNullable<Json>,"client_id"?: string,"completed_at"?: string | null,"completed_by"?: string | null,"form_id"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_onboarding_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: true
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_onboarding_completed_by_fkey"
+      columns: ["completed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_onboarding_form_id_fkey"
+      columns: ["form_id"]
+isOneToOne: false
+      referencedRelation: "onboarding_forms"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_onboarding_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_services": {
+                  Row: {
+                    "client_id": string,"created_at": string,"ends_on": string | null,"id": string,"monthly_qty": number,"price_cents": number | null,"service_id": string,"starts_on": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"ends_on"?: string | null,"id"?: string,"monthly_qty"?: number,"price_cents"?: number | null,"service_id": string,"starts_on"?: string
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"ends_on"?: string | null,"id"?: string,"monthly_qty"?: number,"price_cents"?: number | null,"service_id"?: string,"starts_on"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_services_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_services_service_id_fkey"
+      columns: ["service_id"]
+isOneToOne: false
+      referencedRelation: "service_catalog"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_timeline": {
+                  Row: {
+                    "actor_id": string | null,"client_id": string,"created_at": string,"data": NonNullable<Json>,"id": number,"kind": string,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "actor_id"?: string | null,"client_id": string,"created_at"?: string,"data"?: NonNullable<Json>,"id"?: never,"kind": string,"title": string
+                  }
+                  Update: {
+                    "actor_id"?: string | null,"client_id"?: string,"created_at"?: string,"data"?: NonNullable<Json>,"id"?: never,"kind"?: string,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_timeline_actor_id_fkey"
+      columns: ["actor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_timeline_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"clients": {
+                  Row: {
+                    "communication_channel": string | null,"contract_end": string | null,"contract_start": string | null,"created_at": string,"created_by": string | null,"deleted_at": string | null,"document": string | null,"id": string,"import_id": string | null,"legal_name": string | null,"media_budget_cents": number | null,"monthly_fee_cents": number | null,"name": string,"notes": string | null,"onboarding_completed_at": string | null,"onboarding_legacy": boolean,"organization_id": string,"payment_method": string | null,"renewal_date": string | null,"segment": string | null,"status": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "communication_channel"?: string | null,"contract_end"?: string | null,"contract_start"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"document"?: string | null,"id"?: string,"import_id"?: string | null,"legal_name"?: string | null,"media_budget_cents"?: number | null,"monthly_fee_cents"?: number | null,"name": string,"notes"?: string | null,"onboarding_completed_at"?: string | null,"onboarding_legacy"?: boolean,"organization_id": string,"payment_method"?: string | null,"renewal_date"?: string | null,"segment"?: string | null,"status"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "communication_channel"?: string | null,"contract_end"?: string | null,"contract_start"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"document"?: string | null,"id"?: string,"import_id"?: string | null,"legal_name"?: string | null,"media_budget_cents"?: number | null,"monthly_fee_cents"?: number | null,"name"?: string,"notes"?: string | null,"onboarding_completed_at"?: string | null,"onboarding_legacy"?: boolean,"organization_id"?: string,"payment_method"?: string | null,"renewal_date"?: string | null,"segment"?: string | null,"status"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "clients_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "clients_import_id_fkey"
+      columns: ["import_id"]
+isOneToOne: false
+      referencedRelation: "client_imports"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "clients_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"commercial_handoffs": {
+                  Row: {
+                    "client_id": string,"closed_on": string,"contract_months": number | null,"created_at": string,"created_by": string | null,"id": string,"monthly_fee_cents": number | null,"notes": string | null,"payment_method": string | null,"setup_fee_cents": number | null,"sold_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"closed_on"?: string,"contract_months"?: number | null,"created_at"?: string,"created_by"?: string | null,"id"?: string,"monthly_fee_cents"?: number | null,"notes"?: string | null,"payment_method"?: string | null,"setup_fee_cents"?: number | null,"sold_by"?: string | null
+                  }
+                  Update: {
+                    "client_id"?: string,"closed_on"?: string,"contract_months"?: number | null,"created_at"?: string,"created_by"?: string | null,"id"?: string,"monthly_fee_cents"?: number | null,"notes"?: string | null,"payment_method"?: string | null,"setup_fee_cents"?: number | null,"sold_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "commercial_handoffs_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "commercial_handoffs_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "commercial_handoffs_sold_by_fkey"
+      columns: ["sold_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"handoff_promises": {
+                  Row: {
+                    "client_id": string,"created_at": string,"description": string,"done_at": string | null,"done_by": string | null,"due_at": string,"handoff_id": string | null,"id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"description": string,"done_at"?: string | null,"done_by"?: string | null,"due_at": string,"handoff_id"?: string | null,"id"?: string
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"description"?: string,"done_at"?: string | null,"done_by"?: string | null,"due_at"?: string,"handoff_id"?: string | null,"id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "handoff_promises_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "handoff_promises_done_by_fkey"
+      columns: ["done_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "handoff_promises_handoff_id_fkey"
+      columns: ["handoff_id"]
+isOneToOne: false
+      referencedRelation: "commercial_handoffs"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"invitations": {
                   Row: {
                     "accepted_at": string | null,"cancelled_at": string | null,"cancelled_by": string | null,"client_ids": (string)[],"created_at": string,"email": string,"expires_at": string,"full_name": string,"id": string,"invited_by": string | null,"last_sent_at": string,"organization_id": string,"role_id": string,"sector_ids": (string)[],"send_count": number,"status": Database["public"]['Enums']["invitation_status"],"token_hash": string,"user_id": string | null
@@ -106,6 +480,90 @@ isOneToOne: false
       columns: ["user_id"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"onboarding_checklist_items": {
+                  Row: {
+                    "assignee_id": string | null,"client_id": string,"created_at": string,"done_at": string | null,"done_by": string | null,"due_at": string | null,"id": string,"position": number,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "assignee_id"?: string | null,"client_id": string,"created_at"?: string,"done_at"?: string | null,"done_by"?: string | null,"due_at"?: string | null,"id"?: string,"position"?: number,"title": string
+                  }
+                  Update: {
+                    "assignee_id"?: string | null,"client_id"?: string,"created_at"?: string,"done_at"?: string | null,"done_by"?: string | null,"due_at"?: string | null,"id"?: string,"position"?: number,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "onboarding_checklist_items_assignee_id_fkey"
+      columns: ["assignee_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "onboarding_checklist_items_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "onboarding_checklist_items_done_by_fkey"
+      columns: ["done_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"onboarding_checklist_templates": {
+                  Row: {
+                    "created_at": string,"default_sector_id": string | null,"due_days": number,"id": string,"is_active": boolean,"organization_id": string,"position": number,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"default_sector_id"?: string | null,"due_days"?: number,"id"?: string,"is_active"?: boolean,"organization_id": string,"position"?: number,"title": string
+                  }
+                  Update: {
+                    "created_at"?: string,"default_sector_id"?: string | null,"due_days"?: number,"id"?: string,"is_active"?: boolean,"organization_id"?: string,"position"?: number,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "onboarding_checklist_templates_default_sector_id_fkey"
+      columns: ["default_sector_id"]
+isOneToOne: false
+      referencedRelation: "sectors"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "onboarding_checklist_templates_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"onboarding_forms": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"id": string,"is_current": boolean,"organization_id": string,"sections": NonNullable<Json>,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"is_current"?: boolean,"organization_id": string,"sections": NonNullable<Json>,"version": number
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"is_current"?: boolean,"organization_id"?: string,"sections"?: NonNullable<Json>,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "onboarding_forms_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "onboarding_forms_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
       referencedColumns: ["id"]
     }
                   ]
@@ -269,6 +727,82 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"service_catalog": {
+                  Row: {
+                    "created_at": string,"id": string,"is_active": boolean,"key": string,"name": string,"organization_id": string,"position": number,"sector_id": string | null,"tabs": (string)[],"task_type": string | null,"unit": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"is_active"?: boolean,"key": string,"name": string,"organization_id": string,"position"?: number,"sector_id"?: string | null,"tabs"?: (string)[],"task_type"?: string | null,"unit"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"is_active"?: boolean,"key"?: string,"name"?: string,"organization_id"?: string,"position"?: number,"sector_id"?: string | null,"tabs"?: (string)[],"task_type"?: string | null,"unit"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "service_catalog_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "service_catalog_sector_id_fkey"
+      columns: ["sector_id"]
+isOneToOne: false
+      referencedRelation: "sectors"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"tasks": {
+                  Row: {
+                    "assignee_id": string | null,"client_id": string | null,"completed_at": string | null,"created_at": string,"created_by": string | null,"deleted_at": string | null,"description": string | null,"due_at": string | null,"id": string,"organization_id": string,"priority": string,"sector_id": string | null,"service_id": string | null,"slot_index": number | null,"slot_month": string | null,"slot_total": number | null,"status": string,"title": string,"type": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "assignee_id"?: string | null,"client_id"?: string | null,"completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"description"?: string | null,"due_at"?: string | null,"id"?: string,"organization_id": string,"priority"?: string,"sector_id"?: string | null,"service_id"?: string | null,"slot_index"?: number | null,"slot_month"?: string | null,"slot_total"?: number | null,"status"?: string,"title": string,"type"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "assignee_id"?: string | null,"client_id"?: string | null,"completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"description"?: string | null,"due_at"?: string | null,"id"?: string,"organization_id"?: string,"priority"?: string,"sector_id"?: string | null,"service_id"?: string | null,"slot_index"?: number | null,"slot_month"?: string | null,"slot_total"?: number | null,"status"?: string,"title"?: string,"type"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "tasks_assignee_id_fkey"
+      columns: ["assignee_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tasks_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tasks_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tasks_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tasks_sector_id_fkey"
+      columns: ["sector_id"]
+isOneToOne: false
+      referencedRelation: "sectors"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tasks_service_id_fkey"
+      columns: ["service_id"]
+isOneToOne: false
+      referencedRelation: "service_catalog"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"user_permission_overrides": {
                   Row: {
                     "created_at": string,"created_by": string | null,"effect": Database["public"]['Enums']["override_effect"],"permission_key": string,"scope": Database["public"]['Enums']["permission_scope"],"user_id": string
@@ -333,10 +867,24 @@ isOneToOne: false
 "admin_set_user_role":
 { Args: { "p_role": string,"p_user": string }; Returns: undefined
                            },
+"archive_client":
+{ Args: { "p_client": string }; Returns: undefined
+                           },
 "claim_pending_pushes":
 { Args: { "p_limit"?: number }; Returns: {
               "body": string,"href": string,"id": string,"kind": string,"title": string,"user_id": string
             }[]
+                           },
+"client_operational_summary":
+{ Args: { "p_client": string }; Returns: {
+              "answer": string,"label": string,"section": string
+            }[]
+                           },
+"complete_onboarding":
+{ Args: { "p_client": string }; Returns: number
+                           },
+"create_handoff":
+{ Args: { "p": Json }; Returns: string
                            },
 "duplicate_role":
 { Args: { "p_name": string,"p_role": string }; Returns: string
@@ -346,6 +894,9 @@ isOneToOne: false
                            },
 "finish_pushes":
 { Args: { "p_failed": (string)[],"p_sent": (string)[],"p_skipped": (string)[] }; Returns: undefined
+                           },
+"import_clients":
+{ Args: { "p_file": string,"p_mode": string,"p_rows": Json }; Returns: string
                            },
 "mark_all_notifications_read":
 { Args: Record<PropertyKey, never>; Returns: number
@@ -358,6 +909,15 @@ isOneToOne: false
 "notify_users":
 { Args: { "p_actor": string,"p_body": string,"p_dedupe_key": string,"p_href": string,"p_kind": string,"p_title": string,"p_users": (string)[] }; Returns: number
                            },
+"onboarding_missing":
+{ Args: { "p_client": string }; Returns: (string)[]
+                           },
+"publish_onboarding_form":
+{ Args: { "p_sections": Json }; Returns: number
+                           },
+"rate_limit_blocked":
+{ Args: { "p_bucket": string,"p_max": number,"p_window_seconds": number }; Returns: boolean
+                           },
 "rate_limit_hit":
 { Args: { "p_bucket": string,"p_max": number,"p_window_seconds": number }; Returns: boolean
                            },
@@ -366,6 +926,18 @@ isOneToOne: false
                            },
 "send_test_notification":
 { Args: { "p_user": string }; Returns: undefined
+                           },
+"set_client_service":
+{ Args: { "p_client": string,"p_price_cents"?: number,"p_qty": number,"p_service": string }; Returns: undefined
+                           },
+"set_client_status":
+{ Args: { "p_client": string,"p_status": string }; Returns: undefined
+                           },
+"set_onboarding_recipients":
+{ Args: { "p_ids": (string)[] }; Returns: undefined
+                           },
+"undo_import":
+{ Args: { "p_import": string }; Returns: number
                            },
 "user_effective_permissions":
 { Args: { "p_user": string }; Returns: {

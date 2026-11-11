@@ -31,7 +31,10 @@ export type NavGroup = { label: string; items: NavItem[] };
 export const NAV_GROUPS: NavGroup[] = [
   {
     label: "Trabalho",
-    items: [{ href: "/inicio", label: "Início", icon: "home", mobile: true }],
+    items: [
+      { href: "/inicio", label: "Início", icon: "home", mobile: true },
+      { href: "/clientes", label: "Clientes", icon: "clients", anyOf: ["clients.read"], mobile: true },
+    ],
   },
 ];
 
@@ -51,6 +54,8 @@ export const SETTINGS_PAGES: SettingsPage[] = [
   { href: "/configuracoes/notificacoes", label: "Notificações", description: "O que avisar e em quais aparelhos" },
   { href: "/configuracoes/usuarios", label: "Usuários", description: "Convites, papéis, setores e desativação", perm: "users.manage" },
   { href: "/configuracoes/papeis", label: "Papéis e permissões", description: "O que cada papel pode ver e fazer", perm: "roles.manage" },
+  { href: "/configuracoes/servicos", label: "Serviços", description: "Serviços vendidos, quantidades e abas que liberam", perm: "settings.manage" },
+  { href: "/configuracoes/onboarding", label: "Onboarding", description: "Ficha, checklist e quem é avisado de cliente novo", perm: "settings.manage" },
   { href: "/configuracoes/setores", label: "Setores", description: "Setores da agência e quem faz parte", perm: "settings.manage" },
   { href: "/configuracoes/auditoria", label: "Auditoria", description: "Quem alterou o quê, com antes e depois", perm: "audit.read" },
 ];

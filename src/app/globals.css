@@ -171,6 +171,17 @@
     /* O cabeçalho fixo (64px) não cobre o elemento focado nem âncoras. */
     scroll-padding-top: 5rem;
   }
+  /* Alvos de toque de 44px no celular (revisão funcional, item 6). */
+  @media (pointer: coarse) {
+    [data-slot="button"]:not([data-size="xs"]):not([data-size="icon-xs"]),
+    [data-slot="input"],
+    [data-slot="select-trigger"] {
+      min-height: 2.75rem;
+    }
+    [data-slot="button"][data-size^="icon"] {
+      min-width: 2.75rem;
+    }
+  }
   [role="dialog"],
   [data-slot="sheet-content"],
   [data-slot="popover-content"] {

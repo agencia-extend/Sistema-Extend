@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   // O log de Server Functions (só em dev) imprime argumentos, inclusive senhas.
   logging: { serverFunctions: false },
-  experimental: { serverActions: { bodySizeLimit: "4mb" } },
+  experimental: { serverActions: { bodySizeLimit: "11mb" } },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },

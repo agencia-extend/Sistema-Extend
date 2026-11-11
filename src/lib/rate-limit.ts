@@ -29,4 +29,19 @@ export async function withinRateLimit(bucket: string, max: number, windowSeconds
   }
 }
 
+/** Só consulta se o balde já estourou (não conta tentativa). */
+export async function isRateLimited(bucket: string, max: number, windowSeconds: number): Promise<boolean> {
+  if (!process.env.SUPABASE_SECRET_KEY) return false;
+  try {
+    const { data, error } = await createAdminClient().rpc("rate_limit_blocked", {
+      p_bucket: bucket.slice(0, 200),
+      p_max: max,
+      p_window_seconds: windowSeconds,
+    });
+    return !error && data === true;
+  } catch {
+    return false;
+  }
+}
+
 export const RATE_LIMIT_MESSAGE = "Muitas tentativas em pouco tempo. Aguarde alguns minutos e tente de novo.";

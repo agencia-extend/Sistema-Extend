@@ -21,3 +21,14 @@ export function formatRelative(value: string | Date, now: Date = new Date()): st
   if (now.getTime() - date.getTime() < 60_000) return "agora";
   return `há ${formatDistanceStrict(date, now, { locale: ptBR })}`;
 }
+
+/** "2026-11" do mês atual em São Paulo. */
+export function currentMonthKey(now: Date = new Date()): string {
+  const sp = new Date(now.getTime() - 3 * 3600_000);
+  return `${sp.getUTCFullYear()}-${String(sp.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+/** Instante (ms) de N dias atrás. */
+export function daysAgoMs(days: number, now: Date = new Date()): number {
+  return now.getTime() - days * 86_400_000;
+}
