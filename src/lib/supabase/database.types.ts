@@ -341,6 +341,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"client_months": {
+                  Row: {
+                    "client_id": string,"created_at": string,"ends_on": string,"id": string,"number": number,"starts_on": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"ends_on": string,"id"?: string,"number": number,"starts_on": string
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"ends_on"?: string,"id"?: string,"number"?: number,"starts_on"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_months_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"client_onboarding": {
                   Row: {
                     "answers": NonNullable<Json>,"client_id": string,"completed_at": string | null,"completed_by": string | null,"form_id": string,"updated_at": string,"updated_by": string | null
@@ -1037,6 +1057,44 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"task_content": {
+                  Row: {
+                    "caption": string | null,"destination": (string)[],"editor_id": string | null,"final_url": string | null,"format": string | null,"objective": string | null,"post_on": string | null,"post_url": string | null,"raw_url": string | null,"recorder_id": string | null,"recording_on": string | null,"rework_count": number,"script": string | null,"task_id": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "caption"?: string | null,"destination"?: (string)[],"editor_id"?: string | null,"final_url"?: string | null,"format"?: string | null,"objective"?: string | null,"post_on"?: string | null,"post_url"?: string | null,"raw_url"?: string | null,"recorder_id"?: string | null,"recording_on"?: string | null,"rework_count"?: number,"script"?: string | null,"task_id": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "caption"?: string | null,"destination"?: (string)[],"editor_id"?: string | null,"final_url"?: string | null,"format"?: string | null,"objective"?: string | null,"post_on"?: string | null,"post_url"?: string | null,"raw_url"?: string | null,"recorder_id"?: string | null,"recording_on"?: string | null,"rework_count"?: number,"script"?: string | null,"task_id"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_content_editor_id_fkey"
+      columns: ["editor_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_content_recorder_id_fkey"
+      columns: ["recorder_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_content_task_id_fkey"
+      columns: ["task_id"]
+isOneToOne: true
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_content_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"task_participants": {
                   Row: {
                     "profile_id": string,"task_id": string
@@ -1281,14 +1339,14 @@ isOneToOne: false
                   ]
                 },"workflow_steps": {
                   Row: {
-                    "archived_at": string | null,"color": string,"created_at": string,"id": string,"name": string,"position": number,"sector_id": string | null,"status": string,"waits_client": boolean,"workflow_id": string
+                    "archived_at": string | null,"color": string,"created_at": string,"id": string,"is_rework": boolean,"name": string,"position": number,"sector_id": string | null,"status": string,"waits_client": boolean,"workflow_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "archived_at"?: string | null,"color"?: string,"created_at"?: string,"id"?: string,"name": string,"position": number,"sector_id"?: string | null,"status"?: string,"waits_client"?: boolean,"workflow_id": string
+                    "archived_at"?: string | null,"color"?: string,"created_at"?: string,"id"?: string,"is_rework"?: boolean,"name": string,"position": number,"sector_id"?: string | null,"status"?: string,"waits_client"?: boolean,"workflow_id": string
                   }
                   Update: {
-                    "archived_at"?: string | null,"color"?: string,"created_at"?: string,"id"?: string,"name"?: string,"position"?: number,"sector_id"?: string | null,"status"?: string,"waits_client"?: boolean,"workflow_id"?: string
+                    "archived_at"?: string | null,"color"?: string,"created_at"?: string,"id"?: string,"is_rework"?: boolean,"name"?: string,"position"?: number,"sector_id"?: string | null,"status"?: string,"waits_client"?: boolean,"workflow_id"?: string
                   }
                   Relationships: [
                     {
@@ -1307,17 +1365,23 @@ isOneToOne: false
                   ]
                 },"workflows": {
                   Row: {
-                    "created_at": string,"id": string,"name": string,"organization_id": string,"task_type": string
+                    "board_sector_id": string | null,"created_at": string,"id": string,"name": string,"organization_id": string,"task_type": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"id"?: string,"name": string,"organization_id": string,"task_type": string
+                    "board_sector_id"?: string | null,"created_at"?: string,"id"?: string,"name": string,"organization_id": string,"task_type": string
                   }
                   Update: {
-                    "created_at"?: string,"id"?: string,"name"?: string,"organization_id"?: string,"task_type"?: string
+                    "board_sector_id"?: string | null,"created_at"?: string,"id"?: string,"name"?: string,"organization_id"?: string,"task_type"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "workflows_board_sector_id_fkey"
+      columns: ["board_sector_id"]
+isOneToOne: false
+      referencedRelation: "sectors"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "workflows_organization_id_fkey"
       columns: ["organization_id"]
 isOneToOne: false
@@ -1396,6 +1460,9 @@ isOneToOne: false
                            },
 "rate_limit_reset":
 { Args: { "p_bucket": string }; Returns: undefined
+                           },
+"save_content":
+{ Args: { "p": Json,"p_task": string }; Returns: undefined
                            },
 "send_test_notification":
 { Args: { "p_user": string }; Returns: undefined

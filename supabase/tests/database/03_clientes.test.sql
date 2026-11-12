@@ -81,22 +81,22 @@ set local request.jwt.claims = '{"sub":"00000000-0000-4000-c000-000000000004","r
 select is((select count(*)::int from public.clients where id = (select client_id from t_ctx)), 0, 'editor não marcado não vê o cliente');
 select is((select count(*)::int from public.tasks where client_id = (select client_id from t_ctx)), 0, 'editor não marcado não vê as demandas');
 
--- 7. Job do mês seguinte duas vezes → sem duplicar.
+-- 7. Job num dia do mês seguinte do cliente, duas vezes → sem duplicar.
 reset role;
-select private.monthly_slots_tick((date_trunc('month', now()) + interval '1 month')::date);
-select private.monthly_slots_tick((date_trunc('month', now()) + interval '1 month')::date);
+select private.monthly_slots_tick((now() at time zone 'America/Sao_Paulo')::date + 40);
+select private.monthly_slots_tick((now() at time zone 'America/Sao_Paulo')::date + 40);
 select is((select count(*)::int from public.tasks where client_id = (select client_id from t_ctx)
-           and slot_month = (date_trunc('month', now()) + interval '1 month')::date), 4, 'job idempotente: 4 no mês seguinte');
+           and slot_month > (now() at time zone 'America/Sao_Paulo')::date), 4, 'job idempotente: 4 no mês seguinte');
 
 -- 8. 6 vídeos/mês vale a partir do mês seguinte; mês atual intacto.
 set local role authenticated;
 set local request.jwt.claims = '{"sub":"00000000-0000-4000-c000-000000000002","role":"authenticated"}';
 select public.set_client_service((select client_id from t_ctx), (select id from public.service_catalog where key = 'pacote_videos'), 6);
 reset role;
-delete from public.tasks where client_id = (select client_id from t_ctx) and slot_month = (date_trunc('month', now()) + interval '1 month')::date;
-select private.monthly_slots_tick((date_trunc('month', now()) + interval '1 month')::date);
+delete from public.tasks where client_id = (select client_id from t_ctx) and slot_month > (now() at time zone 'America/Sao_Paulo')::date;
+select private.monthly_slots_tick((now() at time zone 'America/Sao_Paulo')::date + 40);
 select is((select count(*)::int from public.tasks where client_id = (select client_id from t_ctx)
-           and slot_month = (date_trunc('month', now()) + interval '1 month')::date), 6, 'mês seguinte gera 6 após a mudança');
+           and slot_month > (now() at time zone 'America/Sao_Paulo')::date), 6, 'mês seguinte gera 6 após a mudança');
 
 -- 10. Promessa perto do prazo gera alerta (avisa a coordenação).
 update public.handoff_promises set due_at = now() + interval '2 hours' where client_id = (select client_id from t_ctx);
