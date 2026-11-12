@@ -95,6 +95,7 @@ test("4-5. preencher ficha, checklist e equipe → ativo com 4 vídeos da Prisci
   await page.waitForURL(new RegExp(`/clientes/${clientId}$`));
   await expect(page.getByText("Ativo", { exact: true }).first()).toBeVisible();
   await page.getByRole("link", { name: "Demanda do mês" }).click();
+  await page.waitForURL("**/demanda");
   await expect(page.getByText(/^Vídeo \d\/4/)).toHaveCount(4);
   await expect(page.getByText(/Priscila/).first()).toBeVisible();
 });
