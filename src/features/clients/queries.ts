@@ -249,11 +249,11 @@ export async function listMonthTasks(clientId: string, month: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("tasks")
-    .select("id, title, type, status, due_at, slot_index, slot_total, service_id, assignee_id, profiles!tasks_assignee_id_fkey(full_name), service_catalog(name)")
+    .select("id, title, type, status, due_at, slot_index, slot_total, service_id, assignee_id, workflow_step_id, profiles!tasks_assignee_id_fkey(full_name), service_catalog(name), workflow_steps(name, color)")
     .eq("client_id", clientId)
     .eq("slot_month", month)
     .order("service_id")
     .order("slot_index");
   if (error) throw error;
-  return data.map((t) => ({ ...t, assignee: arr(t.profiles)[0]?.full_name ?? null, service: arr(t.service_catalog)[0]?.name ?? "Avulsa" }));
+  return data.map((t) => ({ ...t, assignee: arr(t.profiles)[0]?.full_name ?? null, service: arr(t.service_catalog)[0]?.name ?? "Avulsa", step: arr(t.workflow_steps)[0] ?? null }));
 }

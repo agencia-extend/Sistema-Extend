@@ -3,6 +3,7 @@ import {
   Briefcase,
   CalendarDays,
   House,
+  Kanban,
   LayoutList,
   Megaphone,
   Palette,
@@ -23,6 +24,7 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   calendar: CalendarDays,
   commercial: Briefcase,
   dashboard: BarChart3,
+  boards: Kanban,
   settings: Settings,
 };
 

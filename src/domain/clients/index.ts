@@ -36,7 +36,7 @@ export function clientTabs(status: ClientStatus, serviceTabs: string[], perms: P
   if (status === "onboarding") return [...ALWAYS, { key: "arquivos", label: "Arquivos" }];
   const tabs = [...ALWAYS];
   const hasProduction = serviceTabs.some((t) => ["videos", "design", "conteudo", "gerenciamento", "gravacao", "site"].includes(t));
-  if (hasProduction && perms["tasks.read"]) tabs.push({ key: "demanda", label: "Demanda do mês" });
+  if (hasProduction && perms["tasks.read"]) tabs.push({ key: "demanda", label: "Demanda do mês" }, { key: "quadros", label: "Quadros" });
   tabs.push({ key: "ideias", label: "Ideias e referências" }, { key: "arquivos", label: "Arquivos" }, { key: "historico", label: "Histórico" });
   return tabs;
 }

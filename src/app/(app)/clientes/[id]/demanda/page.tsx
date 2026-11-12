@@ -67,12 +67,19 @@ export default async function DemandaPage({ params, searchParams }: { params: Pr
                   return (
                     <li key={t.id} className="flex flex-wrap items-center gap-x-4 gap-y-2 px-4 py-2.5">
                       <div className="grid min-w-0 flex-1 basis-56 gap-0.5">
-                        <span className="text-sm">{t.title}</span>
+                        <Link href={`/tarefas/${t.id}`} className="text-sm hover:underline">{t.title}</Link>
                         <span className={late ? "text-xs font-medium text-danger" : "text-xs text-muted-foreground"}>
                           {[t.assignee ?? "Sem responsável", t.due_at ? `${late ? "atrasada · " : ""}prazo ${formatDate(t.due_at)}` : null].filter(Boolean).join(" · ")}
                         </span>
                       </div>
-                      <TaskStatusSelect id={t.id} status={t.status} disabled={!user.permissions["tasks.manage"] && !mine} />
+                      {t.step ? (
+                        <Link href={`/tarefas/${t.id}`} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border px-3 text-sm hover:border-brand/60">
+                          <span className="size-2 rounded-full" style={{ background: t.step.color }} aria-hidden="true" />
+                          {t.step.name}
+                        </Link>
+                      ) : (
+                        <TaskStatusSelect id={t.id} status={t.status} disabled={!user.permissions["tasks.manage"] && !mine} />
+                      )}
                     </li>
                   );
                 })}

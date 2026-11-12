@@ -10,6 +10,7 @@ export type NavIcon =
   | "calendar"
   | "commercial"
   | "dashboard"
+  | "boards"
   | "settings";
 
 export type NavItem = {
@@ -33,7 +34,16 @@ export const NAV_GROUPS: NavGroup[] = [
     label: "Trabalho",
     items: [
       { href: "/inicio", label: "Início", icon: "home", mobile: true },
+      { href: "/tarefas", label: "Minhas tarefas", icon: "tasks", anyOf: ["tasks.read"], mobile: true },
       { href: "/clientes", label: "Clientes", icon: "clients", anyOf: ["clients.read"], mobile: true },
+      { href: "/agenda", label: "Agenda", icon: "calendar", anyOf: ["calendar.read"], mobile: true },
+    ],
+  },
+  {
+    label: "Produção",
+    items: [
+      { href: "/setores", label: "Visão do setor", icon: "dashboard", anyOf: ["sector.dashboard.read"] },
+      { href: "/quadros", label: "Quadros", icon: "boards", anyOf: ["tasks.read"] },
     ],
   },
 ];
@@ -56,6 +66,7 @@ export const SETTINGS_PAGES: SettingsPage[] = [
   { href: "/configuracoes/papeis", label: "Papéis e permissões", description: "O que cada papel pode ver e fazer", perm: "roles.manage" },
   { href: "/configuracoes/servicos", label: "Serviços", description: "Serviços vendidos, quantidades e abas que liberam", perm: "settings.manage" },
   { href: "/configuracoes/onboarding", label: "Onboarding", description: "Ficha, checklist e quem é avisado de cliente novo", perm: "settings.manage" },
+  { href: "/configuracoes/fluxos", label: "Fluxos de produção", description: "Etapas de vídeo, design, post, gravação e site", perm: "tasks.boards.configure" },
   { href: "/configuracoes/setores", label: "Setores", description: "Setores da agência e quem faz parte", perm: "settings.manage" },
   { href: "/configuracoes/auditoria", label: "Auditoria", description: "Quem alterou o quê, com antes e depois", perm: "audit.read" },
 ];

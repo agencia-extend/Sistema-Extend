@@ -3,11 +3,15 @@ import { AppShell } from "@/components/app/app-shell";
 import { requireUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { visibleNavGroups, visibleSettingsPages } from "@/config/navigation";
+import { myRunningTimer } from "@/features/tasks/queries";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const user = await requireUser();
   const supabase = await createClient();
-  const { count } = await supabase.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null);
+  const [{ count }, timer] = await Promise.all([
+    supabase.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null),
+    myRunningTimer(user.id),
+  ]);
 
   const groups = visibleNavGroups(user.permissions);
   const settings = visibleSettingsPages(user.permissions);
@@ -29,6 +33,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       showSettings
       searchPages={searchPages}
       unread={count ?? 0}
+      timer={timer}
     >
       {children}
     </AppShell>

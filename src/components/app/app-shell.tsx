@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
-import { Menu } from "lucide-react";
+import { Menu, Timer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import type { NavGroup } from "@/config/navigation";
@@ -31,6 +31,7 @@ export function AppShell({
   showSettings,
   searchPages,
   unread,
+  timer,
   children,
 }: {
   user: ShellUser;
@@ -38,6 +39,7 @@ export function AppShell({
   showSettings: boolean;
   searchPages: SearchPage[];
   unread: number;
+  timer: { taskId: string; title: string; startedAt: string } | null;
   children: ReactNode;
 }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -66,6 +68,16 @@ export function AppShell({
           <div className="flex flex-1 justify-end md:justify-start">
             <GlobalSearch pages={searchPages} canManageUsers={user.canManageUsers} />
           </div>
+          {timer && (
+            <Link
+              href={`/tarefas/${timer.taskId}`}
+              className="inline-flex h-10 max-w-48 items-center gap-1.5 rounded-full border border-success/40 bg-success-soft px-3 text-sm text-success"
+              title={`Cronômetro ligado: ${timer.title}`}
+            >
+              <Timer className="size-4 shrink-0 animate-pulse" aria-hidden="true" />
+              <span className="truncate max-sm:sr-only">{timer.title}</span>
+            </Link>
+          )}
           <NotificationBell userId={user.id} initialUnread={unread} />
           <UserMenu name={user.name} email={user.email} roleName={user.roleName} />
         </header>
