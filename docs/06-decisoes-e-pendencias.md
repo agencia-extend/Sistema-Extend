@@ -67,7 +67,8 @@
 ## Situação em 12/11/2026
 - Etapa 03 testada de ponta a ponta (30/30) e publicada no GitHub. Ficaram de fora: integração com o Drive (D1), sincronização com o Google Agenda (D2) e importação do Trello (D7).
 - Briefing de mídias recebido (`docs/08-briefing-midias.md`). Comparativo e plano da etapa 03B em `docs/09-comparativo-e-plano-midias.md`, aguardando aprovação.
-- **Vercel:** o projeto `hub-extend` ainda não foi criado. As conexões disponíveis (conector e CLI) estão numa conta pessoal do desenvolvedor, sem acesso à organização `agencia-extend` no GitHub. Falta entrar com a conta Vercel da Extend e instalar o app da Vercel nessa organização.
+- **Vercel (12/11/2026):** projeto `hub-extend` publicado em https://hub-extend.vercel.app, região gru1 (São Paulo), na conta Vercel `ohenriquecorreia` (plano Hobby), por decisão do Henrique, até a ida para a VPS. Variáveis de produção e preview configuradas; jobs do banco apontados para o domínio (`scripts/configure-jobs.mjs`). Usa o mesmo Supabase do desenvolvimento (só existe um projeto até agora). A publicação é pela CLI (`vercel deploy --prod`), porque a conta Vercel não tem a conexão de login com o GitHub; com ela, cada push na `main` publicaria sozinho.
+- **Pendente (Supabase → Authentication → URL Configuration):** Site URL `https://hub-extend.vercel.app` e Redirect URL `https://hub-extend.vercel.app/**`. Sem isso, o link de recuperar senha e o de convite podem voltar para o endereço antigo.
 
 ## Decisões da etapa 03B — Controle de Mídias (12/11/2026)
 Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas do item 5; todas reversíveis por configuração ou migration.

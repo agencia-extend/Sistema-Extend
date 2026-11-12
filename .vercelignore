@@ -1,0 +1,7 @@
+# Nunca enviar segredos locais nem artefatos de teste para a Vercel.
+.env*
+!.env.example
+test-results
+playwright-report
+.next
+node_modules
