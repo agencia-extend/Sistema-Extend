@@ -10,7 +10,7 @@ export function DueBadge({ dueAt, status, className }: { dueAt: string | null; s
   const s = dueState(dueAt, status);
   const cls = { late: "text-danger font-medium", today: "text-warning font-medium", soon: "text-foreground", later: "text-muted-foreground", done: "text-muted-foreground", none: "" }[s];
   return (
-    <span className={cn("inline-flex items-center gap-1 text-xs tabular", cls, className)} title={formatDateTime(dueAt)}>
+    <span className={cn("inline-flex shrink-0 items-center gap-1 text-xs whitespace-nowrap tabular", cls, className)} title={formatDateTime(dueAt)}>
       <CalendarClock className="size-3.5" aria-hidden="true" />
       {s === "late" ? "Atrasada · " : s === "today" ? "Hoje · " : ""}
       {formatDate(dueAt)}
@@ -39,15 +39,15 @@ export function TaskCardView({ t, showClient = true, showStep = false }: { t: Ta
     <Link
       href={`/tarefas/${t.id}`}
       className={cn(
-        "grid gap-1.5 rounded-lg border bg-card p-3 text-left shadow-xs transition-colors hover:border-brand/60",
+        "grid grid-cols-[minmax(0,1fr)] gap-1.5 rounded-lg border bg-card p-3 text-left shadow-xs transition-colors hover:border-brand/60",
         late && "border-danger/60 bg-danger-soft/40",
         t.waitsClient && !late && "border-warning/60",
       )}
     >
       <TagChips tags={t.tags} />
-      <span className="text-sm leading-snug font-medium">{t.title}</span>
+      <span className="line-clamp-3 text-sm leading-snug font-medium wrap-break-word">{t.title}</span>
       <span className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted-foreground">
-        {showClient && t.clientName && <span className="truncate">{t.clientName}</span>}
+        {showClient && t.clientName && <span className="max-w-full truncate">{t.clientName}</span>}
         <span>{TASK_TYPE_LABEL[t.type] ?? t.type}</span>
         {showStep && t.stepName && (
           <span className="inline-flex items-center gap-1">
@@ -67,7 +67,7 @@ export function TaskCardView({ t, showClient = true, showStep = false }: { t: Ta
         )}
       </span>
       <span className="flex items-center justify-between gap-2">
-        <span className="truncate text-xs text-muted-foreground">{t.assigneeName ?? "Sem responsável"}</span>
+        <span className="min-w-0 truncate text-xs text-muted-foreground">{t.assigneeName ?? "Sem responsável"}</span>
         <DueBadge dueAt={t.dueAt} status={t.status} />
       </span>
     </Link>

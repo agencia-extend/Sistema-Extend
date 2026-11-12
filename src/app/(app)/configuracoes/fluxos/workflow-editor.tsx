@@ -51,7 +51,7 @@ export function WorkflowEditor({ workflow, sectors }: { workflow: Workflow; sect
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{edit?.id ? "Editar etapa" : "Nova etapa"} · {workflow.name}</DialogTitle>
-            <DialogDescription>O setor define quem recebe o card nesta etapa. O status alimenta a Demanda do mês.</DialogDescription>
+            <DialogDescription>O setor define quem recebe o card nesta etapa. O status alimenta o Controle de Mídias do cliente.</DialogDescription>
           </DialogHeader>
           {edit && (
             <div className="grid gap-4">

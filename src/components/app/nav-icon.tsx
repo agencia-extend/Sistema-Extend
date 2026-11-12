@@ -2,6 +2,7 @@ import {
   BarChart3,
   Briefcase,
   CalendarDays,
+  ClipboardCheck,
   House,
   Kanban,
   LayoutList,
@@ -25,6 +26,7 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   commercial: Briefcase,
   dashboard: BarChart3,
   boards: Kanban,
+  production: ClipboardCheck,
   settings: Settings,
 };
 

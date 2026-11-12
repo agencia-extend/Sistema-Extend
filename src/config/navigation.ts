@@ -11,6 +11,7 @@ export type NavIcon =
   | "commercial"
   | "dashboard"
   | "boards"
+  | "production"
   | "settings";
 
 export type NavItem = {
@@ -44,6 +45,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/setores", label: "Visão do setor", icon: "dashboard", anyOf: ["sector.dashboard.read"] },
       { href: "/quadros", label: "Quadros", icon: "boards", anyOf: ["tasks.read"] },
+      { href: "/producao", label: "Controle geral", icon: "production", anyOf: ["dashboards.read"] },
     ],
   },
 ];

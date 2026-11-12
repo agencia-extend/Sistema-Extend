@@ -94,10 +94,10 @@ test("4-5. preencher ficha, checklist e equipe → ativo com 4 vídeos da Prisci
   await page.getByRole("button", { name: "Concluir onboarding" }).click();
   await page.waitForURL(new RegExp(`/clientes/${clientId}$`));
   await expect(page.getByText("Ativo", { exact: true }).first()).toBeVisible();
-  await page.getByRole("link", { name: "Demanda do mês" }).click();
-  await page.waitForURL("**/demanda");
-  await expect(page.getByText(/^Vídeo \d\/4/)).toHaveCount(4);
-  await expect(page.getByText(/Priscila/).first()).toBeVisible();
+  await page.getByRole("link", { name: "Controle de Mídias" }).click();
+  await page.waitForURL("**/midias");
+  await expect(page.getByRole("link", { name: /^Vídeo \d\/4/ }).filter({ visible: true })).toHaveCount(4);
+  await expect(page.getByText(/Priscila/).filter({ visible: true }).first()).toBeVisible();
 });
 
 test("6. visibilidade: Priscila vê só o resumo; editor não marcado não vê o cliente", async ({ page }) => {

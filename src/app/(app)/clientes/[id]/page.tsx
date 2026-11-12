@@ -13,18 +13,20 @@ import { DataCard } from "@/features/clients/components/data-card";
 import { AccountsCard } from "@/features/clients/components/accounts-card";
 import { PromisesCard } from "@/features/clients/components/promises-card";
 import { Section } from "@/features/clients/components/section";
+import { currentMonth, listClientMonths } from "@/features/media/queries";
+import { periodLabel } from "@/domain/media";
 
 export default async function ClientOverviewPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePermission("clients.read");
   const { id } = await params;
   const client = (await getClient(id))!;
   const now = new Date();
-  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+  const month = currentMonth(await listClientMonths(id));
   const [catalog, team, sectors, tasks, timeline, handoff] = await Promise.all([
     listCatalog(),
     listTeam(),
     listSectors(),
-    listMonthTasks(id, month),
+    month ? listMonthTasks(id, month.startsOn) : Promise.resolve([]),
     listTimeline(id),
     user.permissions["clients.onboarding.read"] ? getHandoff(id) : Promise.resolve(null),
   ]);
@@ -42,12 +44,12 @@ export default async function ClientOverviewPage({ params }: { params: Promise<{
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <div className="grid min-w-0 content-start gap-6">
         {status !== "onboarding" && (
-          <Section title="Este mês">
+          <Section title={month ? `Mês ${month.number} (${periodLabel(month.startsOn, month.endsOn)})` : "Este mês"}>
             <div className="grid grid-cols-[minmax(0,1fr)] gap-4 rounded-xl border bg-card p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
               <ProgressBar value={deliveredPercent(done, live.length)} label={`Entregue (${done}/${live.length})`} />
               <div className="grid min-w-0 content-start gap-2 text-sm">
                 {overdue.length > 0 ? (
-                  <Link href={`/clientes/${id}/demanda`} className="inline-flex items-center gap-1.5 font-medium text-danger hover:underline">
+                  <Link href={`/clientes/${id}/midias`} className="inline-flex items-center gap-1.5 font-medium text-danger hover:underline">
                     <AlertTriangle className="size-4" aria-hidden="true" /> {overdue.length} demanda(s) atrasada(s)
                   </Link>
                 ) : (

@@ -14,11 +14,11 @@ describe("abas do cliente", () => {
   });
   it("ativo com vídeos e permissão mostra demanda do mês", () => {
     const keys = clientTabs("ativo", ["videos"], { "tasks.read": "own" }).map((t) => t.key);
-    expect(keys).toContain("demanda");
+    expect(keys).toContain("midias");
     expect(keys).toContain("historico");
   });
   it("só tráfego não mostra demanda do mês", () => {
-    expect(clientTabs("ativo", ["anuncios"], { "tasks.read": "all" }).map((t) => t.key)).not.toContain("demanda");
+    expect(clientTabs("ativo", ["anuncios"], { "tasks.read": "all" }).map((t) => t.key)).not.toContain("midias");
   });
 });
 

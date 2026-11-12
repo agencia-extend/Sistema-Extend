@@ -18,6 +18,8 @@ import { TaskComments } from "./task-comments";
 import { TaskTime } from "./task-time";
 import { TaskEvents } from "./task-events";
 import { DeleteTask } from "./delete-task";
+import { getContent } from "@/features/media/queries";
+import { ContentCard } from "@/features/media/components/content-card";
 
 export const metadata: Metadata = { title: "Demanda" };
 
@@ -29,7 +31,8 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
   if (!task) notFound();
 
   const supabase = await createClient();
-  const [extras, workflows, board, team, tags, running, related, events] = await Promise.all([
+  const [content, extras, workflows, board, team, tags, running, related, events] = await Promise.all([
+    getContent(id),
     getTaskExtras(id),
     listWorkflows(),
     task.boardId ? getBoard(task.boardId) : Promise.resolve(null),
@@ -84,6 +87,14 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
                 : (wf?.steps ?? []).map((s) => ({ id: s.id, name: s.name, color: s.color, kind: "step" as const, waitsClient: s.waitsClient }))
             }
           />
+          {content && (
+            <ContentCard
+              row={{ ...content, taskId: id, index: null, title: task.title, type: task.type, service: TASK_TYPE_LABEL[task.type] ?? task.type, status: task.status, dueAt: task.dueAt, assigneeId: task.assigneeId, assigneeName: task.assigneeName, step: null }}
+              team={teamOpts}
+              canEdit={canManage}
+              canAssign={canAssign}
+            />
+          )}
           <TaskDescription id={id} value={task.description} canEdit={canManage} />
           <TaskChecklist taskId={id} items={extras.checklist} canEdit={canManage} />
           <TaskAttachments taskId={id} items={extras.attachments} userId={user.id} canManage={canManage} />

@@ -2,6 +2,7 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import type { ClientStatus } from "@/domain/clients";
+import { todayKey } from "@/domain/media";
 import type { FormSection } from "./schemas";
 
 function arr<T>(v: T | T[] | null | undefined): T[] {
@@ -51,9 +52,8 @@ const DONE = new Set(["concluido", "aprovado"]);
 export async function listClients(): Promise<ClientCard[]> {
   const supabase = await createClient();
   const now = new Date();
-  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
-  const today = now.toISOString().slice(0, 10);
-  const [clients, tasks, checklist] = await Promise.all([
+  const today = todayKey(now);
+  const [clients, tasks, checklist, months] = await Promise.all([
     supabase
       .from("clients")
       .select(
@@ -63,14 +63,17 @@ export async function listClients(): Promise<ClientCard[]> {
       .order("name"),
     supabase.from("tasks").select("client_id, status, due_at, slot_month").not("client_id", "is", null),
     supabase.from("onboarding_checklist_items").select("client_id, done_at"),
+    supabase.from("client_months").select("client_id, starts_on").lte("starts_on", today).gte("ends_on", today),
   ]);
   if (clients.error) throw clients.error;
+  // Mês atual de cada cliente (ciclo pelo início do contrato).
+  const monthOf = new Map((months.data ?? []).map((m) => [m.client_id, m.starts_on]));
 
   const taskAgg = new Map<string, { total: number; done: number; overdue: number }>();
   for (const t of tasks.data ?? []) {
     if (!t.client_id || t.status === "cancelado") continue;
     const a = taskAgg.get(t.client_id) ?? { total: 0, done: 0, overdue: 0 };
-    if (t.slot_month === month || (t.due_at && t.due_at.slice(0, 7) === month.slice(0, 7))) {
+    if (t.slot_month && t.slot_month === monthOf.get(t.client_id)) {
       a.total++;
       if (DONE.has(t.status)) a.done++;
     }

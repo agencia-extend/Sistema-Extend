@@ -6,7 +6,7 @@ function one<T>(v: T | T[] | null | undefined): T | null {
   return Array.isArray(v) ? (v[0] ?? null) : (v ?? null);
 }
 
-const LIST_SELECT =
+export const LIST_SELECT =
   "id, title, type, status, priority, due_at, position, client_id, sector_id, assignee_id, workflow_step_id, board_id, board_column_id, blocked_by_task_id, slot_month, completed_at, created_at, clients(name), profiles!tasks_assignee_id_fkey(full_name), workflow_steps(name, color, waits_client), task_tags(tags(id, name, color))";
 
 export type TaskRow = {
@@ -34,9 +34,9 @@ export type TaskRow = {
   tags: { id: string; name: string; color: string }[];
 };
 
-type Raw = Record<string, unknown> & { [k: string]: unknown };
+export type Raw = Record<string, unknown> & { [k: string]: unknown };
 
-function mapRow(t: Raw): TaskRow {
+export function mapRow(t: Raw): TaskRow {
   const step = one(t.workflow_steps as { name: string; color: string; waits_client: boolean } | null);
   return {
     id: t.id as string,
@@ -135,23 +135,24 @@ export async function getTaskExtras(id: string) {
   };
 }
 
-export type Workflow = { id: string; taskType: string; name: string; steps: { id: string; name: string; position: number; sectorId: string | null; status: string; waitsClient: boolean; color: string }[] };
+export type Workflow = { id: string; taskType: string; name: string; boardSectorId: string | null; steps: { id: string; name: string; position: number; sectorId: string | null; status: string; waitsClient: boolean; color: string; isRework: boolean }[] };
 
 export const listWorkflows = cache(async (): Promise<Workflow[]> => {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("workflows")
-    .select("id, task_type, name, workflow_steps(id, name, position, sector_id, status, waits_client, color, archived_at)")
+    .select("id, task_type, name, board_sector_id, workflow_steps(id, name, position, sector_id, status, waits_client, color, is_rework, archived_at)")
     .order("name");
   if (error) throw error;
   return data.map((w) => ({
     id: w.id,
     taskType: w.task_type,
     name: w.name,
+    boardSectorId: w.board_sector_id,
     steps: (w.workflow_steps ?? [])
       .filter((s) => !s.archived_at)
       .sort((a, b) => a.position - b.position)
-      .map((s) => ({ id: s.id, name: s.name, position: s.position, sectorId: s.sector_id, status: s.status, waitsClient: s.waits_client, color: s.color })),
+      .map((s) => ({ id: s.id, name: s.name, position: s.position, sectorId: s.sector_id, status: s.status, waitsClient: s.waits_client, color: s.color, isRework: s.is_rework })),
   }));
 });
 

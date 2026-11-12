@@ -86,7 +86,7 @@ export function SectorView({ tasks, stats, filters: f }: { tasks: TaskRow[]; sta
         {sel("tipo", "Tipo", opts.types.map((t) => ({ id: t, name: TASK_TYPE_LABEL[t] ?? t })))}
         {sel("situacao", "Situação", [{ id: "abertas", name: "Abertas" }, { id: "atrasadas", name: "Atrasadas" }, { id: "concluidas", name: "Concluídas" }])}
         {sel("periodo", "Período", [{ id: "hoje", name: "Hoje" }, { id: "7", name: "Últimos 7 dias" }, { id: "30", name: "Últimos 30 dias" }])}
-        {(f.cliente || f.pessoa || f.etapa || f.tipo || f.situacao || f.periodo) && <Button variant="ghost" onClick={() => router.replace(pathname)}>Limpar filtros</Button>}
+        {(f.cliente || f.pessoa || f.etapa || f.tipo || f.situacao || f.periodo) && <Button variant="ghost" onClick={() => router.replace(sp.get("visao") ? `${pathname}?visao=${sp.get("visao")}` : pathname)}>Limpar filtros</Button>}
       </div>
 
       {byPerson.size > 0 && (

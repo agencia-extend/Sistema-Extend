@@ -40,6 +40,8 @@ export function Kanban({
   realtimeFilter,
   canMove,
   showClient = true,
+  columnOf,
+  stepFor,
 }: {
   columns: KanbanColumn[];
   tasks: TaskRow[];
@@ -47,6 +49,10 @@ export function Kanban({
   realtimeFilter?: string;
   canMove: boolean;
   showClient?: boolean;
+  /** Quadro do setor: a coluna agrupa várias etapas. Diz em qual coluna o card está… */
+  columnOf?: (t: TaskRow) => string;
+  /** …e para qual etapa ele vai ao ser solto numa coluna (null = não pode). */
+  stepFor?: (t: TaskRow, columnId: string) => { id: string; name: string; color: string; waitsClient: boolean } | null;
 }) {
   const router = useRouter();
   // Id estável entre servidor e navegador: sem ele o dnd-kit numera os aria-describedby e a hidratação diverge.
@@ -68,14 +74,14 @@ export function Kanban({
 
   usePostgresChanges(`quadro:${channel}`, { event: "*", table: "tasks", filter: realtimeFilter }, () => router.refresh());
 
-  const colOf = (t: TaskRow) => (columns[0]?.kind === "column" ? t.columnId : t.stepId) ?? columns[0]?.id;
+  const colOf = (t: TaskRow) => (columnOf ? columnOf(t) : ((columns[0]?.kind === "column" ? t.columnId : t.stepId) ?? columns[0]?.id));
   const byCol = useMemo(() => {
     const m = new Map<string, TaskRow[]>(columns.map((c) => [c.id, []]));
     for (const t of tasks) m.get(colOf(t) ?? "")?.push(t);
     for (const list of m.values()) list.sort((a, b) => a.position - b.position);
     return m;
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [tasks, columns]);
+  }, [tasks, columns, columnOf]);
 
   const onStart = (e: DragStartEvent) => setActive(tasks.find((t) => t.id === e.active.id) ?? null);
 
@@ -93,17 +99,20 @@ export function Kanban({
     const col = columns.find((c) => c.id === targetCol)!;
     if (colOf(task) === targetCol && Math.abs(task.position - position) < 1e-9) return;
 
+    const step = stepFor ? stepFor(task, targetCol) : col.kind === "step" ? { id: col.id, name: col.name, color: col.color, waitsClient: Boolean(col.waitsClient) } : null;
+    if (stepFor && !step) return void toast.error(`Este fluxo não tem etapa para "${col.name}".`);
+
     const prev = tasks;
     setTasks((all) =>
-      all.map((t) => (t.id === id ? { ...t, position, ...(col.kind === "column" ? { columnId: col.id } : { stepId: col.id, stepName: col.name, stepColor: col.color, waitsClient: Boolean(col.waitsClient) }) } : t)),
+      all.map((t) => (t.id === id ? { ...t, position, ...(step ? { stepId: step.id, stepName: step.name, stepColor: step.color, waitsClient: step.waitsClient } : { columnId: col.id }) } : t)),
     );
     startTransition(async () => {
-      const res = await moveTask({ id, stepId: col.kind === "step" ? col.id : null, columnId: col.kind === "column" ? col.id : null, position });
+      const res = await moveTask({ id, stepId: step?.id ?? null, columnId: step ? null : col.id, position });
       if (!res.ok) {
         setTasks(prev);
         toast.error(res.message);
       } else if (colOf(task) !== targetCol) {
-        toast.success(`Movido para ${col.name}.`);
+        toast.success(`Movido para ${step && stepFor ? step.name : col.name}.`);
         router.refresh();
       }
     });
