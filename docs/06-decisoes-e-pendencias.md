@@ -63,3 +63,8 @@
 
 ## Pendências da etapa 02
 - Planilha real "Controle de clientes": o importador adivinha as colunas pelo cabeçalho; validar com a planilha da Jacque.
+
+## Situação em 12/11/2026
+- Etapa 03 testada de ponta a ponta (30/30) e publicada no GitHub. Ficaram de fora: integração com o Drive (D1), sincronização com o Google Agenda (D2) e importação do Trello (D7).
+- Briefing de mídias recebido (`docs/08-briefing-midias.md`). Comparativo e plano da etapa 03B em `docs/09-comparativo-e-plano-midias.md`, aguardando aprovação.
+- **Vercel:** o projeto `hub-extend` ainda não foi criado. As conexões disponíveis (conector e CLI) estão numa conta pessoal do desenvolvedor, sem acesso à organização `agencia-extend` no GitHub. Falta entrar com a conta Vercel da Extend e instalar o app da Vercel nessa organização.
