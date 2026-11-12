@@ -40,12 +40,12 @@ export default async function ClientOverviewPage({ params }: { params: Promise<{
 
   return (
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <div className="grid content-start gap-6">
+      <div className="grid min-w-0 content-start gap-6">
         {status !== "onboarding" && (
           <Section title="Este mês">
-            <div className="grid gap-4 rounded-xl border bg-card p-4 sm:grid-cols-2">
+            <div className="grid grid-cols-[minmax(0,1fr)] gap-4 rounded-xl border bg-card p-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
               <ProgressBar value={deliveredPercent(done, live.length)} label={`Entregue (${done}/${live.length})`} />
-              <div className="grid content-start gap-2 text-sm">
+              <div className="grid min-w-0 content-start gap-2 text-sm">
                 {overdue.length > 0 ? (
                   <Link href={`/clientes/${id}/demanda`} className="inline-flex items-center gap-1.5 font-medium text-danger hover:underline">
                     <AlertTriangle className="size-4" aria-hidden="true" /> {overdue.length} demanda(s) atrasada(s)
@@ -56,10 +56,10 @@ export default async function ClientOverviewPage({ params }: { params: Promise<{
                 {next.length > 0 && (
                   <ul className="grid gap-1">
                     {next.map((t) => (
-                      <li key={t.id} className="flex items-center gap-2">
+                      <li key={t.id} className="flex min-w-0 items-center gap-2">
                         <CalendarClock className="size-3.5 shrink-0 text-muted-foreground" aria-hidden="true" />
-                        <span className="truncate">{t.title}</span>
-                        <span className="ml-auto text-xs text-muted-foreground tabular">{formatDate(t.due_at!)}</span>
+                        <Link href={`/tarefas/${t.id}`} className="min-w-0 truncate py-1 hover:underline">{t.title}</Link>
+                        <span className="ml-auto shrink-0 text-xs text-muted-foreground tabular">{formatDate(t.due_at!)}</span>
                       </li>
                     ))}
                   </ul>
@@ -94,7 +94,7 @@ export default async function ClientOverviewPage({ params }: { params: Promise<{
         <AccountsCard clientId={id} canManage={canManage} accounts={client.client_accounts ?? []} contacts={client.client_contacts ?? []} />
       </div>
 
-      <div className="grid content-start gap-6">
+      <div className="grid min-w-0 content-start gap-6">
         <PromisesCard clientId={id} canManage={canManage} promises={client.handoff_promises ?? []} />
         <DataCard
           canManage={canManage}

@@ -30,7 +30,7 @@ export default async function QuadrosClientePage({ params, searchParams }: { par
         <nav aria-label="Tipo de demanda" className="flex flex-wrap gap-1.5">
           {types.map((t) => (
             <Link key={t} href={`?tipo=${t}`} aria-current={t === type ? "page" : undefined}
-              className={cn("rounded-full border px-3 py-1.5 text-sm", t === type ? "border-brand bg-accent font-medium text-accent-foreground" : "hover:bg-muted")}>
+              className={cn("chip rounded-full border px-3 text-sm", t === type ? "border-brand bg-accent font-medium text-accent-foreground" : "hover:bg-muted")}>
               {TASK_TYPE_LABEL[t] ?? t}
             </Link>
           ))}

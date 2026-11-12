@@ -36,7 +36,7 @@ export default async function HistoricoPage({ params, searchParams }: { params: 
             key={k || "tudo"}
             href={k ? `?tipo=${k}` : "?"}
             aria-current={kind === k ? "page" : undefined}
-            className={cn("rounded-full border px-3 py-1.5 text-sm", kind === k ? "border-brand bg-accent font-medium text-accent-foreground" : "hover:bg-muted")}
+            className={cn("chip rounded-full border px-3 text-sm", kind === k ? "border-brand bg-accent font-medium text-accent-foreground" : "hover:bg-muted")}
           >
             {v}
           </Link>

@@ -33,7 +33,7 @@ export default async function DemandaPage({ params, searchParams }: { params: Pr
     <div className="grid max-w-5xl gap-5">
       <div className="flex items-center gap-2">
         <Link href={`?mes=${shift(month, -1)}`} className={buttonVariants({ variant: "outline", size: "icon" })} aria-label="Mês anterior"><ChevronLeft /></Link>
-        <h2 className="min-w-40 text-center text-base font-semibold capitalize">{MONTHS[m - 1]} de {y}</h2>
+        <h2 className="min-w-40 text-center text-base font-semibold first-letter:uppercase">{MONTHS[m - 1]} de {y}</h2>
         <Link href={`?mes=${shift(month, 1)}`} className={buttonVariants({ variant: "outline", size: "icon" })} aria-label="Próximo mês"><ChevronRight /></Link>
       </div>
 

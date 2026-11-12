@@ -101,15 +101,15 @@ export default async function AgendaPage({ searchParams }: { searchParams: Promi
           <h2 className="mr-auto text-base font-semibold first-letter:uppercase">{title}</h2>
           <nav aria-label="Visão" className="flex rounded-lg border p-0.5">
             {Object.entries(VIEWS).map(([k, l]) => (
-              <Link key={k} href={qs({ visao: k })} aria-current={view === k ? "page" : undefined} className={cn("rounded-md px-3 py-1.5 text-sm", view === k ? "bg-accent font-medium text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>{l}</Link>
+              <Link key={k} href={qs({ visao: k })} aria-current={view === k ? "page" : undefined} className={cn("chip rounded-md px-3 text-sm", view === k ? "bg-accent font-medium text-accent-foreground" : "text-muted-foreground hover:text-foreground")}>{l}</Link>
             ))}
           </nav>
         </div>
         {sectors.length > 0 && (
           <nav aria-label="Agenda" className="flex flex-wrap gap-1.5">
-            <Link href={qs({ setor: "" })} aria-current={!sector ? "page" : undefined} className={cn("rounded-full border px-3 py-1 text-sm", !sector ? "border-brand bg-accent font-medium" : "hover:bg-muted")}>Minha agenda</Link>
+            <Link href={qs({ setor: "" })} aria-current={!sector ? "page" : undefined} className={cn("chip rounded-full border px-3 text-sm", !sector ? "border-brand bg-accent font-medium" : "hover:bg-muted")}>Minha agenda</Link>
             {sectors.map((x) => (
-              <Link key={x.id} href={qs({ setor: x.key })} aria-current={sector?.id === x.id ? "page" : undefined} className={cn("rounded-full border px-3 py-1 text-sm", sector?.id === x.id ? "border-brand bg-accent font-medium" : "hover:bg-muted")}>{x.name}</Link>
+              <Link key={x.id} href={qs({ setor: x.key })} aria-current={sector?.id === x.id ? "page" : undefined} className={cn("chip rounded-full border px-3 text-sm", sector?.id === x.id ? "border-brand bg-accent font-medium" : "hover:bg-muted")}>{x.name}</Link>
             ))}
           </nav>
         )}

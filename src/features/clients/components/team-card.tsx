@@ -49,7 +49,7 @@ export function TeamCard({ clientId, canManage, sectors, team, members }: { clie
                       {canManage && (
                         <button
                           type="button"
-                          className="grid size-6 place-items-center rounded-full hover:bg-muted"
+                          className="grid size-7 place-items-center rounded-full hover:bg-muted pointer-coarse:size-10"
                           aria-label={`Remover ${m.name} de ${s.name}`}
                           disabled={pending}
                           onClick={() => startTransition(async () => void handleResult(await removeMember({ clientId, sectorId: s.id, profileId: m.profileId })))}

@@ -181,6 +181,10 @@
     [data-slot="button"][data-size^="icon"] {
       min-width: 2.75rem;
     }
+    /* Links de texto em linha: a área de toque cresce sem mexer no layout. */
+    [data-slot="breadcrumb-link"] {
+      padding-block: 0.75rem;
+    }
   }
   [role="dialog"],
   [data-slot="sheet-content"],
@@ -216,6 +220,18 @@
 @layer utilities {
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+  /* Filtros em pílula e seletores de visão: 36px com mouse, 44px no toque. */
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.25rem;
+    white-space: nowrap;
+  }
+  @media (pointer: coarse) {
+    .chip {
+      min-height: 2.75rem;
+    }
   }
   .pb-safe {
     padding-bottom: env(safe-area-inset-bottom);

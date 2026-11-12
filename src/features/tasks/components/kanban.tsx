@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useId, useMemo, useState, useTransition } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -49,6 +49,8 @@ export function Kanban({
   showClient?: boolean;
 }) {
   const router = useRouter();
+  // Id estável entre servidor e navegador: sem ele o dnd-kit numera os aria-describedby e a hidratação diverge.
+  const dndId = useId();
   const [tasks, setTasks] = useState(initial);
   const [active, setActive] = useState<TaskRow | null>(null);
   const [, startTransition] = useTransition();
@@ -108,7 +110,7 @@ export function Kanban({
   };
 
   return (
-    <DndContext sensors={sensors} collisionDetection={closestCorners} onDragStart={onStart} onDragEnd={onEnd} onDragCancel={() => setActive(null)}>
+    <DndContext id={dndId} sensors={sensors} collisionDetection={closestCorners} onDragStart={onStart} onDragEnd={onEnd} onDragCancel={() => setActive(null)}>
       <div className="-mx-4 flex snap-x gap-3 overflow-x-auto px-4 pb-4 sm:mx-0 sm:px-0">
         {columns.map((c) => (
           <Column key={c.id} col={c} tasks={byCol.get(c.id) ?? []} canMove={canMove} showClient={showClient} />

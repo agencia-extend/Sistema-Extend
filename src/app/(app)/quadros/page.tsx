@@ -43,7 +43,7 @@ export default async function QuadrosPage() {
         {archived.length > 0 && (
           <section className="grid gap-2" aria-label="Arquivados">
             <h2 className="text-sm font-semibold text-muted-foreground">Arquivados</h2>
-            <ul className="flex flex-wrap gap-2">{archived.map((b) => <li key={b.id}><Link href={`/quadros/${b.id}`} className="rounded-full border px-3 py-1.5 text-sm hover:bg-muted">{b.name}</Link></li>)}</ul>
+            <ul className="flex flex-wrap gap-2">{archived.map((b) => <li key={b.id}><Link href={`/quadros/${b.id}`} className="chip rounded-full border px-3 text-sm hover:bg-muted">{b.name}</Link></li>)}</ul>
           </section>
         )}
       </PageBody>

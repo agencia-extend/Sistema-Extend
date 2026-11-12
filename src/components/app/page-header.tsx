@@ -32,7 +32,7 @@ export function PageHeader({
   return (
     <header
       className={cn(
-        "flex flex-col gap-3 px-4 pt-5 pb-4 sm:px-6 md:flex-row md:items-end md:justify-between",
+        "flex flex-col gap-3 px-4 pt-5 pb-4 sm:px-6 lg:flex-row lg:items-end lg:justify-between",
         className,
       )}
     >
@@ -41,10 +41,13 @@ export function PageHeader({
           // Trilha sem link não leva a lugar nenhum: no celular, só ocuparia espaço.
           <Breadcrumb className={breadcrumbs.some((c) => c.href) ? undefined : "max-md:hidden"}>
             <BreadcrumbList>
-              {breadcrumbs.map((c, i) => (
+              {breadcrumbs.map((c, i) => {
+                // A última parte sem link repete o título logo abaixo: em tela estreita ela só empurra o conteúdo.
+                const repeatsTitle = i > 0 && i === breadcrumbs.length - 1 && !c.href;
+                return (
                 <Fragment key={`${c.label}-${i}`}>
-                  {i > 0 && <BreadcrumbSeparator />}
-                  <BreadcrumbItem>
+                  {i > 0 && <BreadcrumbSeparator className={repeatsTitle ? "max-lg:hidden" : undefined} />}
+                  <BreadcrumbItem className={repeatsTitle ? "max-lg:hidden" : undefined}>
                     {c.href ? (
                       <BreadcrumbLink asChild>
                         <Link href={c.href}>{c.label}</Link>
@@ -54,14 +57,15 @@ export function PageHeader({
                     )}
                   </BreadcrumbItem>
                 </Fragment>
-              ))}
+                );
+              })}
             </BreadcrumbList>
           </Breadcrumb>
         )}
-        <h1 className="truncate text-xl font-semibold tracking-tight sm:text-2xl">{title}</h1>
+        <h1 className="text-xl font-semibold tracking-tight wrap-break-word sm:text-2xl lg:truncate">{title}</h1>
         {description && <p className="max-w-prose text-sm text-muted-foreground">{description}</p>}
       </div>
-      {actions && <div className="flex flex-wrap items-center gap-2 max-md:[&>*]:flex-auto">{actions}</div>}
+      {actions && <div className="flex flex-wrap items-center gap-2 max-sm:*:flex-auto">{actions}</div>}
     </header>
   );
 }
