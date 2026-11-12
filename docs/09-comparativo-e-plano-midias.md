@@ -1,6 +1,6 @@
 # 09 — Comparativo com o briefing de mídias e plano de construção
 
-Data: 12/11/2026. Compara o que está no ar (etapas 01 a 03) com `docs/08-briefing-midias.md` (áudios e vídeos de tela do WhatsApp, fluxograma do Miro e formulário de briefing). **Nada deste plano foi codado; aguarda aprovação.**
+Data: 12/11/2026. Compara o que está no ar (etapas 01 a 03) com `docs/08-briefing-midias.md` (áudios e vídeos de tela do WhatsApp, fluxograma do Miro e formulário de briefing). **Situação:** as quatro fatias do item 3 foram construídas em 12/11/2026 com os ajustes registrados em `docs/06` ("Decisões da etapa 03B"). O que ficou de fora está em "Pendências da etapa 03B".
 
 ## 1. O que o briefing pede × o que existe
 

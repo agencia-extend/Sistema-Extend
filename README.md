@@ -33,6 +33,7 @@ Verificações: `npm run typecheck`, `npm run lint`, `npm run test` (Vitest), `n
 | 01 | [01-FUNDACAO](prompts/01-FUNDACAO.md) | Projeto, Supabase da Extend, login por convite, papéis e permissões, layout, notificações, PWA | MVP |
 | 02 | [02-CLIENTES-ONBOARDING](prompts/02-CLIENTES-ONBOARDING.md) | Fechamento comercial → cliente → onboarding obrigatório → abas e demandas geradas automaticamente | MVP |
 | 03 | [03-PRODUCAO-TAREFAS](prompts/03-PRODUCAO-TAREFAS.md) | Quadros por cliente e por setor, minhas tarefas, fluxo com troca de responsável, tempo, agenda, arquivos | MVP |
+| 03B | [docs/09](docs/09-comparativo-e-plano-midias.md) | Controle de Mídias: mês do cliente pelo início do contrato, campos de cada conteúdo, quadro do setor (Edição e Design), relatório de produção por pessoa | MVP |
 | 04 | [04-CRIATIVOS](prompts/04-CRIATIVOS.md) | Solicitação de criativos tráfego → mídias, versões, aprovação interna e do cliente por link, biblioteca | MVP |
 | 05 | [05-ANUNCIOS](prompts/05-ANUNCIOS.md) | Conexão Meta/Google, sincronização, painéis, planejamento, nomenclatura, calendário, performance por criativo | MVP |
 | 06 | [06-RELATORIOS-ALERTAS](prompts/06-RELATORIOS-ALERTAS.md) | Relatórios automáticos no WhatsApp, alertas, checklists, registro de alterações, dashboards gerais | MVP |

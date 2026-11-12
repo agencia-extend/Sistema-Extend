@@ -68,3 +68,19 @@
 - Etapa 03 testada de ponta a ponta (30/30) e publicada no GitHub. Ficaram de fora: integração com o Drive (D1), sincronização com o Google Agenda (D2) e importação do Trello (D7).
 - Briefing de mídias recebido (`docs/08-briefing-midias.md`). Comparativo e plano da etapa 03B em `docs/09-comparativo-e-plano-midias.md`, aguardando aprovação.
 - **Vercel:** o projeto `hub-extend` ainda não foi criado. As conexões disponíveis (conector e CLI) estão numa conta pessoal do desenvolvedor, sem acesso à organização `agencia-extend` no GitHub. Falta entrar com a conta Vercel da Extend e instalar o app da Vercel nessa organização.
+
+## Decisões da etapa 03B — Controle de Mídias (12/11/2026)
+Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas do item 5; todas reversíveis por configuração ou migration.
+- **Ordem:** a 03B veio antes da etapa 04 (Criativos).
+- **Mês do cliente:** começa no dia de início do contrato (`client_months`). Sem data de início, vale o dia em que o cliente ficou ativo. O job diário `extend-slots-mensais` abre o mês novo no dia da virada; alterar serviço vale a partir do próximo mês do cliente.
+- **Slots:** continuam sendo um por item contratado de cada serviço ("Vídeo 1/8", "Arte 1/4"), listados juntos e numerados no Controle de Mídias. O formato nasce pelo tipo do serviço e pode ser trocado. Não foi criado um slot genérico "Conteúdo N" (C3 do `docs/09`).
+- **Etapas:** os fluxos de vídeo e design **não foram trocados** (decisão D3 segue aberta com a Jackeline). O quadro do setor agrupa as etapas atuais nas 6 colunas do Trello: tudo antes da etapa do setor = Não iniciado; Edição/Criação e Ajustes = Em andamento; Revisão interna = Aprovação interna; Aprovação do cliente = Aprovação cliente; Programado = Inserir no cronograma; Publicado = Finalizado. A regra está em `src/domain/media` e vale também para etapas criadas depois.
+- **Em alteração:** entrar na etapa marcada como retrabalho (`workflow_steps.is_rework`, hoje "Ajustes") soma 1 em `task_content.rework_count`. Arrastar de uma aprovação de volta para "Em andamento" leva a essa etapa. Ainda não há tela para marcar outra etapa como retrabalho.
+- **Quadro do setor:** existe para os setores que produzem (`workflows.board_sector_id`: Edição para vídeo, Design para arte). O card entra quando alguém é escolhido para editar/criar. Essa pessoa vê e move o card mesmo quando a etapa atual é de outra pessoa; continua sem ver os cards das colegas.
+- **Permissões alteradas:** Editor de vídeo, Designer e Gravação passam a abrir a visão do próprio setor; Coordenação de conteúdo abre a de todos os setores e o Controle geral (`dashboards.read`).
+- **Drive:** só links nesta etapa (link final, takes brutos, post). D1 segue aberta.
+
+## Pendências da etapa 03B
+- Do `docs/09` ficaram para a próxima fatia: código/tipo do cliente, responsável pela comunicação, escopo em texto, lista de clientes em tabela, histórico de contratos, abas Materiais/Documentos/Gravações, briefing por seções A–E, checklist do Miro em dias úteis, cronograma com grid, prazos recorrentes de sexta e segunda, importação da planilha "Controle de Mídias".
+- No Controle geral os números ainda não abrem a lista que os compõe (só a linha do cliente leva ao Controle de Mídias dele).
+- Rodar `prompts/99-REVISAO-FUNCIONAL.md` completo para as etapas 03 e 03B.
