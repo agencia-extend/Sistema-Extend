@@ -1,12 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState, useTransition } from "react";
+import { useCallback, useState, useTransition } from "react";
 import { Bell, CheckCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { createClient } from "@/lib/supabase/client";
+import { usePostgresChanges } from "@/lib/supabase/use-postgres-changes";
 import { formatRelative } from "@/domain/shared/dates";
 import { markAllNotificationsRead, markNotificationRead } from "@/features/notifications/actions";
 import { cn } from "@/lib/utils";
@@ -36,21 +37,12 @@ export function NotificationBell({ userId, initialUnread }: { userId: string; in
   }, []);
 
   // Tempo real: nova notificação aparece no sino sem recarregar.
-  useEffect(() => {
-    const supabase = createClient();
-    const channel = supabase
-      .channel(`notificacoes:${userId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, (payload: { new: unknown }) => {
-        const n = payload.new as Item;
-        setUnread((u) => u + 1);
-        setItems((prev) => (prev ? [n, ...prev].slice(0, 20) : prev));
-        toast(n.title, { description: n.body ?? undefined });
-      })
-      .subscribe();
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [userId]);
+  usePostgresChanges(`notificacoes:${userId}`, { event: "INSERT", table: "notifications", filter: `user_id=eq.${userId}` }, (payload) => {
+    const n = payload.new as Item;
+    setUnread((u) => u + 1);
+    setItems((prev) => (prev ? [n, ...prev].slice(0, 20) : prev));
+    toast(n.title, { description: n.body ?? undefined });
+  });
 
   const onOpenChange = (v: boolean) => {
     setOpen(v);
