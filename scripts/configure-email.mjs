@@ -21,7 +21,7 @@ const template = (file) => readFileSync(`supabase/templates/${file}`, "utf8").re
 
 const body = {
   site_url: site,
-  uri_allow_list: `${site}/**,http://localhost:3000/**`,
+  uri_allow_list: `${site}/**,http://localhost:3000/**,http://localhost:3100/**`,
   smtp_host: process.env.SMTP_HOST || "mail.agenciaextend.com.br",
   smtp_port: process.env.SMTP_PORT || "465",
   smtp_user: user,
