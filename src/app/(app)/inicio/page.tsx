@@ -11,6 +11,8 @@ import { myPending, onboardingsInProgress, promisesDueSoon } from "@/features/ho
 import { ProgressBar } from "@/features/clients/components/bits";
 import { deliveredPercent } from "@/domain/clients";
 import { cn } from "@/lib/utils";
+import { OpsPanel } from "@/features/home/components/ops-panel";
+import type { OpsPeriod } from "@/domain/ops";
 
 export const metadata: Metadata = { title: "Início" };
 
@@ -19,12 +21,16 @@ function greeting() {
   return hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
 }
 
-export default async function InicioPage({ searchParams }: { searchParams: Promise<{ senha?: string; "bem-vindo"?: string }> }) {
+export default async function InicioPage({ searchParams }: { searchParams: Promise<{ senha?: string; "bem-vindo"?: string; periodo?: string; pessoa?: string }> }) {
   const user = await requireUser();
   const params = await searchParams;
   const firstName = user.fullName.split(" ")[0];
   const canUsers = Boolean(user.permissions["users.manage"]);
   const seesOnboarding = Boolean(user.permissions["clients.onboarding.read"]);
+  // Painel operacional: só para quem vê os dashboards gerais (sócios e coordenação).
+  const seesOps = Boolean(user.permissions["dashboards.read"]);
+  const period: OpsPeriod = params.periodo === "hoje" || params.periodo === "semana" || params.periodo === "todos" ? params.periodo : "mes";
+  const personId = params.pessoa && /^[0-9a-f-]{36}$/.test(params.pessoa) ? params.pessoa : null;
 
   const supabase = await createClient();
   const [pending, onboardings, promises, setup] = await Promise.all([
@@ -44,7 +50,7 @@ export default async function InicioPage({ searchParams }: { searchParams: Promi
   return (
     <>
       <PageHeader title={`${greeting()}, ${firstName}`} description={user.sectors.map((s) => s.name).join(" · ") || undefined} />
-      <PageBody className="grid gap-8">
+      <PageBody className="grid grid-cols-[minmax(0,1fr)] gap-8">
         {params.senha === "ok" && <FormAlert tone="success">Senha atualizada.</FormAlert>}
         {params["bem-vindo"] && <FormAlert tone="success">Acesso ativado. Ative as notificações neste aparelho para receber suas demandas.</FormAlert>}
 
@@ -80,6 +86,8 @@ export default async function InicioPage({ searchParams }: { searchParams: Promi
             </ul>
           )}
         </section>
+
+        {seesOps && <OpsPanel period={period} personId={personId} />}
 
         {(onboardings.length > 0 || promises.length > 0) && (
           <div className="grid gap-6 lg:grid-cols-2">

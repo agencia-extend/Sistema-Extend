@@ -12,7 +12,7 @@ Recebido em 12/11/2026 (`PROMPT-ERP-OPERACIONAL.md`, enviado pelo Henrique). É 
 | Tarefa recorrente | `tasks.repeat_*`: todo dia, toda semana, a cada 2 semanas, todo mês | **Feito em 13/11** |
 | Modelos rápidos | `task_templates` + "Começar de um modelo" + Configurações → Rotinas e modelos | **Feito em 13/11** (14 modelos adaptados à Extend) |
 | Prazos fixos da semana (briefing de mídias 3.7) | `service_routines`: cronograma na sexta, legendas e posts na segunda, para cada cliente com Gerenciamento | **Feito em 13/11** |
-| Dashboard operacional (KPIs, alta prioridade, reuniões, saúde dos clientes, entregas por tipo) | Início com pendências; Controle geral com produção | Próximo |
+| Dashboard operacional (KPIs, alta prioridade, reuniões, saúde dos clientes, entregas por tipo) | Bloco "Operacional" no Início, para quem tem `dashboards.read` (sócios e coordenação), com período e filtro por pessoa | **Feito em 13/11** |
 | Kanban em 5 colunas fixas + status de aprovação | Fluxos por tipo de demanda com etapas e responsável por etapa; quadro do setor com as colunas do Trello | Mantido o modelo da Extend (mais rico); não duplicar |
 | Workspace do cliente com abas | Central do cliente com abas por serviço | Já existia; abas novas (Materiais, Gravações, Cronograma) no plano do `docs/09` |
 | Linha do tempo com marcos | Histórico do cliente | Marcos entram com os Playbooks |

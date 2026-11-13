@@ -134,6 +134,19 @@ test("4. social media não vê Rotinas e modelos no menu nem abre a página", as
   await expect(page.getByRole("link", { name: new RegExp(routineTitle) }).filter({ visible: true })).toBeVisible();
 });
 
+test("5. painel operacional: a coordenação vê e filtra pela Madu; a Madu não vê o painel", async ({ page }) => {
+  await login(page, people.Joana.email, pw);
+  await expect(page.getByRole("heading", { name: "Operacional" })).toBeVisible();
+  await page.getByRole("navigation", { name: "Pessoa" }).getByRole("link", { name: /^Madu/ }).click();
+  await expect(page.getByText(`Demandas de ${people.Madu.name}.`)).toBeVisible();
+  await page.getByRole("navigation", { name: "Período" }).getByRole("link", { name: "Tudo" }).click();
+  await expect(page.getByRole("link", { name: /Concluídas \(tudo\)/ })).toContainText(/[1-9]/);
+
+  await login(page, people.Madu.email, pw);
+  await expect(page.getByRole("heading", { name: "Minhas pendências" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Operacional" })).toHaveCount(0);
+});
+
 test.afterAll(async () => {
   if (!configured) return;
   await admin.from("service_routines").delete().eq("title", routineTitle);
