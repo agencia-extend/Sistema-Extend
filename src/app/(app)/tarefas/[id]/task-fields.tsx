@@ -13,6 +13,7 @@ import { FormField } from "@/components/app/form-field";
 import { createTag, setParticipants, setTaskTags, updateTask } from "@/features/tasks/actions";
 import { handleResult } from "@/lib/action-feedback";
 import { PRIORITY_LABEL } from "@/domain/tasks";
+import { REPEAT_OPTIONS, repeatFromKey, repeatKey } from "@/domain/tasks/repeat";
 import { TagChips } from "@/features/tasks/components/task-bits";
 import { Section } from "@/features/clients/components/section";
 
@@ -32,7 +33,7 @@ export function TaskFields({
   canAssign,
   blocker,
 }: {
-  task: { id: string; assigneeId: string | null; dueAt: string | null; priority: string; blockedBy: string | null; waitingNote: string; tags: Tag[] };
+  task: { id: string; assigneeId: string | null; dueAt: string | null; priority: string; blockedBy: string | null; waitingNote: string; tags: Tag[]; repeatUnit: string | null; repeatEvery: number | null; repeatNextId: string | null };
   participants: string[];
   team: Opt[];
   tags: Tag[];
@@ -77,6 +78,18 @@ export function TaskFields({
             <SelectContent>{Object.entries(PRIORITY_LABEL).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
           </Select>
         </FormField>
+        <FormField
+          label="Repetir"
+          hint={task.repeatNextId ? "A próxima desta série já foi criada; mudar aqui vale para as seguintes a partir dela." : task.repeatUnit ? "Ao concluir ou passar do prazo, a próxima nasce sozinha para o mesmo responsável." : undefined}
+        >
+          <Select value={repeatKey(task.repeatUnit, task.repeatEvery)} disabled={!canEdit || pending} onValueChange={(v) => run(updateTask({ id: task.id, repeat: repeatFromKey(v) }))}>
+            <SelectTrigger className="w-full" aria-label="Repetir"><SelectValue /></SelectTrigger>
+            <SelectContent>{REPEAT_OPTIONS.map((o) => <SelectItem key={o.key} value={o.key}>{o.label}</SelectItem>)}</SelectContent>
+          </Select>
+        </FormField>
+        {task.repeatNextId && (
+          <Link href={`/tarefas/${task.repeatNextId}`} className="-mt-2 text-sm font-medium text-primary hover:underline">Abrir a próxima da série</Link>
+        )}
 
         <div className="grid gap-1.5">
           <span className="text-sm font-medium">Etiquetas</span>

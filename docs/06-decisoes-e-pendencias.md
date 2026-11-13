@@ -85,3 +85,11 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
 - Do `docs/09` ficaram para a próxima fatia: código/tipo do cliente, responsável pela comunicação, escopo em texto, lista de clientes em tabela, histórico de contratos, abas Materiais/Documentos/Gravações, briefing por seções A–E, checklist do Miro em dias úteis, cronograma com grid, prazos recorrentes de sexta e segunda, importação da planilha "Controle de Mídias".
 - No Controle geral os números ainda não abrem a lista que os compõe (só a linha do cliente leva ao Controle de Mídias dele).
 - Rodar `prompts/99-REVISAO-FUNCIONAL.md` completo para as etapas 03 e 03B.
+
+## Correções de 13/11/2026
+- **Criar demanda pela tela era negado para todos** ("Você não tem permissão"). A política de leitura de `tasks` consultava a própria tabela e não enxergava a linha recém-inserida. Quem cria, e o responsável, passam a ler direto pela coluna (`20261113000200`). Coberto por teste de banco e pelo roteiro `e2e/04`.
+- **Fuso horário:** entre 21h e meia-noite (São Paulo), o fechamento gravava o início do contrato no dia seguinte (data UTC) e concluir o onboarding na mesma noite não criava as demandas do mês. As datas de negócio usam `private.today_sp()` (`20261113000300`).
+- Tela de entrada: a foto do escritório saiu; entrou a marca animada (`BrandMotion`).
+
+## Pendências novas
+- Gamificação e Treinamentos do prompt ERP: aguardam decisão da Extend (`docs/10`).

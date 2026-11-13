@@ -68,6 +68,7 @@ export const SETTINGS_PAGES: SettingsPage[] = [
   { href: "/configuracoes/papeis", label: "Papéis e permissões", description: "O que cada papel pode ver e fazer", perm: "roles.manage" },
   { href: "/configuracoes/servicos", label: "Serviços", description: "Serviços vendidos, quantidades e abas que liberam", perm: "settings.manage" },
   { href: "/configuracoes/onboarding", label: "Onboarding", description: "Ficha, checklist e quem é avisado de cliente novo", perm: "settings.manage" },
+  { href: "/configuracoes/rotinas", label: "Rotinas e modelos", description: "Prazos fixos da semana por serviço e modelos de demanda", perm: "tasks.boards.configure" },
   { href: "/configuracoes/fluxos", label: "Fluxos de produção", description: "Etapas de vídeo, design, post, gravação e site", perm: "tasks.boards.configure" },
   { href: "/configuracoes/setores", label: "Setores", description: "Setores da agência e quem faz parte", perm: "settings.manage" },
   { href: "/configuracoes/auditoria", label: "Auditoria", description: "Quem alterou o quê, com antes e depois", perm: "audit.read" },

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ClipboardCheck } from "lucide-react";
 import { requirePermission } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
-import { listTasks } from "@/features/tasks/queries";
+import { listTasks, listTemplates } from "@/features/tasks/queries";
 import { listTeam } from "@/features/clients/queries";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { EmptyState } from "@/components/app/states";
@@ -31,11 +31,12 @@ export default async function TarefasPage({ searchParams }: { searchParams: Prom
   const order = sp.ordem === "prioridade" ? "prioridade" : "prazo";
 
   const supabase = await createClient();
-  const [mine, done, team, clients] = await Promise.all([
+  const [mine, done, team, clients, templates] = await Promise.all([
     listTasks({ assigneeId: user.id, openOnly: true }),
     tab === "concluidas" ? listTasks({ assigneeId: user.id }) : Promise.resolve([]),
     listTeam(),
     supabase.from("clients").select("id, name").is("deleted_at", null).in("status", ["ativo", "onboarding"]).order("name"),
+    listTemplates(),
   ]);
 
   const groups: Record<keyof typeof TABS, typeof mine> = {
@@ -56,7 +57,7 @@ export default async function TarefasPage({ searchParams }: { searchParams: Prom
       <PageHeader
         title="Minhas tarefas"
         description="Tudo o que está na sua mão, com prazo e cliente."
-        actions={user.permissions["tasks.manage"] ? <NewTaskDialog clients={clients.data ?? []} team={team.map((t) => ({ id: t.id, name: t.name }))} preset={{ assigneeId: user.id }} /> : undefined}
+        actions={user.permissions["tasks.manage"] ? <NewTaskDialog clients={clients.data ?? []} team={team.map((t) => ({ id: t.id, name: t.name }))} templates={templates} preset={{ assigneeId: user.id }} /> : undefined}
       />
       <PageBody className="grid gap-4">
         <nav aria-label="Filtro" className="flex gap-1 overflow-x-auto border-b">

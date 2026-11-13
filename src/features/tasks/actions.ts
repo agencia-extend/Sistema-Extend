@@ -39,6 +39,9 @@ export const createTask = defineAction({ schema: createTaskSchema, permission: "
         board_id: t.boardId ?? null,
         board_column_id: t.columnId ?? null,
         created_by: user.id,
+        repeat_unit: t.repeat?.unit ?? null,
+        repeat_every: t.repeat?.every ?? null,
+        repeat_owner_id: t.repeat ? (t.assigneeId ?? null) : null,
       })
       .select("id")
       .single(),
@@ -60,6 +63,15 @@ export const updateTask = defineAction({ schema: updateTaskSchema }, async ({ id
     patch.blocked_by_task_id = p.blockedBy;
   }
   if (p.waitingNote !== undefined) patch.waiting_note = p.waitingNote || null;
+  if (p.repeat !== undefined) {
+    patch.repeat_unit = p.repeat?.unit ?? null;
+    patch.repeat_every = p.repeat?.every ?? null;
+    if (p.repeat) {
+      // A série fica com quem está responsável agora.
+      const { data: cur } = await supabase.from("tasks").select("assignee_id").eq("id", id).single();
+      patch.repeat_owner_id = cur?.assignee_id ?? null;
+    }
+  }
   const row = must(await supabase.from("tasks").update(patch).eq("id", id).select("client_id").single()) as { client_id: string | null };
   touch(id, row.client_id);
   return ok(null, "Demanda atualizada.");

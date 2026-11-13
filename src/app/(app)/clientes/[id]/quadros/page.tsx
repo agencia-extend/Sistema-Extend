@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requirePermission } from "@/lib/auth/dal";
 import { currentServices, getClient, listTeam } from "@/features/clients/queries";
-import { listTasks, listWorkflows } from "@/features/tasks/queries";
+import { listTasks, listWorkflows, listTemplates } from "@/features/tasks/queries";
 import { TASK_TYPE_LABEL } from "@/domain/tasks";
 import { Kanban } from "@/features/tasks/components/kanban";
 import { NewTaskDialog } from "@/features/tasks/components/new-task-dialog";
@@ -21,7 +21,7 @@ export default async function QuadrosClientePage({ params, searchParams }: { par
   const { tipo } = await searchParams;
   const type = tipo && types.includes(tipo) ? tipo : types[0];
   const wf = workflows.find((w) => w.taskType === type)!;
-  const [tasks, team] = await Promise.all([listTasks({ clientId: id, type }), listTeam()]);
+  const [tasks, team, templates] = await Promise.all([listTasks({ clientId: id, type }), listTeam(), listTemplates()]);
   const canManage = Boolean(user.permissions["tasks.manage"]);
 
   return (
@@ -39,7 +39,7 @@ export default async function QuadrosClientePage({ params, searchParams }: { par
           {(user.permissions["tasks.assign"] || user.permissions["clients.manage"]) && (
             <StepDefaults clientId={id} steps={wf.steps.map((s) => ({ id: s.id, name: s.name }))} team={team.map((t) => ({ id: t.id, name: t.name }))} />
           )}
-          {canManage && <NewTaskDialog clients={[]} team={team.map((t) => ({ id: t.id, name: t.name }))} preset={{ clientId: id, type: type as "geral" }} />}
+          {canManage && <NewTaskDialog clients={[]} team={team.map((t) => ({ id: t.id, name: t.name }))} templates={templates.filter((t) => t.type === type)} preset={{ clientId: id, type: type as "geral" }} />}
         </div>
       </div>
       <Kanban

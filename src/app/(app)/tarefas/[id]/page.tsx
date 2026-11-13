@@ -102,7 +102,7 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
         </div>
         <aside className="grid content-start gap-6">
           <TaskFields
-            task={{ id, assigneeId: task.assigneeId, dueAt: task.dueAt, priority: task.priority, blockedBy: task.blocker?.id ?? null, waitingNote: task.waitingNote, tags: task.tags }}
+            task={{ id, assigneeId: task.assigneeId, dueAt: task.dueAt, priority: task.priority, blockedBy: task.blocker?.id ?? null, waitingNote: task.waitingNote, tags: task.tags, repeatUnit: task.repeatUnit, repeatEvery: task.repeatEvery, repeatNextId: task.repeatNextId }}
             participants={extras.participants}
             team={teamOpts}
             tags={tags}

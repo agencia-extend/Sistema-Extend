@@ -933,6 +933,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"service_routines": {
+                  Row: {
+                    "created_at": string,"description": string | null,"due_hour": number,"id": string,"is_active": boolean,"lead_days": number,"organization_id": string,"sector_id": string,"service_id": string,"title": string,"updated_at": string,"weekday": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"description"?: string | null,"due_hour"?: number,"id"?: string,"is_active"?: boolean,"lead_days"?: number,"organization_id": string,"sector_id": string,"service_id": string,"title": string,"updated_at"?: string,"weekday": number
+                  }
+                  Update: {
+                    "created_at"?: string,"description"?: string | null,"due_hour"?: number,"id"?: string,"is_active"?: boolean,"lead_days"?: number,"organization_id"?: string,"sector_id"?: string,"service_id"?: string,"title"?: string,"updated_at"?: string,"weekday"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "service_routines_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "service_routines_sector_id_fkey"
+      columns: ["sector_id"]
+isOneToOne: false
+      referencedRelation: "sectors"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "service_routines_service_id_fkey"
+      columns: ["service_id"]
+isOneToOne: false
+      referencedRelation: "service_catalog"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"tags": {
                   Row: {
                     "color": string,"created_at": string,"id": string,"name": string,"organization_id": string
@@ -1185,6 +1217,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"task_templates": {
+                  Row: {
+                    "category": string,"created_at": string,"description": string | null,"due_days": number,"id": string,"is_active": boolean,"name": string,"organization_id": string,"position": number,"priority": string,"repeat_every": number | null,"repeat_unit": string | null,"type": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "category": string,"created_at"?: string,"description"?: string | null,"due_days"?: number,"id"?: string,"is_active"?: boolean,"name": string,"organization_id": string,"position"?: number,"priority"?: string,"repeat_every"?: number | null,"repeat_unit"?: string | null,"type"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "category"?: string,"created_at"?: string,"description"?: string | null,"due_days"?: number,"id"?: string,"is_active"?: boolean,"name"?: string,"organization_id"?: string,"position"?: number,"priority"?: string,"repeat_every"?: number | null,"repeat_unit"?: string | null,"type"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_templates_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"task_time_entries": {
                   Row: {
                     "ended_at": string | null,"id": string,"profile_id": string,"started_at": string,"task_id": string
@@ -1213,14 +1265,14 @@ isOneToOne: false
                   ]
                 },"tasks": {
                   Row: {
-                    "assignee_id": string | null,"blocked_by_task_id": string | null,"board_column_id": string | null,"board_id": string | null,"client_id": string | null,"completed_at": string | null,"created_at": string,"created_by": string | null,"deleted_at": string | null,"description": string | null,"due_at": string | null,"id": string,"organization_id": string,"position": number,"priority": string,"sector_id": string | null,"service_id": string | null,"slot_index": number | null,"slot_month": string | null,"slot_total": number | null,"start_at": string | null,"status": string,"title": string,"type": string,"updated_at": string,"waiting_note": string | null,"workflow_step_id": string | null
+                    "assignee_id": string | null,"blocked_by_task_id": string | null,"board_column_id": string | null,"board_id": string | null,"client_id": string | null,"completed_at": string | null,"created_at": string,"created_by": string | null,"deleted_at": string | null,"description": string | null,"due_at": string | null,"id": string,"organization_id": string,"position": number,"priority": string,"repeat_every": number | null,"repeat_from_id": string | null,"repeat_next_id": string | null,"repeat_owner_id": string | null,"repeat_unit": string | null,"routine_id": string | null,"routine_on": string | null,"sector_id": string | null,"service_id": string | null,"slot_index": number | null,"slot_month": string | null,"slot_total": number | null,"start_at": string | null,"status": string,"title": string,"type": string,"updated_at": string,"waiting_note": string | null,"workflow_step_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "assignee_id"?: string | null,"blocked_by_task_id"?: string | null,"board_column_id"?: string | null,"board_id"?: string | null,"client_id"?: string | null,"completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"description"?: string | null,"due_at"?: string | null,"id"?: string,"organization_id": string,"position"?: number,"priority"?: string,"sector_id"?: string | null,"service_id"?: string | null,"slot_index"?: number | null,"slot_month"?: string | null,"slot_total"?: number | null,"start_at"?: string | null,"status"?: string,"title": string,"type"?: string,"updated_at"?: string,"waiting_note"?: string | null,"workflow_step_id"?: string | null
+                    "assignee_id"?: string | null,"blocked_by_task_id"?: string | null,"board_column_id"?: string | null,"board_id"?: string | null,"client_id"?: string | null,"completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"description"?: string | null,"due_at"?: string | null,"id"?: string,"organization_id": string,"position"?: number,"priority"?: string,"repeat_every"?: number | null,"repeat_from_id"?: string | null,"repeat_next_id"?: string | null,"repeat_owner_id"?: string | null,"repeat_unit"?: string | null,"routine_id"?: string | null,"routine_on"?: string | null,"sector_id"?: string | null,"service_id"?: string | null,"slot_index"?: number | null,"slot_month"?: string | null,"slot_total"?: number | null,"start_at"?: string | null,"status"?: string,"title": string,"type"?: string,"updated_at"?: string,"waiting_note"?: string | null,"workflow_step_id"?: string | null
                   }
                   Update: {
-                    "assignee_id"?: string | null,"blocked_by_task_id"?: string | null,"board_column_id"?: string | null,"board_id"?: string | null,"client_id"?: string | null,"completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"description"?: string | null,"due_at"?: string | null,"id"?: string,"organization_id"?: string,"position"?: number,"priority"?: string,"sector_id"?: string | null,"service_id"?: string | null,"slot_index"?: number | null,"slot_month"?: string | null,"slot_total"?: number | null,"start_at"?: string | null,"status"?: string,"title"?: string,"type"?: string,"updated_at"?: string,"waiting_note"?: string | null,"workflow_step_id"?: string | null
+                    "assignee_id"?: string | null,"blocked_by_task_id"?: string | null,"board_column_id"?: string | null,"board_id"?: string | null,"client_id"?: string | null,"completed_at"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"description"?: string | null,"due_at"?: string | null,"id"?: string,"organization_id"?: string,"position"?: number,"priority"?: string,"repeat_every"?: number | null,"repeat_from_id"?: string | null,"repeat_next_id"?: string | null,"repeat_owner_id"?: string | null,"repeat_unit"?: string | null,"routine_id"?: string | null,"routine_on"?: string | null,"sector_id"?: string | null,"service_id"?: string | null,"slot_index"?: number | null,"slot_month"?: string | null,"slot_total"?: number | null,"start_at"?: string | null,"status"?: string,"title"?: string,"type"?: string,"updated_at"?: string,"waiting_note"?: string | null,"workflow_step_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -1264,6 +1316,30 @@ isOneToOne: false
       columns: ["organization_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tasks_repeat_from_id_fkey"
+      columns: ["repeat_from_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tasks_repeat_next_id_fkey"
+      columns: ["repeat_next_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tasks_repeat_owner_id_fkey"
+      columns: ["repeat_owner_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "tasks_routine_id_fkey"
+      columns: ["routine_id"]
+isOneToOne: false
+      referencedRelation: "service_routines"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "tasks_sector_id_fkey"

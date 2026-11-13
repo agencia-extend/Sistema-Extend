@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { CalendarClock, Hourglass, Link2 } from "lucide-react";
+import { CalendarClock, Hourglass, Link2, Repeat } from "lucide-react";
+import { repeatLabel } from "@/domain/tasks/repeat";
 import { dueState, TASK_TYPE_LABEL } from "@/domain/tasks";
 import { formatDate, formatDateTime } from "@/domain/shared/dates";
 import type { TaskRow } from "@/features/tasks/queries";
@@ -58,6 +59,11 @@ export function TaskCardView({ t, showClient = true, showStep = false }: { t: Ta
         {t.waitsClient && (
           <span className="inline-flex items-center gap-1 text-warning">
             <Hourglass className="size-3" aria-hidden="true" /> aguarda cliente
+          </span>
+        )}
+        {t.repeatUnit && (
+          <span className="inline-flex items-center gap-1">
+            <Repeat className="size-3" aria-hidden="true" /> {repeatLabel(t.repeatUnit, t.repeatEvery)?.toLowerCase()}
           </span>
         )}
         {t.blocked && (

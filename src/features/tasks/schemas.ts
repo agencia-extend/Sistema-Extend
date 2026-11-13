@@ -4,7 +4,10 @@ const uuid = z.uuid("Identificador inválido.");
 const TYPES = ["video", "design", "conteudo", "gravacao", "site", "criativo", "roteiro", "post", "geral"] as const;
 const PRIORITIES = ["baixa", "media", "alta", "urgente"] as const;
 
+const repeat = z.object({ unit: z.enum(["dia", "semana", "mes"]), every: z.number().int().min(1).max(52) }).nullable();
+
 export const createTaskSchema = z.object({
+  repeat: repeat.optional(),
   title: z.string().trim().min(2, "Dê um título à demanda.").max(200),
   clientId: uuid.nullable().optional(),
   type: z.enum(TYPES),
@@ -18,6 +21,7 @@ export const createTaskSchema = z.object({
 
 export const updateTaskSchema = z.object({
   id: uuid,
+  repeat: repeat.optional(),
   title: z.string().trim().min(2, "Dê um título à demanda.").max(200).optional(),
   description: z.string().max(10000).nullable().optional(),
   priority: z.enum(PRIORITIES).optional(),

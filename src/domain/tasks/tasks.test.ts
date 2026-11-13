@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { dueState, findMentions, formatDuration, positionBetween, totalMs } from "./index";
+import { repeatFromKey, repeatKey, repeatLabel } from "./repeat";
 
 describe("posição no quadro", () => {
   it("entre vizinhos", () => {
@@ -47,5 +48,20 @@ describe("menções", () => {
     expect(findMentions("ok @priscila.", team)).toEqual(["p"]);
     expect(findMentions("mande para joao@priscila.com", team)).toEqual([]);
     expect(findMentions("@Jacqueline Souza e @Priscila", team).sort()).toEqual(["j", "p"]);
+  });
+});
+
+
+describe("repetição", () => {
+  it("converte entre a chave do seletor e o valor salvo", () => {
+    expect(repeatFromKey("semana-2")).toEqual({ unit: "semana", every: 2 });
+    expect(repeatFromKey("nao")).toBeNull();
+    expect(repeatKey("mes", 1)).toBe("mes-1");
+    expect(repeatKey(null, null)).toBe("nao");
+  });
+  it("escreve a repetição como a equipe fala", () => {
+    expect(repeatLabel("semana", 1)).toBe("Toda semana");
+    expect(repeatLabel("semana", 3)).toBe("A cada 3 semanas");
+    expect(repeatLabel(null, null)).toBeNull();
   });
 });

@@ -7,7 +7,7 @@ function one<T>(v: T | T[] | null | undefined): T | null {
 }
 
 export const LIST_SELECT =
-  "id, title, type, status, priority, due_at, position, client_id, sector_id, assignee_id, workflow_step_id, board_id, board_column_id, blocked_by_task_id, slot_month, completed_at, created_at, clients(name), profiles!tasks_assignee_id_fkey(full_name), workflow_steps(name, color, waits_client), task_tags(tags(id, name, color))";
+  "id, title, type, status, priority, due_at, position, client_id, sector_id, assignee_id, workflow_step_id, board_id, board_column_id, blocked_by_task_id, slot_month, completed_at, created_at, repeat_unit, repeat_every, clients(name), profiles!tasks_assignee_id_fkey(full_name), workflow_steps(name, color, waits_client), task_tags(tags(id, name, color))";
 
 export type TaskRow = {
   id: string;
@@ -31,6 +31,8 @@ export type TaskRow = {
   blocked: boolean;
   completedAt: string | null;
   createdAt: string;
+  repeatUnit: string | null;
+  repeatEvery: number | null;
   tags: { id: string; name: string; color: string }[];
 };
 
@@ -60,6 +62,8 @@ export function mapRow(t: Raw): TaskRow {
     blocked: Boolean(t.blocked_by_task_id),
     completedAt: (t.completed_at as string) ?? null,
     createdAt: t.created_at as string,
+    repeatUnit: (t.repeat_unit as string) ?? null,
+    repeatEvery: (t.repeat_every as number) ?? null,
     tags: ((t.task_tags as { tags: { id: string; name: string; color: string } | null }[]) ?? []).flatMap((x) => (x.tags ? [x.tags] : [])),
   };
 }
@@ -95,7 +99,7 @@ export const getTask = cache(async (id: string) => {
   const { data, error } = await supabase
     .from("tasks")
     .select(
-      `${LIST_SELECT}, description, created_by, waiting_note, service_id, start_at, blocker:blocked_by_task_id(id, title, status), creator:profiles!tasks_created_by_fkey(full_name)`,
+      `${LIST_SELECT}, description, created_by, waiting_note, repeat_next_id, service_id, start_at, blocker:blocked_by_task_id(id, title, status), creator:profiles!tasks_created_by_fkey(full_name)`,
     )
     .eq("id", id)
     .is("deleted_at", null)
@@ -109,6 +113,7 @@ export const getTask = cache(async (id: string) => {
     createdBy: raw.created_by as string | null,
     creatorName: one(raw.creator as { full_name: string } | null)?.full_name ?? null,
     waitingNote: (raw.waiting_note as string) ?? "",
+    repeatNextId: (raw.repeat_next_id as string) ?? null,
     blocker: one(raw.blocker as { id: string; title: string; status: string } | null),
   };
 });
@@ -191,4 +196,26 @@ export async function myRunningTimer(userId: string) {
     .is("ended_at", null)
     .maybeSingle();
   return data ? { taskId: data.task_id, startedAt: data.started_at, title: one(data.tasks)?.title ?? "" } : null;
+}
+
+/** Modelos de demanda ativos (para o "Começar de um modelo"). */
+export async function listTemplates(activeOnly = true) {
+  const supabase = await createClient();
+  let q = supabase.from("task_templates").select("id, name, category, type, description, due_days, priority, repeat_unit, repeat_every, position, is_active");
+  if (activeOnly) q = q.eq("is_active", true);
+  const { data, error } = await q.order("position").order("name");
+  if (error) throw error;
+  return data.map((t) => ({
+    id: t.id,
+    name: t.name,
+    category: t.category,
+    type: t.type,
+    description: t.description ?? "",
+    dueDays: t.due_days,
+    priority: t.priority,
+    repeatUnit: t.repeat_unit,
+    repeatEvery: t.repeat_every,
+    position: t.position,
+    isActive: t.is_active,
+  }));
 }
