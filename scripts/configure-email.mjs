@@ -1,8 +1,8 @@
-// Configura o envio de e-mails do Supabase Auth pela caixa da Extend (HostGator)
+// Configura o envio de e-mails do Supabase Auth pela caixa da Extend (Titan, contratado na HostGator)
 // e aplica os modelos de convite e de recuperação de senha.
 // Uso: node scripts/configure-email.mjs https://endereco-do-sistema
 // Precisa em .env.local: SUPABASE_ACCESS_TOKEN, SMTP_USER, SMTP_PASS (senha da caixa de e-mail),
-// e opcionais SMTP_HOST (padrão mail.agenciaextend.com.br), SMTP_PORT (padrão 465) e SMTP_FROM_NAME.
+// e opcionais SMTP_HOST (padrão smtp.titan.email), SMTP_PORT (padrão 465) e SMTP_FROM_NAME.
 import { readFileSync } from "node:fs";
 import { loadEnv, required } from "./env.mjs";
 
@@ -22,7 +22,7 @@ const template = (file) => readFileSync(`supabase/templates/${file}`, "utf8").re
 const body = {
   site_url: site,
   uri_allow_list: `${site}/**,http://localhost:3000/**,http://localhost:3100/**`,
-  smtp_host: process.env.SMTP_HOST || "mail.agenciaextend.com.br",
+  smtp_host: process.env.SMTP_HOST || "smtp.titan.email",
   smtp_port: process.env.SMTP_PORT || "465",
   smtp_user: user,
   smtp_pass: pass,
