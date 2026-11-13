@@ -12,6 +12,7 @@ export type NavIcon =
   | "dashboard"
   | "boards"
   | "production"
+  | "training"
   | "settings";
 
 export type NavItem = {
@@ -47,6 +48,10 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/quadros", label: "Quadros", icon: "boards", anyOf: ["tasks.read"] },
       { href: "/producao", label: "Controle geral", icon: "production", anyOf: ["dashboards.read"] },
     ],
+  },
+  {
+    label: "Equipe",
+    items: [{ href: "/treinamentos", label: "Treinamentos", icon: "training", anyOf: ["trainings.read", "trainings.manage"] }],
   },
 ];
 

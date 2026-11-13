@@ -9,6 +9,7 @@ export const NOTIFICATION_KINDS = [
   { key: "creative_ready", label: "Criativo pronto" },
   { key: "ad_alert", label: "Alertas de anúncios" },
   { key: "client_onboarding", label: "Cliente novo em onboarding" },
+  { key: "training", label: "Treinamento atribuído, atrasado ou concluído" },
   { key: "system", label: "Avisos do sistema e testes" },
 ] as const;
 

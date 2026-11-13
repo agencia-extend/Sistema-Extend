@@ -92,4 +92,4 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
 - Tela de entrada: a foto do escritório saiu; entrou a marca animada (`BrandMotion`).
 
 ## Pendências novas
-- Gamificação e Treinamentos do prompt ERP: aguardam decisão da Extend (`docs/10`).
+- Gamificação: **não entra** (decisão da Extend em 13/11/2026). Treinamentos: feito em 13/11 (`docs/10`).

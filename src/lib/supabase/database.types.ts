@@ -1361,6 +1361,110 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"training_assignments": {
+                  Row: {
+                    "assigned_by": string | null,"completed_at": string | null,"created_at": string,"due_on": string | null,"id": string,"profile_id": string,"training_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "assigned_by"?: string | null,"completed_at"?: string | null,"created_at"?: string,"due_on"?: string | null,"id"?: string,"profile_id": string,"training_id": string
+                  }
+                  Update: {
+                    "assigned_by"?: string | null,"completed_at"?: string | null,"created_at"?: string,"due_on"?: string | null,"id"?: string,"profile_id"?: string,"training_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "training_assignments_assigned_by_fkey"
+      columns: ["assigned_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_assignments_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_assignments_training_id_fkey"
+      columns: ["training_id"]
+isOneToOne: false
+      referencedRelation: "trainings"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"training_lessons": {
+                  Row: {
+                    "body": string | null,"created_at": string,"duration_min": number | null,"file_name": string | null,"file_path": string | null,"id": string,"position": number,"title": string,"training_id": string,"updated_at": string,"video_url": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body"?: string | null,"created_at"?: string,"duration_min"?: number | null,"file_name"?: string | null,"file_path"?: string | null,"id"?: string,"position"?: number,"title": string,"training_id": string,"updated_at"?: string,"video_url"?: string | null
+                  }
+                  Update: {
+                    "body"?: string | null,"created_at"?: string,"duration_min"?: number | null,"file_name"?: string | null,"file_path"?: string | null,"id"?: string,"position"?: number,"title"?: string,"training_id"?: string,"updated_at"?: string,"video_url"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "training_lessons_training_id_fkey"
+      columns: ["training_id"]
+isOneToOne: false
+      referencedRelation: "trainings"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"training_progress": {
+                  Row: {
+                    "completed_at": string,"lesson_id": string,"profile_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "completed_at"?: string,"lesson_id": string,"profile_id": string
+                  }
+                  Update: {
+                    "completed_at"?: string,"lesson_id"?: string,"profile_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "training_progress_lesson_id_fkey"
+      columns: ["lesson_id"]
+isOneToOne: false
+      referencedRelation: "training_lessons"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "training_progress_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"trainings": {
+                  Row: {
+                    "category": string,"created_at": string,"created_by": string | null,"id": string,"is_published": boolean,"organization_id": string,"position": number,"summary": string | null,"title": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "category"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"is_published"?: boolean,"organization_id": string,"position"?: number,"summary"?: string | null,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "category"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"is_published"?: boolean,"organization_id"?: string,"position"?: number,"summary"?: string | null,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "trainings_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "trainings_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"user_permission_overrides": {
                   Row: {
                     "created_at": string,"created_by": string | null,"effect": Database["public"]['Enums']["override_effect"],"permission_key": string,"scope": Database["public"]['Enums']["permission_scope"],"user_id": string

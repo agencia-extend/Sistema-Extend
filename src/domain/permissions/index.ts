@@ -42,6 +42,8 @@ export const PERMISSION_KEYS = [
   "inbox.reply",
   "inbox.manage",
   "dashboards.read",
+  "trainings.read",
+  "trainings.manage",
   "users.manage",
   "roles.manage",
   "settings.manage",

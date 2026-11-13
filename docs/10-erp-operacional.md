@@ -19,8 +19,8 @@ Recebido em 12/11/2026 (`PROMPT-ERP-OPERACIONAL.md`, enviado pelo Henrique). É 
 | Playbooks (etapas com prazo relativo geram tarefas e marcos) | Checklist fixo de onboarding | Planejado: começa pelo checklist do Miro |
 | Tráfego (gasto, CTR, campanhas) | Etapa 05 (API Meta/Google) | No plano; sem tela com dado estático |
 | Portal do cliente | Etapa 12 | No plano |
-| Gamificação (ons, faixas, ranking, missões, carreira) | — | **Decisão da Extend** (mexe com a equipe) |
-| Treinamentos (squad, método em 4 fases) | — | **Decisão da Extend** (o conteúdo do prompt é de outra agência) |
+| Gamificação (ons, faixas, ranking, missões, carreira) | — | **Não entra** (decisão da Extend em 13/11) |
+| Treinamentos | `/treinamentos`: trilhas com aulas (texto, vídeo do YouTube/Loom/Drive/Vimeo, PDF ou slides), progresso por pessoa, atribuição com prazo, aba Equipe | **Feito em 13/11** (conteúdo da Extend; o do prompt é de outra agência) |
 | Assistente de IA | Futuro (D10) | Fora do MVP |
 | Presença "N online" | — | Baixa prioridade |
 
@@ -28,3 +28,5 @@ Recebido em 12/11/2026 (`PROMPT-ERP-OPERACIONAL.md`, enviado pelo Henrique). É 
 - **Repetição:** a próxima da série nasce ao concluir ou quando o prazo passa (a atrasada continua aberta, para não sumir trabalho). Vai para quem estava responsável quando a repetição foi ligada. Copia descrição, checklist (desmarcado), etiquetas e participantes. Se ficou parada semanas, pula para a próxima data futura. Cliente encerrado ou excluído para a série.
 - **Rotinas:** criadas de 0 a 6 dias antes (padrão 3), uma por cliente, rotina e data. Tipo "Geral" (A fazer → Fazendo → Feito). Só clientes **ativos** com o serviço vigente.
 - **Modelos e rotinas** são configurados por quem tem "Configurar quadros, colunas e fluxos" (admin e coordenação de conteúdo).
+- **Treinamentos:** permissões `trainings.read` (todos os papéis) e `trainings.manage` (admin, coordenação de conteúdo e gerente de tráfego). Rascunho só a gestão vê. Atribuir avisa a pessoa (se o treinamento estiver publicado; se for rascunho, avisa ao publicar). Concluir a última aula avisa quem atribuiu. Prazo vencido avisa uma vez (cron `extend-treinamentos`, 06:10). Arquivos até 25 MB no bucket privado `treinamentos`, enviados direto do navegador (a RLS confere). Vem com o treinamento real "Primeiros passos no Sistema Extend".
+- **Sem pontuação, ranking ou faixas** (decisão da Extend).

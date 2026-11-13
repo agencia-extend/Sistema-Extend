@@ -3,6 +3,7 @@ import {
   Briefcase,
   CalendarDays,
   ClipboardCheck,
+  GraduationCap,
   House,
   Kanban,
   LayoutList,
@@ -27,6 +28,7 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   dashboard: BarChart3,
   boards: Kanban,
   production: ClipboardCheck,
+  training: GraduationCap,
   settings: Settings,
 };
 
