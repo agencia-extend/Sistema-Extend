@@ -11,7 +11,7 @@ Documentos úteis: `README.md`, `docs/fase-0-arquitetura.md`, `docs/integracoes.
 | Sessão e permissão no servidor | `src/lib/auth/dal.ts`, `src/proxy.ts`, `src/lib/supabase/{server,client,admin}.ts` | 01 |
 | Catálogo de permissões | `src/domain/permissions/index.ts` | 01 |
 | RLS com escopo, overrides, trava de autoelevação | migrations de fundação (`20261031000100_foundation`…), `20261105090000_access_escalation_guard`, testes `supabase/tests/database/*` | 01 |
-| Convite com token hash, rate limit | `src/app/(auth)/convite/[token]`, `src/lib/rate-limit.ts`, `supabase/templates/convite.html` | 01 |
+| Convite com token hash, rate limit | `src/app/(auth)/convite/[token]`, `src/lib/rate-limit.ts`, `scripts/email-templates.mjs` | 01 |
 | Notificações + Web Push + relógio no banco | `features/notifications/*`, `/api/push/dispatch`, `private.notifications_tick`, `cron.schedule(...)` nas migrations | 01 |
 | Menu filtrado por permissão | `src/config/navigation.ts` | 01 |
 | Cifra de tokens | `src/lib/crypto.ts` (AES-256-GCM) | 05 |

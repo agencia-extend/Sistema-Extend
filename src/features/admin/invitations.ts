@@ -11,6 +11,8 @@ import { clientIp, RATE_LIMIT_MESSAGE, withinRateLimit } from "@/lib/rate-limit"
 import { fail, ok, type ActionResult } from "@/domain/shared/result";
 import { formatDateTime } from "@/domain/shared/dates";
 import { acceptInvitationSchema } from "@/features/auth/schemas";
+import { sendEmail } from "@/lib/email/send";
+import { welcomeEmail } from "@/lib/email/messages";
 import { invitationIdSchema, inviteSchema } from "./schemas";
 
 const INVITE_DAYS = 7;
@@ -35,7 +37,7 @@ type InvitationRow = {
 
 /**
  * Cria a conta no Auth (perfil inativo até o aceite) e dispara o e-mail do Supabase.
- * Os campos de `data` alimentam o template supabase/templates/convite.html.
+ * Os campos de `data` alimentam o modelo "invite" de scripts/email-templates.mjs.
  */
 async function sendInvite(inv: InvitationRow, token: string, ctx: { inviterName: string; roleName: string }) {
   return createAdminClient().auth.admin.inviteUserByEmail(inv.email, {
@@ -240,6 +242,15 @@ export async function acceptInvitation(raw: unknown): Promise<ActionResult<null>
   }
   const { error: finErr } = await admin.rpc("finalize_invitation", { p_invitation: inv.id, p_full_name: parsed.data.fullName });
   if (finErr) return fail("business_rule", "Este convite é inválido, já foi usado ou expirou. Peça um novo convite.");
+
+  // Boas-vindas com os primeiros passos. Falha no envio não impede a entrada.
+  const { data: roleRow } = await admin.from("invitations").select("roles(name)").eq("id", inv.id).maybeSingle();
+  const welcome = welcomeEmail(publicEnv.NEXT_PUBLIC_SITE_URL, {
+    name: parsed.data.fullName,
+    email: inv.email,
+    roleName: one(roleRow?.roles as { name: string } | { name: string }[] | null)?.name,
+  });
+  await sendEmail(inv.email, welcome.subject, welcome.parts);
 
   const supabase = await createClient();
   const { error: signErr } = await supabase.auth.signInWithPassword({ email: inv.email, password: parsed.data.password });

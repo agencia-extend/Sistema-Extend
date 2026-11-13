@@ -5,6 +5,10 @@ import { defineAction, must } from "@/lib/actions";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { fail, ok } from "@/domain/shared/result";
+import { formatDateTime } from "@/domain/shared/dates";
+import { publicEnv } from "@/lib/env";
+import { sendEmail } from "@/lib/email/send";
+import { accessPausedEmail, accessResumedEmail } from "@/lib/email/messages";
 import {
   duplicateRoleSchema,
   overrideSchema,
@@ -22,7 +26,7 @@ const ROLES = "/configuracoes/papeis";
 
 // --- Usuários -------------------------------------------------------------------
 
-export const setUserActive = defineAction({ schema: setUserActiveSchema, permission: "users.manage" }, async ({ userId, active }) => {
+export const setUserActive = defineAction({ schema: setUserActiveSchema, permission: "users.manage" }, async ({ userId, active }, { user }) => {
   const supabase = await createClient();
   // A RPC aplica as travas (não desativar a si mesmo, nem um admin sem ser admin, último admin).
   must(await supabase.rpc("admin_set_user_active", { p_user: userId, p_active: active }));
@@ -32,7 +36,18 @@ export const setUserActive = defineAction({ schema: setUserActiveSchema, permiss
   }
   revalidatePath(USERS);
   revalidatePath(`${USERS}/${userId}`);
-  return ok(null, active ? "Acesso reativado." : "Acesso desativado. A pessoa foi desconectada.");
+
+  // Avisa a pessoa por e-mail (ela não vê o sistema enquanto está pausada).
+  const { data: person } = await supabase.from("profiles").select("full_name, email").eq("id", userId).single();
+  let mail: Awaited<ReturnType<typeof sendEmail>> = "skipped";
+  if (person) {
+    const p = { name: person.full_name || person.email, email: person.email };
+    const site = publicEnv.NEXT_PUBLIC_SITE_URL;
+    const m = active ? accessResumedEmail(site, p, user.fullName) : accessPausedEmail(site, p, user.fullName, formatDateTime(new Date()));
+    mail = await sendEmail(person.email, m.subject, m.parts);
+  }
+  const warn = mail === "failed" ? " O e-mail de aviso não pôde ser enviado; avise a pessoa por outro canal." : mail === "sent" ? " Ela foi avisada por e-mail." : "";
+  return ok(null, (active ? "Acesso reativado." : "Acesso desativado. A pessoa foi desconectada.") + warn);
 });
 
 export const updateUserAccess = defineAction(
