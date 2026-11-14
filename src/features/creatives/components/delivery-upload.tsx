@@ -10,6 +10,7 @@ import { FormAlert, FormField } from "@/components/app/form-field";
 import { createClient } from "@/lib/supabase/client";
 import { addDelivery } from "@/features/creatives/actions";
 import { handleResult } from "@/lib/action-feedback";
+import { useHydrated } from "@/hooks/use-hydrated";
 
 const MAX = 10 * 1024 * 1024;
 const safe = (n: string) => n.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^\w.-]+/g, "-").slice(-80);
@@ -23,6 +24,8 @@ export function DeliveryUpload({ taskId, nextVersion }: { taskId: string; nextVe
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
+  // Antes de a página ficar interativa, o arquivo escolhido se perderia.
+  const hydrated = useHydrated();
 
   const send = () => {
     setError(null);
@@ -65,7 +68,7 @@ export function DeliveryUpload({ taskId, nextVersion }: { taskId: string; nextVe
       <div className="flex flex-wrap items-center gap-2">
         <input ref={fileRef} type="file" multiple hidden aria-label="Arquivos da versão" accept="image/*,video/*,application/pdf"
           onChange={(e) => { setFiles([...files, ...Array.from(e.target.files ?? [])]); e.target.value = ""; }} />
-        <Button type="button" variant="outline" size="sm" onClick={() => fileRef.current?.click()}><Upload aria-hidden="true" /> Escolher arquivos</Button>
+        <Button type="button" variant="outline" size="sm" disabled={!hydrated} onClick={() => fileRef.current?.click()}><Upload aria-hidden="true" /> Escolher arquivos</Button>
         {files.map((f, i) => (
           <span key={i} className="inline-flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs">
             <Paperclip className="size-3.5" aria-hidden="true" /> {f.name}
@@ -81,7 +84,7 @@ export function DeliveryUpload({ taskId, nextVersion }: { taskId: string; nextVe
       <FormField label="Recado para quem pediu" optional>
         <Textarea rows={2} maxLength={2000} value={note} onChange={(e) => setNote(e.target.value)} />
       </FormField>
-      <div><Button onClick={send} disabled={pending}>{pending && <LoaderCircle className="animate-spin" aria-hidden="true" />} {pending ? "Enviando…" : `Enviar v${nextVersion}`}</Button></div>
+      <div><Button onClick={send} disabled={pending || !hydrated}>{pending && <LoaderCircle className="animate-spin" aria-hidden="true" />} {pending ? "Enviando…" : `Enviar v${nextVersion}`}</Button></div>
     </section>
   );
 }

@@ -71,6 +71,7 @@ async function sendVersion(page: Page, kind: "arquivo" | "link") {
   page.on("console", (m) => { if (m.type() === "error") console.log("BROWSER:", m.text()); });
   await login(page, people.Priscila.email);
   await page.goto(`/criativos/${creativeId}`);
+  await expect(page.getByRole("button", { name: "Escolher arquivos" })).toBeEnabled();
   if (kind === "arquivo") await page.locator('input[type="file"][aria-label="Arquivos da versão"]').setInputFiles({ name: "criativo.png", mimeType: "image/png", buffer: PNG });
   else await page.getByRole("textbox", { name: "Link 1 da versão" }).fill("https://drive.google.com/file/d/abc123/view");
   await page.getByRole("button", { name: /^Enviar v\d$/ }).click();
