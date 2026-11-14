@@ -73,7 +73,7 @@ export function PolicyContent({ c }: { c: Controller }) {
         <p>Só com fornecedores que fazem o sistema funcionar, que tratam os dados em nome da agência (operadores) e apenas para isso:</p>
         <List>
           <li><strong>Supabase</strong>: banco de dados, login e arquivos.</li>
-          <li><strong>Vercel</strong>: hospedagem do sistema (servidores em São Paulo).</li>
+          <li><strong>Vercel</strong>: hospedagem do sistema (servidores nos Estados Unidos, ao lado do banco de dados).</li>
           <li><strong>Titan (contratado pela HostGator)</strong>: envio dos e-mails do sistema.</li>
           <li><strong>Serviços de aviso dos navegadores</strong> (Google, Apple, Mozilla, Microsoft): entregam o aviso no seu aparelho, com o título e o texto do aviso.</li>
           <li><strong>YouTube, Loom, Google Drive e Vimeo</strong>: só quando uma aula de treinamento tem vídeo dessas plataformas e você abre a aula. Vídeos do YouTube usam o modo de privacidade reforçada.</li>
@@ -83,7 +83,7 @@ export function PolicyContent({ c }: { c: Controller }) {
 
       <Section id="exterior" n={5} title="Dados guardados fora do Brasil">
         <p>
-          O banco de dados fica em servidores do Supabase nos <strong>Estados Unidos</strong>. Essa transferência internacional segue o art. 33 da LGPD, com as garantias contratuais de proteção de dados oferecidas pelo fornecedor (cláusulas-padrão contratuais) e as medidas de segurança descritas no item 7.
+          O banco de dados (Supabase) e o servidor do sistema (Vercel) ficam nos <strong>Estados Unidos</strong>. Essa transferência internacional segue o art. 33 da LGPD, com as garantias contratuais de proteção de dados oferecidas pelo fornecedor (cláusulas-padrão contratuais) e as medidas de segurança descritas no item 7.
         </p>
       </Section>
 
