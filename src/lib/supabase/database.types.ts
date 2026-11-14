@@ -775,6 +775,84 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"privacy_consents": {
+                  Row: {
+                    "accepted_at": string,"profile_id": string,"version": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accepted_at"?: string,"profile_id": string,"version": string
+                  }
+                  Update: {
+                    "accepted_at"?: string,"profile_id"?: string,"version"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "privacy_consents_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"privacy_requests": {
+                  Row: {
+                    "created_at": string,"details": string | null,"due_on": string,"id": string,"kind": string,"organization_id": string,"profile_id": string,"resolved_at": string | null,"resolved_by": string | null,"response": string | null,"status": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"details"?: string | null,"due_on"?: string,"id"?: string,"kind": string,"organization_id"?: string,"profile_id"?: string,"resolved_at"?: string | null,"resolved_by"?: string | null,"response"?: string | null,"status"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"details"?: string | null,"due_on"?: string,"id"?: string,"kind"?: string,"organization_id"?: string,"profile_id"?: string,"resolved_at"?: string | null,"resolved_by"?: string | null,"response"?: string | null,"status"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "privacy_requests_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "privacy_requests_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "privacy_requests_resolved_by_fkey"
+      columns: ["resolved_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"privacy_settings": {
+                  Row: {
+                    "address": string | null,"cnpj": string | null,"dpo_email": string | null,"dpo_name": string | null,"legal_name": string | null,"organization_id": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "address"?: string | null,"cnpj"?: string | null,"dpo_email"?: string | null,"dpo_name"?: string | null,"legal_name"?: string | null,"organization_id": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "address"?: string | null,"cnpj"?: string | null,"dpo_email"?: string | null,"dpo_name"?: string | null,"legal_name"?: string | null,"organization_id"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "privacy_settings_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: true
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "privacy_settings_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"profile_sectors": {
                   Row: {
                     "created_at": string,"is_lead": boolean,"profile_id": string,"sector_id": string
@@ -1622,6 +1700,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "permission_key": string,"scope": Database["public"]['Enums']["permission_scope"]
             }[]
+                           },
+"my_personal_data":
+{ Args: Record<PropertyKey, never>; Returns: Json
                            },
 "notify_users":
 { Args: { "p_actor": string,"p_body": string,"p_dedupe_key": string,"p_href": string,"p_kind": string,"p_title": string,"p_users": (string)[] }; Returns: number

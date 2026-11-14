@@ -3,13 +3,15 @@ import { requireUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { ProfileForm, PasswordForm } from "./profile-forms";
+import { myRequests } from "@/features/privacy/queries";
+import { MyPrivacy } from "@/features/privacy/components/my-privacy";
 
 export const metadata: Metadata = { title: "Meu perfil" };
 
 export default async function PerfilPage() {
   const user = await requireUser();
   const supabase = await createClient();
-  const { data } = await supabase.from("profiles").select("phone_e164").eq("id", user.id).single();
+  const [{ data }, requests] = await Promise.all([supabase.from("profiles").select("phone_e164").eq("id", user.id).single(), myRequests(user.id)]);
   const phone = (data?.phone_e164 as string | null)?.replace(/^\+55/, "") ?? "";
 
   return (
@@ -28,6 +30,7 @@ export default async function PerfilPage() {
           </h2>
           <PasswordForm />
         </section>
+        <MyPrivacy requests={requests} />
       </PageBody>
     </>
   );

@@ -58,6 +58,9 @@ test("1-2. convite → editor define senha, vê só o permitido e é bloqueado e
   await page.goto(`/convite/${token}`);
   await page.getByLabel("Crie uma senha").fill(editorPassword);
   await page.getByRole("button", { name: "Aceitar convite e entrar" }).click();
+  await expect(page.getByText("Para entrar, confirme que leu a Política de Privacidade e os Termos de uso.")).toBeVisible();
+  await page.getByRole("checkbox", { name: /Li e concordo/ }).click();
+  await page.getByRole("button", { name: "Aceitar convite e entrar" }).click();
   await page.waitForURL("**/inicio**");
   await expect(page.getByRole("heading", { name: /Editor/ })).toBeVisible();
 

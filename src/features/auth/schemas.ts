@@ -26,4 +26,5 @@ export const acceptInvitationSchema = z.object({
   token: z.string().regex(/^[A-Za-z0-9_-]{40,60}$/, "Convite inválido."),
   fullName: z.string().trim().min(2, "Informe seu nome.").max(120),
   password: passwordSchema,
+  acceptPolicy: z.literal(true, { message: "Para entrar, confirme que leu a Política de Privacidade e os Termos de uso." }),
 });

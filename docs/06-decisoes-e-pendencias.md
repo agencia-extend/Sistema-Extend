@@ -97,3 +97,25 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
 
 ## Pendências novas
 - Gamificação: **não entra** (decisão da Extend em 13/11/2026). Treinamentos: feito em 13/11 (`docs/10`).
+- **Privacidade / LGPD (13/11/2026):**
+  - **Páginas públicas:** `/privacidade` e `/termos`, com links no login, nos e-mails e no Meu perfil. O texto descreve só o que o sistema faz de fato: dados, bases legais do art. 7º, operadores, transferência para os EUA (o banco Supabase fica em us-east-1), prazos de guarda, segurança, cookies essenciais e direitos do art. 18.
+  - **Ciência da política:**
+    - quem entra pelo convite precisa marcar "Li e concordo";
+    - quem já usa vê um aviso no topo até tocar "Li e entendi";
+    - fica registrado em `privacy_consents`, por versão (`PRIVACY_VERSION` em `src/domain/privacy`).
+    - Quando o texto mudar, troque a versão para todos lerem de novo.
+  - **Pedidos dos titulares:**
+    - pelo Meu perfil → Privacidade, com prazo legal de 15 dias;
+    - o admin é avisado e responde em Configurações → Privacidade (LGPD), e a pessoa é avisada da resposta;
+    - "Baixar meus dados" gera um JSON pela RPC `my_personal_data`;
+    - permissão `privacy.manage`, só do admin.
+  - **Retenção automática** (cron `extend-privacidade`, diário):
+    - avisos lidos: 180 dias; avisos não lidos: 1 ano;
+    - convites não aceitos: 90 dias;
+    - aparelhos sem uso: 1 ano;
+    - auditoria e pedidos respondidos: 5 anos.
+  - **Pendente com a Extend:**
+    - preencher razão social, CNPJ, endereço e encarregado (DPO) em Configurações → Privacidade;
+    - revisar o texto com o advogado da agência;
+    - avaliar mover o projeto de produção do Supabase para São Paulo (sa-east-1), o que tira a transferência internacional;
+    - apagar ou anonimizar, após 5 anos, o histórico de quem saiu (a política promete isso).

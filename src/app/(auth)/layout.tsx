@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { ReactNode } from "react";
 import { BrandMotion } from "@/components/app/brand-motion";
 
@@ -33,6 +34,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         <div className="flex flex-1 items-center px-6 py-10 lg:px-12">
           <div className="w-full max-w-sm">{children}</div>
         </div>
+        <footer className="flex flex-wrap gap-x-4 gap-y-1 px-6 pb-6 text-xs text-muted-foreground lg:px-12">
+          <Link href="/privacidade" className="hover:text-foreground hover:underline">Política de Privacidade</Link>
+          <Link href="/termos" className="hover:text-foreground hover:underline">Termos de uso</Link>
+        </footer>
       </main>
     </div>
   );

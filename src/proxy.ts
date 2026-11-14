@@ -13,6 +13,8 @@ const PUBLIC_PATHS = [
   "/aprovar",
   "/proposta",
   "/avaliar-leads",
+  "/privacidade",
+  "/termos",
 ];
 
 function isPublic(pathname: string) {

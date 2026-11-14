@@ -45,6 +45,7 @@ export const PERMISSION_KEYS = [
   "trainings.read",
   "trainings.manage",
   "users.manage",
+  "privacy.manage",
   "roles.manage",
   "settings.manage",
   "integrations.manage",

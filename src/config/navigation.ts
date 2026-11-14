@@ -67,7 +67,7 @@ export type SettingsPage = { href: string; label: string; description: string; p
 
 /** Páginas de Configurações; sem perm = todo usuário. */
 export const SETTINGS_PAGES: SettingsPage[] = [
-  { href: "/configuracoes/perfil", label: "Meu perfil", description: "Nome, cargo, telefone e senha" },
+  { href: "/configuracoes/perfil", label: "Meu perfil", description: "Nome, cargo, telefone, senha e privacidade" },
   { href: "/configuracoes/notificacoes", label: "Notificações", description: "O que avisar e em quais aparelhos" },
   { href: "/configuracoes/usuarios", label: "Usuários", description: "Convites, papéis, setores e desativação", perm: "users.manage" },
   { href: "/configuracoes/papeis", label: "Papéis e permissões", description: "O que cada papel pode ver e fazer", perm: "roles.manage" },
@@ -77,6 +77,7 @@ export const SETTINGS_PAGES: SettingsPage[] = [
   { href: "/configuracoes/fluxos", label: "Fluxos de produção", description: "Etapas de vídeo, design, post, gravação e site", perm: "tasks.boards.configure" },
   { href: "/configuracoes/setores", label: "Setores", description: "Setores da agência e quem faz parte", perm: "settings.manage" },
   { href: "/configuracoes/auditoria", label: "Auditoria", description: "Quem alterou o quê, com antes e depois", perm: "audit.read" },
+  { href: "/configuracoes/privacidade", label: "Privacidade (LGPD)", description: "Pedidos sobre dados pessoais e dados do controlador", perm: "privacy.manage" },
 ];
 
 export function visibleSettingsPages(permissions: PermissionMap): SettingsPage[] {

@@ -13,6 +13,7 @@ import { formatDateTime } from "@/domain/shared/dates";
 import { acceptInvitationSchema } from "@/features/auth/schemas";
 import { sendEmail } from "@/lib/email/send";
 import { welcomeEmail } from "@/lib/email/messages";
+import { PRIVACY_VERSION } from "@/domain/privacy";
 import { invitationIdSchema, inviteSchema } from "./schemas";
 
 const INVITE_DAYS = 7;
@@ -242,6 +243,9 @@ export async function acceptInvitation(raw: unknown): Promise<ActionResult<null>
   }
   const { error: finErr } = await admin.rpc("finalize_invitation", { p_invitation: inv.id, p_full_name: parsed.data.fullName });
   if (finErr) return fail("business_rule", "Este convite é inválido, já foi usado ou expirou. Peça um novo convite.");
+
+  // Registra a ciência da política e dos termos marcada no aceite.
+  await admin.from("privacy_consents").upsert({ profile_id: inv.user_id, version: PRIVACY_VERSION }, { onConflict: "profile_id,version", ignoreDuplicates: true });
 
   // Boas-vindas com os primeiros passos. Falha no envio não impede a entrada.
   const { data: roleRow } = await admin.from("invitations").select("roles(name)").eq("id", inv.id).maybeSingle();

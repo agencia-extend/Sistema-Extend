@@ -4,13 +4,17 @@ import { requireUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 import { visibleNavGroups, visibleSettingsPages } from "@/config/navigation";
 import { myRunningTimer } from "@/features/tasks/queries";
+import { hasCurrentConsent } from "@/features/privacy/queries";
+import { PolicyNotice } from "@/features/privacy/components/policy-notice";
+import { PRIVACY_UPDATED_LABEL, PRIVACY_VERSION } from "@/domain/privacy";
 
 export default async function AppLayout({ children }: { children: ReactNode }) {
   const user = await requireUser();
   const supabase = await createClient();
-  const [{ count }, timer] = await Promise.all([
+  const [{ count }, timer, consented] = await Promise.all([
     supabase.from("notifications").select("id", { count: "exact", head: true }).is("read_at", null),
     myRunningTimer(user.id),
+    hasCurrentConsent(user.id),
   ]);
 
   const groups = visibleNavGroups(user.permissions);
@@ -35,6 +39,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
       unread={count ?? 0}
       timer={timer}
     >
+      {!consented && <PolicyNotice version={PRIVACY_VERSION} updated={PRIVACY_UPDATED_LABEL} />}
       {children}
     </AppShell>
   );

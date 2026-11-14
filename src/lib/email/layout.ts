@@ -156,7 +156,7 @@ export function renderEmail(e: EmailParts): string {
                 <tr>
                   <td style="padding-top:18px;font-size:12px;line-height:1.6;color:${C.muted};">
                     Sistema interno da Agência Extend<br>
-                    <a href="${site}" style="color:${C.muted};">${host}</a><br>
+                    <a href="${site}" style="color:${C.muted};">${host}</a> &nbsp;|&nbsp; <a href="${site}/privacidade" style="color:${C.muted};">Política de Privacidade</a><br>
                     Você recebeu este e-mail porque este endereço está cadastrado no sistema da equipe.
                   </td>
                 </tr>
