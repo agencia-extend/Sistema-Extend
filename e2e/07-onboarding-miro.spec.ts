@@ -61,6 +61,11 @@ test("1. a ficha mostra os passos do Miro por marco, com orientação e prazo em
   await expect(page.getByText(/no mínimo 5 criativos por mês/)).toBeVisible();
   // A ficha ganhou a seção de obrigações do cliente.
   await expect(page.getByText("Porta-voz do projeto (quem decide e aprova)")).toBeVisible();
+  // Briefing por seções: o cliente só tem Meta Ads → Geral e Tráfego aparecem; Vídeos, Design e Site não.
+  await expect(page.getByText("A. Geral", { exact: true })).toBeVisible();
+  await expect(page.getByText("B. Tráfego pago", { exact: true })).toBeVisible();
+  await expect(page.getByText("E. Site / Landing page", { exact: true })).toHaveCount(0);
+  await expect(page.getByText("C. Produção de vídeos", { exact: true })).toHaveCount(0);
 
   // Concluir os dois passos de abertura fecha o marco.
   await page.getByLabel("Repasse da data de início e dos serviços vendidos para a coordenação", { exact: true }).click();

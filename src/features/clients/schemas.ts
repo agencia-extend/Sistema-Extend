@@ -156,6 +156,9 @@ export const checklistTemplateSchema = z.object({
   is_active: z.boolean(),
 });
 
+/** Abas de serviço que podem condicionar uma seção da ficha. */
+export const SECTION_TABS = ["anuncios", "videos", "gravacao", "design", "conteudo", "gerenciamento", "site"] as const;
+
 const questionSchema = z.object({
   key: z.string().regex(/^[a-z0-9_]{1,60}$/, "Chave inválida."),
   label: z.string().trim().min(2).max(200),
@@ -168,7 +171,15 @@ const questionSchema = z.object({
 
 export const formSectionsSchema = z.object({
   sections: z
-    .array(z.object({ key: z.string().regex(/^[a-z0-9_]{1,40}$/), title: z.string().trim().min(2).max(80), questions: z.array(questionSchema).min(1).max(40) }))
+    .array(
+      z.object({
+        key: z.string().regex(/^[a-z0-9_]{1,40}$/),
+        title: z.string().trim().min(2).max(80),
+        /** Abas de serviço que fazem a seção aparecer (vazio = sempre). */
+        show_for: z.array(z.enum(SECTION_TABS)).max(10).optional(),
+        questions: z.array(questionSchema).min(1).max(40),
+      }),
+    )
     .min(1)
     .max(20),
 });

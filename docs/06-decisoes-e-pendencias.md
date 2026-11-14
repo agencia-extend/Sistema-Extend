@@ -188,3 +188,10 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
   - **Biblioteca** (`creative_library`): o aprovado entra com a copy. Situações: em teste, vencedor, fadigado, reprovado pela Meta e arquivado. A exportação do mês sai em CSV e PDF (pdf-lib).
   - **Pendente para a etapa 05:** a performance (RF-BIB-03) e o botão "pedir novo criativo" a partir do anúncio (RF-CRI-08). O banco já tem `creative_requests.source_ad_ref` e `creative_library.ad_ref`, e nada falso aparece na tela.
   - **Limitação conhecida:** a página do criativo, para quem não tem acesso, mostra "Página não encontrada" com código HTTP 200. A tela de carregamento começa a responder antes do 404, e nenhum dado do criativo é enviado.
+- **Briefing por seções A–E (14/11/2026)** (docs/08, item 3.3): a ficha de onboarding virou o briefing completo, com 70 perguntas em 6 seções: A. Geral, B. Tráfego pago, C. Produção de vídeos, D. Design, E. Site/Landing page e Obrigações do cliente.
+  - **Seções por serviço:** cada seção tem `show_for` (abas de serviço). A seção só aparece, só conta no "o que falta" e só entra no resumo operacional se o cliente tiver o serviço, vigente ou com início futuro (`private.section_applies`, `sectionApplies`).
+  - **Edição:** em Configurações → Onboarding, cada seção tem "Mostrar para".
+  - **Salvamento:** o rascunho é salvo sozinho, como antes.
+  - **Valores sensíveis:** investimento, ticket, meta de faturamento, acessos e forma de pagamento dos anúncios ficam só para quem vê a ficha completa.
+  - **Gerador:** a ficha é gerada por `scripts/gen-briefing.mjs`.
+- **Arquivos escolhidos antes de a página ficar interativa se perdiam** (envio de versões do criativo e importação de planilha). O campo agora só fica ativo depois do carregamento.

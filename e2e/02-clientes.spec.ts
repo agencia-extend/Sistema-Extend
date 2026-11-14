@@ -119,6 +119,7 @@ test("9. importar planilha com 10 clientes e desfazer", async ({ page }) => {
   writeFileSync(file, csv, "utf8");
   await login(page, adminEmail, adminPassword);
   await page.goto("/clientes/importar");
+  await expect(page.locator('input[type="file"]')).toBeEnabled();
   await page.setInputFiles('input[type="file"]', file);
   await expect(page.getByText("2. Prévia: 10 cliente(s) válido(s)")).toBeVisible();
   await page.getByRole("button", { name: /Importar 10 cliente/ }).click();

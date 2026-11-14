@@ -8,7 +8,9 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { publishForm } from "@/features/clients/settings-actions";
-import type { FormQuestion, FormSection } from "@/features/clients/schemas";
+import { SECTION_TABS, type FormQuestion, type FormSection } from "@/features/clients/schemas";
+import { SECTION_TAB_LABEL } from "@/domain/clients";
+import { Checkbox } from "@/components/ui/checkbox";
 import { handleResult } from "@/lib/action-feedback";
 
 const TYPES: Record<FormQuestion["type"], string> = {
@@ -51,7 +53,7 @@ export function FormEditor({ version, initial }: { version: number; initial: For
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div className="grid gap-1">
           <h2 id="ficha" className="text-base font-semibold">Perguntas da ficha <span className="font-normal text-muted-foreground">(versão {version})</span></h2>
-          <p className="text-sm text-muted-foreground">“Equipe vê” coloca a resposta no resumo operacional para editores, designers e social media.</p>
+          <p className="text-sm text-muted-foreground">“Equipe vê” coloca a resposta no resumo operacional para editores, designers e social media. Seção marcada para um serviço só aparece para clientes com ele.</p>
         </div>
         <Button onClick={publish} disabled={pending || !dirty}>
           {pending && <LoaderCircle className="animate-spin" aria-hidden="true" />} Publicar nova versão
@@ -66,6 +68,25 @@ export function FormEditor({ version, initial }: { version: number; initial: For
             <Button variant="ghost" size="icon" aria-label="Subir seção" onClick={() => update((all) => move(all, si, -1))}><ArrowUp /></Button>
             <Button variant="ghost" size="icon" aria-label="Descer seção" onClick={() => update((all) => move(all, si, 1))}><ArrowDown /></Button>
             <Button variant="ghost" size="icon" aria-label="Remover seção" onClick={() => update((all) => all.filter((_, i) => i !== si))} disabled={sections.length === 1}><Trash2 /></Button>
+          </div>
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+            <span className="text-muted-foreground">Mostrar para:</span>
+            {!s.show_for?.length && <span className="text-xs font-medium">todos os clientes</span>}
+            {SECTION_TABS.map((t) => {
+              const on = Boolean(s.show_for?.includes(t));
+              return (
+                <label key={t} className="inline-flex min-h-8 items-center gap-1.5">
+                  <Checkbox
+                    checked={on}
+                    aria-label={`Seção ${s.title}: mostrar para clientes com ${SECTION_TAB_LABEL[t]}`}
+                    onCheckedChange={(c) =>
+                      update((all) => all.map((x, i) => (i !== si ? x : { ...x, show_for: c ? [...(x.show_for ?? []), t] : (x.show_for ?? []).filter((y) => y !== t) })))
+                    }
+                  />
+                  {SECTION_TAB_LABEL[t]}
+                </label>
+              );
+            })}
           </div>
           <ul className="grid gap-2">
             {s.questions.map((q, qi) => (

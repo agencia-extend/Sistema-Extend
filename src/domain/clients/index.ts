@@ -124,3 +124,18 @@ export const MATERIAL_CATEGORY: Record<MaterialCategory, { label: string; hint: 
 export const FILE_FOLDERS = ["geral", "midias", "trafego"] as const;
 export type FileFolder = (typeof FILE_FOLDERS)[number];
 export const FILE_FOLDER_LABEL: Record<FileFolder, string> = { geral: "Geral", midias: "Mídias", trafego: "Tráfego" };
+
+/** Seção da ficha vale para o cliente? Sem "show_for" vale sempre; com, basta um serviço que tenha a aba. */
+export function sectionApplies(showFor: readonly string[] | undefined, clientTabs: readonly string[]): boolean {
+  return !showFor?.length || showFor.some((t) => clientTabs.includes(t));
+}
+
+export const SECTION_TAB_LABEL: Record<string, string> = {
+  anuncios: "Tráfego (Meta/Google)",
+  videos: "Vídeos",
+  gravacao: "Gravação",
+  design: "Design",
+  conteudo: "Conteúdo",
+  gerenciamento: "Gerenciamento de redes",
+  site: "Site",
+};

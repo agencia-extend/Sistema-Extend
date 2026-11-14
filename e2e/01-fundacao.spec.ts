@@ -114,7 +114,7 @@ test("4, 6, 7, 8, 9. admin: exceção, ver como, notificação, desativar e audi
   // 8. desativar derruba a sessão.
   await page.getByRole("button", { name: "Desativar acesso" }).click();
   await page.getByRole("button", { name: "Desativar acesso" }).last().click();
-  await expect(page.getByText(/Acesso desativado/)).toBeVisible();
+  await expect(page.getByText(/Acesso desativado. A pessoa foi desconectada/)).toBeVisible();
   await editorPage.goto("/inicio");
   await expect(editorPage).toHaveURL(/login/);
   await editorCtx.close();

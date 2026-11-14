@@ -1,5 +1,6 @@
 import { requirePermission } from "@/lib/auth/dal";
-import { getClient, getMissing, getOnboarding, getOperationalSummary, listTeam } from "@/features/clients/queries";
+import { currentServices, upcomingServices, getClient, getMissing, getOnboarding, getOperationalSummary, listTeam } from "@/features/clients/queries";
+import { sectionApplies } from "@/domain/clients";
 import { formatDateTime } from "@/domain/shared/dates";
 import { todayKey } from "@/domain/media";
 import { Section } from "@/features/clients/components/section";
@@ -42,13 +43,16 @@ export default async function FichaPage({ params }: { params: Promise<{ id: stri
   }
 
   const canEdit = Boolean(user.permissions["clients.onboarding.manage"]) && !ob.completedAt;
+  // Briefing por seções: só as dos serviços contratados (A e Obrigações sempre).
+  const tabs = [...currentServices(client), ...upcomingServices(client)].flatMap((s) => (Array.isArray(s.service_catalog) ? s.service_catalog : s.service_catalog ? [s.service_catalog] : []).flatMap((c) => c.tabs));
+  const sections = ob.sections.filter((s) => sectionApplies(s.show_for, tabs));
   const [team, missing] = await Promise.all([listTeam(), client.status === "onboarding" ? getMissing(id) : Promise.resolve([])]);
 
   return (
     <div className="grid gap-8 xl:grid-cols-[minmax(0,1fr)_380px]">
       <div className="grid content-start gap-6">
         {ob.completedAt && <FormAlert tone="success">Onboarding concluído em {formatDateTime(ob.completedAt)}. A ficha fica guardada como estava.</FormAlert>}
-        <OnboardingForm clientId={id} sections={ob.sections} answers={ob.answers} canEdit={canEdit} savedAt={ob.updatedAt} />
+        <OnboardingForm clientId={id} sections={sections} answers={ob.answers} canEdit={canEdit} savedAt={ob.updatedAt} />
       </div>
       <div className="grid content-start gap-6">
         {client.status === "onboarding" && (

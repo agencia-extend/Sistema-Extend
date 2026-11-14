@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { clientCode, clientTabs, contractWindow, deliveredPercent, journeyStage } from "./index";
+import { clientCode, clientTabs, contractWindow, deliveredPercent, journeyStage, sectionApplies } from "./index";
 import { buildRows, guessMapping, parseDateBR, parseServiceCell } from "./import";
 import { centsToInput, formatBRL, parseBRL } from "@/domain/shared/money";
 
@@ -38,6 +38,15 @@ describe("abas do cliente", () => {
   });
   it("só tráfego não mostra demanda do mês", () => {
     expect(clientTabs("ativo", ["anuncios"], { "tasks.read": "all" }).map((t) => t.key)).not.toContain("midias");
+  });
+});
+
+describe("seções da ficha por serviço", () => {
+  it("mostra sempre as sem condição e as dos serviços contratados", () => {
+    expect(sectionApplies(undefined, [])).toBe(true);
+    expect(sectionApplies([], ["anuncios"])).toBe(true);
+    expect(sectionApplies(["anuncios"], ["anuncios", "videos"])).toBe(true);
+    expect(sectionApplies(["site"], ["anuncios"])).toBe(false);
   });
 });
 

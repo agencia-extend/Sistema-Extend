@@ -11,6 +11,7 @@ import { FormAlert, FormField } from "@/components/app/form-field";
 import { buildRows, guessMapping, type ImportField } from "@/domain/clients/import";
 import { importClients } from "@/features/clients/actions";
 import { handleResult } from "@/lib/action-feedback";
+import { useHydrated } from "@/hooks/use-hydrated";
 
 const IGNORE = "__ignorar";
 const BASE_FIELDS: [ImportField, string][] = [
@@ -32,6 +33,8 @@ export function Importer({ services }: { services: { id: string; name: string; k
   const [error, setError] = useState<string | null>(null);
   const [reading, setReading] = useState(false);
   const [pending, startTransition] = useTransition();
+  // Antes de a página ficar interativa, o arquivo escolhido se perderia.
+  const hydrated = useHydrated();
 
   const result = useMemo(() => (records.length ? buildRows(records, mapping) : null), [records, mapping]);
   const hasName = Object.values(mapping).includes("name");
@@ -70,7 +73,7 @@ export function Importer({ services }: { services: { id: string; name: string; k
     <div className="grid gap-6">
       <FormAlert>{error}</FormAlert>
       <FormField label="Planilha" hint="A primeira linha precisa ter os nomes das colunas. Até 1.000 clientes por vez.">
-        <Input type="file" accept=".xlsx,.xls,.csv" onChange={(e) => e.target.files?.[0] && void read(e.target.files[0])} disabled={reading || pending} />
+        <Input type="file" accept=".xlsx,.xls,.csv" onChange={(e) => e.target.files?.[0] && void read(e.target.files[0])} disabled={reading || pending || !hydrated} />
       </FormField>
       {reading && <p className="flex items-center gap-2 text-sm text-muted-foreground"><LoaderCircle className="size-4 animate-spin" aria-hidden="true" /> Lendo planilha…</p>}
 
