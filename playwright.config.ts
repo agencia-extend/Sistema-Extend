@@ -9,6 +9,8 @@ try {
 export default defineConfig({
   testDir: "./e2e",
   timeout: 60_000,
+  // Em produção a primeira chamada depois de publicar pode levar mais que 5 s (função "acordando").
+  expect: { timeout: 10_000 },
   fullyParallel: false,
   workers: 1,
   retries: 0,
