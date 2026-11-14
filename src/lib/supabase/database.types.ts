@@ -983,6 +983,44 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"marketing_dates": {
+                  Row: {
+                    "brief": Json | null,"client_id": string,"created_at": string,"created_by": string | null,"id": string,"kind": string,"lead_days": number,"notes": string | null,"on_date": string,"organization_id": string,"request_error": string | null,"request_task_id": string | null,"requested_at": string | null,"title": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "brief"?: Json | null,"client_id": string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"kind"?: string,"lead_days"?: number,"notes"?: string | null,"on_date": string,"organization_id": string,"request_error"?: string | null,"request_task_id"?: string | null,"requested_at"?: string | null,"title": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "brief"?: Json | null,"client_id"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"kind"?: string,"lead_days"?: number,"notes"?: string | null,"on_date"?: string,"organization_id"?: string,"request_error"?: string | null,"request_task_id"?: string | null,"requested_at"?: string | null,"title"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "marketing_dates_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "marketing_dates_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "marketing_dates_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "marketing_dates_request_task_id_fkey"
+      columns: ["request_task_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"notification_preferences": {
                   Row: {
                     "in_app": boolean,"kind": string,"push": boolean,"updated_at": string,"user_id": string
@@ -2527,6 +2565,9 @@ isOneToOne: false
 "decide_approval":
 { Args: { "p_comment": string,"p_decision": string,"p_ip": string,"p_name": string,"p_token_hash": string }; Returns: string
                            },
+"delete_marketing_date":
+{ Args: { "p_id": string }; Returns: undefined
+                           },
 "duplicate_role":
 { Args: { "p_name": string,"p_role": string }; Returns: string
                            },
@@ -2545,6 +2586,11 @@ isOneToOne: false
 "mark_all_notifications_read":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
+"marketing_calendar_clients":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "can_request": boolean,"id": string,"name": string
+            }[]
+                           },
 "move_lead":
 { Args: { "p_lead": string,"p_reason"?: string,"p_stage": string }; Returns: undefined
                            },
@@ -2558,6 +2604,11 @@ isOneToOne: false
                            },
 "my_personal_data":
 { Args: Record<PropertyKey, never>; Returns: Json
+                           },
+"national_marketing_dates":
+{ Args: { "p_end": string,"p_start": string }; Returns: {
+              "on_date": string,"title": string
+            }[]
                            },
 "notify_users":
 { Args: { "p_actor": string,"p_body": string,"p_dedupe_key": string,"p_href": string,"p_kind": string,"p_title": string,"p_users": (string)[] }; Returns: number
@@ -2617,6 +2668,9 @@ isOneToOne: false
                            },
 "save_content":
 { Args: { "p": Json,"p_task": string }; Returns: undefined
+                           },
+"save_marketing_date":
+{ Args: { "p": Json }; Returns: string
                            },
 "save_proposal":
 { Args: { "p": Json }; Returns: string

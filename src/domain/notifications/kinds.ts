@@ -8,6 +8,7 @@ export const NOTIFICATION_KINDS = [
   { key: "client_approval", label: "Aprovação do cliente recebida" },
   { key: "client_waiting", label: "Cliente sem retorno em aprovação" },
   { key: "creative_ready", label: "Criativo pronto" },
+  { key: "marketing", label: "Calendário de marketing: pedidos de criativo criados ou com erro" },
   { key: "ad_alert", label: "Alertas de anúncios" },
   { key: "client_onboarding", label: "Cliente novo em onboarding" },
   { key: "training", label: "Treinamento atribuído, atrasado ou concluído" },

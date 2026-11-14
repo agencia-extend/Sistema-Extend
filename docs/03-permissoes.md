@@ -31,6 +31,8 @@ Formato: `módulo.recurso.ação` com escopo `own` (meu), `clients` (clientes em
 | tasks.manage | all | clients | clients | all | clients | own | — |
 | tasks.assign | all | clients | clients | all | clients | — | — |
 | sector.dashboard.read | all | tráfego | — | todos de criação | gerenciamento | — | — |
+| marketing_calendar.read (calendário de marketing) | all | all | clients | all | clients | clients | — |
+| marketing_calendar.manage (datas dos clientes) | all | all | clients | all | clients | — | — |
 | creatives.request.create | all | clients | clients | all | — | — | — |
 | creatives.produce | all | — | — | all | clients | own | — |
 | creatives.performance.read | all | all | clients | all | clients | own | — |

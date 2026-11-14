@@ -24,6 +24,8 @@ export const PERMISSION_KEYS = [
   "sector.dashboard.read",
   "calendar.read",
   "calendar.manage",
+  "marketing_calendar.read",
+  "marketing_calendar.manage",
   "creatives.request.create",
   "creatives.produce",
   "creatives.review",
