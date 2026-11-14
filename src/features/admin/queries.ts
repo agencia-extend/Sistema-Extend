@@ -59,6 +59,7 @@ export async function listUsers(): Promise<UserRow[]> {
   const { data, error } = await supabase
     .from("profiles")
     .select("id, full_name, email, job_title, is_active, deactivated_at, created_at, user_roles(roles(id, key, name)), profile_sectors(sectors(id, name, color))")
+    .is("portal_client_id", null)
     .order("full_name");
   if (error) throw error;
   return (data ?? []).map((p) => ({
@@ -80,6 +81,7 @@ export async function listInvitations(): Promise<InvitationRow[]> {
     .from("invitations")
     .select("id, email, full_name, status, expires_at, send_count, last_sent_at, roles(name)")
     .eq("status", "pendente")
+    .is("portal_client_id", null)
     .order("created_at", { ascending: false });
   if (error) throw error;
   const now = Date.now();

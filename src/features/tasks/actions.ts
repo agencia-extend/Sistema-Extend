@@ -142,7 +142,7 @@ export const deleteChecklist = defineAction({ schema: z.object({ id: uuid, taskI
 
 export const addComment = defineAction({ schema: commentSchema }, async ({ taskId, body }, { user }) => {
   const supabase = await createClient();
-  const { data: team } = await supabase.from("profiles").select("id, full_name").eq("is_active", true);
+  const { data: team } = await supabase.from("profiles").select("id, full_name").eq("is_active", true).is("portal_client_id", null);
   const mentions = findMentions(body, (team ?? []).map((p) => ({ id: p.id, name: p.full_name }))).filter((id) => id !== user.id);
   must(await supabase.from("task_comments").insert({ task_id: taskId, author_id: user.id, body, mentions }));
   touch(taskId);

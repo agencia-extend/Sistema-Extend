@@ -207,6 +207,7 @@ export async function listTeam() {
     .from("profiles")
     .select("id, full_name, email, profile_sectors(sector_id)")
     .eq("is_active", true)
+    .is("portal_client_id", null)
     .order("full_name");
   if (error) throw error;
   return data.map((p) => ({ id: p.id, name: p.full_name || p.email, sectorIds: arr(p.profile_sectors).map((s) => s.sector_id) }));

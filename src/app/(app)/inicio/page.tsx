@@ -39,7 +39,7 @@ export default async function InicioPage({ searchParams }: { searchParams: Promi
     seesOnboarding || user.permissions["commercial.handoff.create"] ? promisesDueSoon() : Promise.resolve([]),
     canUsers
       ? Promise.all([
-          supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_active", true),
+          supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_active", true).is("portal_client_id", null),
           supabase.from("invitations").select("id", { count: "exact", head: true }).eq("status", "pendente"),
           supabase.from("push_subscriptions").select("id", { count: "exact", head: true }),
         ]).then(([m, p, d]) => ({ members: m.count ?? 0, pending: p.count ?? 0, devices: d.count ?? 0 }))

@@ -1,6 +1,5 @@
 "use server";
 
-import { createHash, randomBytes } from "node:crypto";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { defineAction, must } from "@/lib/actions";
@@ -9,60 +8,12 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv } from "@/lib/env";
 import { clientIp, RATE_LIMIT_MESSAGE, withinRateLimit } from "@/lib/rate-limit";
 import { fail, ok, type ActionResult } from "@/domain/shared/result";
-import { formatDateTime } from "@/domain/shared/dates";
 import { acceptInvitationSchema } from "@/features/auth/schemas";
 import { sendEmail } from "@/lib/email/send";
-import { welcomeEmail } from "@/lib/email/messages";
+import { portalWelcomeEmail, welcomeEmail } from "@/lib/email/messages";
 import { PRIVACY_VERSION } from "@/domain/privacy";
 import { invitationIdSchema, inviteSchema } from "./schemas";
-
-const INVITE_DAYS = 7;
-const SECRET_MISSING = "Convites ainda não estão configurados no servidor (falta SUPABASE_SECRET_KEY). Avise o responsável técnico.";
-
-const newToken = () => randomBytes(32).toString("base64url");
-const hashToken = (token: string) => createHash("sha256").update(token).digest("hex");
-const acceptUrl = (token: string) => `${publicEnv.NEXT_PUBLIC_SITE_URL}/convite/${token}`;
-const expiresAt = () => new Date(Date.now() + INVITE_DAYS * 86_400_000).toISOString();
-
-type InvitationRow = {
-  id: string;
-  organization_id: string;
-  email: string;
-  full_name: string;
-  role_id: string;
-  status: "pendente" | "aceito" | "cancelado";
-  expires_at: string;
-  user_id: string | null;
-  send_count: number;
-};
-
-/**
- * Cria a conta no Auth (perfil inativo até o aceite) e dispara o e-mail do Supabase.
- * Os campos de `data` alimentam o modelo "invite" de scripts/email-templates.mjs.
- */
-async function sendInvite(inv: InvitationRow, token: string, ctx: { inviterName: string; roleName: string }) {
-  return createAdminClient().auth.admin.inviteUserByEmail(inv.email, {
-    redirectTo: acceptUrl(token),
-    data: {
-      invitation_id: inv.id,
-      role_id: inv.role_id,
-      full_name: inv.full_name,
-      invite_url: acceptUrl(token),
-      inviter_name: ctx.inviterName,
-      role_name: ctx.roleName,
-      expires_label: formatDateTime(inv.expires_at),
-    },
-  });
-}
-
-/** Remove a conta criada pelo convite, apenas se ela nunca foi ativada. */
-async function removePendingAccount(userId: string | null) {
-  if (!userId) return;
-  const admin = createAdminClient();
-  const { data: profile } = await admin.from("profiles").select("is_active").eq("id", userId).maybeSingle();
-  if (!profile || profile.is_active) return;
-  await admin.auth.admin.deleteUser(userId);
-}
+import { SECRET_MISSING, expiresAt, hashToken, newToken, removePendingAccount, sendInvite, type InvitationRow } from "./invite-core";
 
 async function inviteContext(roleId: string, inviterName: string) {
   const supabase = await createClient();
@@ -128,7 +79,7 @@ export const resendInvitation = defineAction({ schema: invitationIdSchema, permi
   if (!(await withinRateLimit(`invite:${user.id}`, 30, 3600))) return fail("business_rule", RATE_LIMIT_MESSAGE);
 
   const supabase = await createClient();
-  const inv = must(await supabase.from("invitations").select("*").eq("id", id).single()) as InvitationRow;
+  const inv = must(await supabase.from("invitations").select("*").eq("id", id).is("portal_client_id", null).single()) as InvitationRow;
   if (inv.status !== "pendente") return fail("business_rule", "Só convites pendentes podem ser reenviados.");
 
   // Novo token e novo prazo; a conta pendente é recriada junto com o e-mail novo.
@@ -150,7 +101,7 @@ export const resendInvitation = defineAction({ schema: invitationIdSchema, permi
       .single(),
   ) as InvitationRow;
 
-  const { data, error } = await sendInvite(updated, token, await inviteContext(updated.role_id, user.fullName));
+  const { data, error } = await sendInvite(updated, token, await inviteContext(updated.role_id!, user.fullName));
   if (error || !data.user) {
     console.error("[resendInvitation]", error?.code ?? error?.status);
     return fail("unknown", "Não foi possível reenviar o convite agora. Tente novamente.");
@@ -163,7 +114,7 @@ export const resendInvitation = defineAction({ schema: invitationIdSchema, permi
 export const cancelInvitation = defineAction({ schema: invitationIdSchema, permission: "users.manage" }, async ({ id }, { user }) => {
   if (!process.env.SUPABASE_SECRET_KEY) return fail("business_rule", SECRET_MISSING);
   const supabase = await createClient();
-  const inv = must(await supabase.from("invitations").select("*").eq("id", id).single()) as InvitationRow;
+  const inv = must(await supabase.from("invitations").select("*").eq("id", id).is("portal_client_id", null).single()) as InvitationRow;
   if (inv.status !== "pendente") return fail("business_rule", "Este convite não está mais pendente.");
 
   must(
@@ -192,7 +143,7 @@ export async function previewInvitation(token: string): Promise<InvitationPrevie
   if (!/^[A-Za-z0-9_-]{40,60}$/.test(token) || !process.env.SUPABASE_SECRET_KEY) return { state: "invalido" };
   const { data } = await createAdminClient()
     .from("invitations")
-    .select("email, full_name, status, expires_at, user_id, roles(name), inviter:profiles!invitations_invited_by_fkey(full_name, email)")
+    .select("email, full_name, status, expires_at, user_id, roles(name), clients(name), inviter:profiles!invitations_invited_by_fkey(full_name, email)")
     .eq("token_hash", hashToken(token))
     .maybeSingle();
   if (!data || !data.user_id) return { state: "invalido" };
@@ -205,7 +156,7 @@ export async function previewInvitation(token: string): Promise<InvitationPrevie
     state: "valido",
     email: data.email,
     fullName: data.full_name,
-    roleName: role?.name ?? "",
+    roleName: role?.name ?? (one(data.clients as { name: string } | { name: string }[] | null) ? `usuário da área do cliente de ${one(data.clients as { name: string } | { name: string }[] | null)!.name}` : ""),
     inviterName: inviter?.full_name || inviter?.email || "",
     expiresAt: data.expires_at,
   };
@@ -224,7 +175,7 @@ export async function acceptInvitation(raw: unknown): Promise<ActionResult<null>
   const admin = createAdminClient();
   const { data: inv } = await admin
     .from("invitations")
-    .select("id, email, status, expires_at, user_id")
+    .select("id, email, status, expires_at, user_id, portal_client_id, clients(name), roles(name)")
     .eq("token_hash", hashToken(parsed.data.token))
     .maybeSingle();
   if (!inv || !inv.user_id || inv.status !== "pendente" || new Date(inv.expires_at).getTime() < Date.now()) {
@@ -248,16 +199,15 @@ export async function acceptInvitation(raw: unknown): Promise<ActionResult<null>
   await admin.from("privacy_consents").upsert({ profile_id: inv.user_id, version: PRIVACY_VERSION }, { onConflict: "profile_id,version", ignoreDuplicates: true });
 
   // Boas-vindas com os primeiros passos. Falha no envio não impede a entrada.
-  const { data: roleRow } = await admin.from("invitations").select("roles(name)").eq("id", inv.id).maybeSingle();
-  const welcome = welcomeEmail(publicEnv.NEXT_PUBLIC_SITE_URL, {
-    name: parsed.data.fullName,
-    email: inv.email,
-    roleName: one(roleRow?.roles as { name: string } | { name: string }[] | null)?.name,
-  });
+  const person = { name: parsed.data.fullName, email: inv.email };
+  const portalClient = one(inv.clients as { name: string } | { name: string }[] | null);
+  const welcome = inv.portal_client_id
+    ? portalWelcomeEmail(publicEnv.NEXT_PUBLIC_SITE_URL, person, portalClient?.name ?? "")
+    : welcomeEmail(publicEnv.NEXT_PUBLIC_SITE_URL, { ...person, roleName: one(inv.roles as { name: string } | { name: string }[] | null)?.name });
   await sendEmail(inv.email, welcome.subject, welcome.parts);
 
   const supabase = await createClient();
   const { error: signErr } = await supabase.auth.signInWithPassword({ email: inv.email, password: parsed.data.password });
   if (signErr) redirect("/login");
-  redirect("/inicio?bem-vindo=1");
+  redirect(inv.portal_client_id ? "/portal" : "/inicio?bem-vindo=1");
 }

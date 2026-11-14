@@ -133,7 +133,7 @@ export async function getTraining(id: string, userId: string, withTeam: boolean)
 /** Pessoas ativas que podem receber um treinamento. */
 export async function listTeamOptions() {
   const supabase = await createClient();
-  const { data, error } = await supabase.from("profiles").select("id, full_name, job_title").eq("is_active", true).order("full_name");
+  const { data, error } = await supabase.from("profiles").select("id, full_name, job_title").eq("is_active", true).is("portal_client_id", null).order("full_name");
   if (error) throw error;
   return (data ?? []).map((p) => ({ id: p.id, name: p.full_name, jobTitle: p.job_title }));
 }

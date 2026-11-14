@@ -12,6 +12,7 @@ export const NOTIFICATION_KINDS = [
   { key: "training", label: "Treinamento atribuído, atrasado ou concluído" },
   { key: "crm", label: "Comercial: próximas ações e leads parados" },
   { key: "proposal", label: "Propostas: aberta pelo cliente, aceita ou vencida" },
+  { key: "portal", label: "Área do cliente: entrada de pessoas do cliente" },
   { key: "privacy", label: "Pedidos sobre dados pessoais (LGPD) e respostas" },
   { key: "system", label: "Avisos do sistema e testes" },
 ] as const;

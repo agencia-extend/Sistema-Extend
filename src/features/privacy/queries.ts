@@ -93,8 +93,8 @@ export async function controllerForEdit(): Promise<Controller> {
 export async function consentCoverage(): Promise<{ aware: number; total: number }> {
   const supabase = await createClient();
   const [{ count: total }, { count: aware }] = await Promise.all([
-    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_active", true),
-    supabase.from("privacy_consents").select("profile_id, profiles!inner(is_active)", { count: "exact", head: true }).eq("version", PRIVACY_VERSION).eq("profiles.is_active", true),
+    supabase.from("profiles").select("id", { count: "exact", head: true }).eq("is_active", true).is("portal_client_id", null),
+    supabase.from("privacy_consents").select("profile_id, profiles!inner(is_active)", { count: "exact", head: true }).eq("version", PRIVACY_VERSION).eq("profiles.is_active", true).is("profiles.portal_client_id", null),
   ]);
   return { aware: aware ?? 0, total: total ?? 0 };
 }

@@ -34,14 +34,15 @@ const ALWAYS: ClientTab[] = [
  * Abas de módulos que ainda não existem não entram (regra nº 1).
  */
 export function clientTabs(status: ClientStatus, serviceTabs: string[], perms: PermissionMap): ClientTab[] {
-  if (status === "onboarding") return [...ALWAYS, { key: "contratos", label: "Contratos" }, { key: "arquivos", label: "Documentos" }];
+  const portal: ClientTab = { key: "area-do-cliente", label: "Área do cliente" };
+  if (status === "onboarding") return [...ALWAYS, { key: "contratos", label: "Contratos" }, { key: "arquivos", label: "Documentos" }, portal];
   const tabs = [...ALWAYS];
   const hasProduction = serviceTabs.some((t) => ["videos", "design", "conteudo", "gerenciamento", "gravacao", "site"].includes(t));
   if (hasProduction && perms["tasks.read"]) tabs.push({ key: "midias", label: "Controle de Mídias" }, { key: "quadros", label: "Quadros" });
   // Cronograma só para quem tem Gerenciamento (briefing: cliente sem gerenciamento não tem cronograma).
   if (serviceTabs.includes("gerenciamento") && perms["tasks.read"]) tabs.push({ key: "cronograma", label: "Cronograma" });
   if (serviceTabs.some((t) => t === "videos" || t === "gravacao") && perms["tasks.read"]) tabs.push({ key: "gravacoes", label: "Gravações" });
-  tabs.push({ key: "contratos", label: "Contratos" }, { key: "ideias", label: "Ideias e referências" }, { key: "arquivos", label: "Documentos" }, { key: "historico", label: "Histórico" });
+  tabs.push({ key: "contratos", label: "Contratos" }, { key: "ideias", label: "Ideias e referências" }, { key: "arquivos", label: "Documentos" }, { key: "historico", label: "Histórico" }, portal);
   return tabs;
 }
 
@@ -121,9 +122,11 @@ export const MATERIAL_CATEGORY: Record<MaterialCategory, { label: string; hint: 
   outros: { label: "Outros", hint: "O que não se encaixa nas categorias acima." },
 };
 
-export const FILE_FOLDERS = ["geral", "midias", "trafego"] as const;
+export const FILE_FOLDERS = ["geral", "midias", "trafego", "relatorios", "cliente"] as const;
 export type FileFolder = (typeof FILE_FOLDERS)[number];
-export const FILE_FOLDER_LABEL: Record<FileFolder, string> = { geral: "Geral", midias: "Mídias", trafego: "Tráfego" };
+export const FILE_FOLDER_LABEL: Record<FileFolder, string> = { geral: "Geral", midias: "Mídias", trafego: "Tráfego", relatorios: "Relatórios", cliente: "Para o cliente" };
+/** Pastas que o cliente vê na área do cliente (compartilhar exige clients.portal.manage). */
+export const SHARED_FOLDERS: readonly FileFolder[] = ["relatorios", "cliente"];
 
 /** Seção da ficha vale para o cliente? Sem "show_for" vale sempre; com, basta um serviço que tenha a aba. */
 export function sectionApplies(showFor: readonly string[] | undefined, clientTabs: readonly string[]): boolean {

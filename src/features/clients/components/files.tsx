@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useTransition } from "react";
+import type { FileFolder } from "@/domain/clients";
 import { LoaderCircle, Paperclip, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -40,7 +41,7 @@ export function UploadButton({
   clientId: string;
   category: "geral" | "fechamento" | "reuniao" | "identidade" | "contrato" | "referencia";
   meetingId?: string;
-  folder?: "geral" | "midias" | "trafego";
+  folder?: FileFolder;
   label?: string;
   variant?: "ghost" | "outline" | "default";
 }) {

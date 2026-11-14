@@ -567,6 +567,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"client_strategies": {
+                  Row: {
+                    "client_id": string,"draft": string,"published": string | null,"published_at": string | null,"published_by": string | null,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"draft"?: string,"published"?: string | null,"published_at"?: string | null,"published_by"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "client_id"?: string,"draft"?: string,"published"?: string | null,"published_at"?: string | null,"published_by"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_strategies_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: true
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_strategies_published_by_fkey"
+      columns: ["published_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_strategies_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"client_timeline": {
                   Row: {
                     "actor_id": string | null,"client_id": string,"created_at": string,"data": NonNullable<Json>,"id": number,"kind": string,"title": string
@@ -807,14 +839,14 @@ isOneToOne: false
                   ]
                 },"invitations": {
                   Row: {
-                    "accepted_at": string | null,"cancelled_at": string | null,"cancelled_by": string | null,"client_ids": (string)[],"created_at": string,"email": string,"expires_at": string,"full_name": string,"id": string,"invited_by": string | null,"last_sent_at": string,"organization_id": string,"role_id": string,"sector_ids": (string)[],"send_count": number,"status": Database["public"]['Enums']["invitation_status"],"token_hash": string,"user_id": string | null
+                    "accepted_at": string | null,"cancelled_at": string | null,"cancelled_by": string | null,"client_ids": (string)[],"created_at": string,"email": string,"expires_at": string,"full_name": string,"id": string,"invited_by": string | null,"last_sent_at": string,"organization_id": string,"portal_client_id": string | null,"role_id": string | null,"sector_ids": (string)[],"send_count": number,"status": Database["public"]['Enums']["invitation_status"],"token_hash": string,"user_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "accepted_at"?: string | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"client_ids"?: (string)[],"created_at"?: string,"email": string,"expires_at"?: string,"full_name"?: string,"id"?: string,"invited_by"?: string | null,"last_sent_at"?: string,"organization_id": string,"role_id": string,"sector_ids"?: (string)[],"send_count"?: number,"status"?: Database["public"]['Enums']["invitation_status"],"token_hash": string,"user_id"?: string | null
+                    "accepted_at"?: string | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"client_ids"?: (string)[],"created_at"?: string,"email": string,"expires_at"?: string,"full_name"?: string,"id"?: string,"invited_by"?: string | null,"last_sent_at"?: string,"organization_id": string,"portal_client_id"?: string | null,"role_id"?: string | null,"sector_ids"?: (string)[],"send_count"?: number,"status"?: Database["public"]['Enums']["invitation_status"],"token_hash": string,"user_id"?: string | null
                   }
                   Update: {
-                    "accepted_at"?: string | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"client_ids"?: (string)[],"created_at"?: string,"email"?: string,"expires_at"?: string,"full_name"?: string,"id"?: string,"invited_by"?: string | null,"last_sent_at"?: string,"organization_id"?: string,"role_id"?: string,"sector_ids"?: (string)[],"send_count"?: number,"status"?: Database["public"]['Enums']["invitation_status"],"token_hash"?: string,"user_id"?: string | null
+                    "accepted_at"?: string | null,"cancelled_at"?: string | null,"cancelled_by"?: string | null,"client_ids"?: (string)[],"created_at"?: string,"email"?: string,"expires_at"?: string,"full_name"?: string,"id"?: string,"invited_by"?: string | null,"last_sent_at"?: string,"organization_id"?: string,"portal_client_id"?: string | null,"role_id"?: string | null,"sector_ids"?: (string)[],"send_count"?: number,"status"?: Database["public"]['Enums']["invitation_status"],"token_hash"?: string,"user_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -828,6 +860,12 @@ isOneToOne: false
       columns: ["organization_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "invitations_portal_client_id_fkey"
+      columns: ["portal_client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "invitations_role_id_fkey"
@@ -1339,14 +1377,14 @@ isOneToOne: false
                   ]
                 },"profiles": {
                   Row: {
-                    "avatar_path": string | null,"created_at": string,"deactivated_at": string | null,"email": string,"full_name": string,"id": string,"is_active": boolean,"job_title": string | null,"last_seen_at": string | null,"organization_id": string,"phone_e164": string | null,"preferences": NonNullable<Json>,"updated_at": string
+                    "avatar_path": string | null,"created_at": string,"deactivated_at": string | null,"email": string,"full_name": string,"id": string,"is_active": boolean,"job_title": string | null,"last_seen_at": string | null,"organization_id": string,"phone_e164": string | null,"portal_client_id": string | null,"preferences": NonNullable<Json>,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "avatar_path"?: string | null,"created_at"?: string,"deactivated_at"?: string | null,"email": string,"full_name"?: string,"id": string,"is_active"?: boolean,"job_title"?: string | null,"last_seen_at"?: string | null,"organization_id": string,"phone_e164"?: string | null,"preferences"?: NonNullable<Json>,"updated_at"?: string
+                    "avatar_path"?: string | null,"created_at"?: string,"deactivated_at"?: string | null,"email": string,"full_name"?: string,"id": string,"is_active"?: boolean,"job_title"?: string | null,"last_seen_at"?: string | null,"organization_id": string,"phone_e164"?: string | null,"portal_client_id"?: string | null,"preferences"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Update: {
-                    "avatar_path"?: string | null,"created_at"?: string,"deactivated_at"?: string | null,"email"?: string,"full_name"?: string,"id"?: string,"is_active"?: boolean,"job_title"?: string | null,"last_seen_at"?: string | null,"organization_id"?: string,"phone_e164"?: string | null,"preferences"?: NonNullable<Json>,"updated_at"?: string
+                    "avatar_path"?: string | null,"created_at"?: string,"deactivated_at"?: string | null,"email"?: string,"full_name"?: string,"id"?: string,"is_active"?: boolean,"job_title"?: string | null,"last_seen_at"?: string | null,"organization_id"?: string,"phone_e164"?: string | null,"portal_client_id"?: string | null,"preferences"?: NonNullable<Json>,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -1354,6 +1392,12 @@ isOneToOne: false
       columns: ["organization_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "profiles_portal_client_id_fkey"
+      columns: ["portal_client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
       referencedColumns: ["id"]
     }
                   ]
@@ -2445,6 +2489,9 @@ isOneToOne: false
 "archive_client":
 { Args: { "p_client": string }; Returns: undefined
                            },
+"can_manage_portal":
+{ Args: { "p_client": string }; Returns: boolean
+                           },
 "claim_pending_pushes":
 { Args: { "p_limit"?: number }; Returns: {
               "body": string,"href": string,"id": string,"kind": string,"title": string,"user_id": string
@@ -2518,6 +2565,32 @@ isOneToOne: false
 "onboarding_missing":
 { Args: { "p_client": string }; Returns: (string)[]
                            },
+"portal_approvals":
+{ Args: { "p_client": string }; Returns: Json
+                           },
+"portal_decide":
+{ Args: { "p_comment": string,"p_decision": string,"p_task": string }; Returns: undefined
+                           },
+"portal_file_path":
+{ Args: { "p_client": string,"p_id": string,"p_kind": string }; Returns: string
+                           },
+"portal_files":
+{ Args: { "p_client": string }; Returns: Json
+                           },
+"portal_home":
+{ Args: { "p_client": string }; Returns: Json
+                           },
+"portal_people":
+{ Args: { "p_client": string }; Returns: Json
+                           },
+"portal_schedule":
+{ Args: { "p_client": string,"p_end": string,"p_start": string }; Returns: {
+              "caption": string,"cover_path": string,"done": boolean,"final_url": string,"format": string,"post_on": string,"post_url": string,"task_id": string,"title": string
+            }[]
+                           },
+"portal_strategy":
+{ Args: { "p_client": string }; Returns: Json
+                           },
 "proposal_viewed":
 { Args: { "p_ip": string,"p_token": string,"p_user_agent": string }; Returns: string
                            },
@@ -2538,6 +2611,9 @@ isOneToOne: false
                            },
 "review_creative":
 { Args: { "p_comment": string,"p_decision": string,"p_task": string }; Returns: undefined
+                           },
+"save_client_strategy":
+{ Args: { "p_body": string,"p_client": string,"p_publish": boolean }; Returns: string
                            },
 "save_content":
 { Args: { "p": Json,"p_task": string }; Returns: undefined
@@ -2565,6 +2641,9 @@ isOneToOne: false
                            },
 "set_onboarding_recipients":
 { Args: { "p_ids": (string)[] }; Returns: undefined
+                           },
+"set_portal_user_active":
+{ Args: { "p_active": boolean,"p_user": string }; Returns: string
                            },
 "start_timer":
 { Args: { "p_task": string }; Returns: undefined

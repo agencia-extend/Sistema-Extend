@@ -6,7 +6,7 @@ import { PageBody, PageHeader } from "@/components/app/page-header";
 import { NOTIFICATION_KINDS } from "@/domain/notifications/kinds";
 import { formatRelative } from "@/domain/shared/dates";
 import { PreferenceRow } from "./preference-row";
-import { PushDevice } from "./push-device";
+import { PushDevice } from "@/features/notifications/components/push-device";
 
 export const metadata: Metadata = { title: "Notificações" };
 

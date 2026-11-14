@@ -34,6 +34,7 @@ export function GlobalSearch({ pages, canManageUsers }: { pages: SearchPage[]; c
       .from("profiles")
       .select("id, full_name, email, job_title")
       .eq("is_active", true)
+      .is("portal_client_id", null)
       .order("full_name")
       .limit(200)
       .then(({ data, error }: { data: Person[] | null; error: unknown }) => {

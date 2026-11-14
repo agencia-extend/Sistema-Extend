@@ -4,7 +4,7 @@ import { buildRows, guessMapping, parseDateBR, parseServiceCell } from "./import
 import { centsToInput, formatBRL, parseBRL } from "@/domain/shared/money";
 
 describe("abas do cliente", () => {
-  it("em onboarding mostra só visão geral, ficha, materiais, reuniões, contratos e documentos", () => {
+  it("em onboarding mostra só visão geral, ficha, materiais, reuniões, contratos, documentos e área do cliente", () => {
     expect(clientTabs("onboarding", ["videos"], { "tasks.read": "all" }).map((t) => t.label)).toEqual([
       "Visão geral",
       "Ficha",
@@ -12,6 +12,7 @@ describe("abas do cliente", () => {
       "Reuniões",
       "Contratos",
       "Documentos",
+      "Área do cliente",
     ]);
   });
   it("nº com três dígitos e situação do fim do contrato", () => {

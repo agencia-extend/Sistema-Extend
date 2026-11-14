@@ -8,6 +8,7 @@ export const PERMISSION_KEYS = [
   "clients.onboarding.read",
   "clients.onboarding.manage",
   "clients.import",
+  "clients.portal.manage",
   "commercial.handoff.create",
   "crm.leads.read",
   "crm.leads.manage",

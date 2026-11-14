@@ -14,7 +14,17 @@ import { cn } from "@/lib/utils";
 
 type Item = { id: string; title: string; body: string | null; href: string | null; read_at: string | null; created_at: string };
 
-export function NotificationBell({ userId, initialUnread }: { userId: string; initialUnread: number }) {
+export function NotificationBell({
+  userId,
+  initialUnread,
+  settingsHref = "/configuracoes/notificacoes",
+  emptyText = "Nada por aqui. Quando alguém atribuir uma demanda a você ou algo mudar nos seus clientes, aparece aqui.",
+}: {
+  userId: string;
+  initialUnread: number;
+  settingsHref?: string;
+  emptyText?: string;
+}) {
   const [open, setOpen] = useState(false);
   const [unread, setUnread] = useState(initialUnread);
   const [items, setItems] = useState<Item[] | null>(null);
@@ -94,9 +104,7 @@ export function NotificationBell({ userId, initialUnread }: { userId: string; in
           )}
           {!error && items === null && <p className="px-4 py-6 text-sm text-muted-foreground">Carregando…</p>}
           {!error && items?.length === 0 && (
-            <p className="px-4 py-6 text-sm text-muted-foreground">
-              Nada por aqui. Quando alguém atribuir uma demanda a você ou algo mudar nos seus clientes, aparece aqui.
-            </p>
+            <p className="px-4 py-6 text-sm text-muted-foreground">{emptyText}</p>
           )}
           {items?.map((n) => {
             const body = (
@@ -122,7 +130,7 @@ export function NotificationBell({ userId, initialUnread }: { userId: string; in
           })}
         </div>
         <div className="border-t px-4 py-2.5">
-          <Link href="/configuracoes/notificacoes" className="text-xs font-medium text-primary hover:underline" onClick={() => setOpen(false)}>
+          <Link href={settingsHref} className="text-xs font-medium text-primary hover:underline" onClick={() => setOpen(false)}>
             Preferências e notificações no celular
           </Link>
         </div>

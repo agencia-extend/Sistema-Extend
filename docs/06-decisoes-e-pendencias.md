@@ -214,3 +214,20 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
 - **Vencimento**: job diário `extend-propostas` (00h05 de Brasília) marca “expirada” e avisa o vendedor; a página pública e a lista já mostram vencida antes do job.
 - **WhatsApp (RF-PRO-06)**: até o número da Extend estar ligado ao sistema (etapa 07), “Abrir no WhatsApp” usa o WhatsApp de quem envia (wa.me) com a mensagem do modelo já preenchida. Quando a etapa 07 existir, o mesmo botão passa a enviar pelo número da Extend.
 - **Painel comercial**: ganhou “Propostas enviadas” e “Propostas aceitas” no período.
+
+## Decisões da etapa 12 — Área do cliente (14/11/2026)
+- **Quem é o usuário do cliente:** um perfil marcado com `profiles.portal_client_id`, ligado a **um** cliente. Não é um papel: ele não tem papel, setor nem permissão. `private.org_id()` e `private.user_perm_scope()` devolvem nulo para ele, então nenhuma política interna o deixa ler nada (clientes, demandas, comentários, arquivos, contratos, perfis da equipe). Gatilhos impedem dar papel, setor, equipe do cliente, participação ou responsabilidade em demanda a ele.
+- **O que ele vê** sai só das funções `portal_*` (security definer, colunas escolhidas):
+  - visão geral: serviços contratados (quantidade, sem valor), etapas do projeto, progresso do mês por serviço, próximos posts e o nome do contato na Extend;
+  - cronograma do mês (mesma regra da aba Cronograma);
+  - aprovações pendentes (demanda na etapa que aguarda o cliente, com versão enviada ou roteiro) e decisões recentes;
+  - relatórios e materiais: Documentos › **Relatórios** e › **Para o cliente** (pastas novas) e conteúdos concluídos com link final do Drive;
+  - estratégia/planejamento publicado (`client_strategies`: rascunho da equipe, o cliente vê só o publicado).
+- **O que nunca vê:** valores (mensalidade, contrato, preços), notas e comentários internos, nota da entrega, ficha de onboarding, equipe por setor, outros clientes. Coberto por `18_area_do_cliente.test.sql` e pelo roteiro `e2e/14`.
+- **Convite (RF-ACL-01):** aba **Área do cliente** no ambiente do cliente. Usa o mesmo convite da equipe (`invitations.portal_client_id`, sem papel). Quem convidou é avisado do aceite. Permissão nova `clients.portal.manage` (admin, coordenação de conteúdo e gerente de tráfego: todos; gestor de tráfego e social media: clientes em que estão). Pausar acesso derruba a sessão e avisa por e-mail.
+- **Aprovar pelo portal:** mesma regra do link (`private.apply_client_decision`, usada pelo link e pelo portal). Só a pessoa do cliente decide; a equipe na prévia não. A decisão fica registrada em `approval_links` com o nome de quem aprovou.
+- **Avisos (RF-ACL-03):** no sistema e push (PWA) quando chega conteúdo para aprovar, relatório ou arquivo novo, e estratégia publicada. Os avisos no celular são ligados em Área do cliente › Ajuda. WhatsApp para o cliente fica para a etapa 07 (depende do provedor e do número, D4).
+- **Prévia:** “Ver como o cliente” abre o portal daquele cliente para a equipe que o vê (somente leitura).
+- **Manual do cliente:** página Ajuda do portal.
+- **Fora agora (não aparece na tela):** relatórios automáticos (etapa 06, depende da Meta/Google Ads) e avaliação de leads (etapa 11). Por enquanto os relatórios são os PDFs que a equipe envia para a pasta Relatórios.
+- **Correção encontrada no teste:** a checagem de acesso do portal devolvia “nulo” para acesso pausado e deixava passar; agora é `coalesce(..., false)`.

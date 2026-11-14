@@ -46,7 +46,7 @@ test.beforeAll(async () => {
   await makeUser("OutroEditor", "editor_video", "edicao");
 });
 
-test("1-2. comercial registra o fechamento → cliente em onboarding só com 6 abas", async ({ page }) => {
+test("1-2. comercial registra o fechamento → cliente em onboarding só com 7 abas", async ({ page }) => {
   await login(page, adminEmail, adminPassword);
   await page.goto("/clientes/novo");
   await page.getByLabel(/^Nome do cliente/).fill(clientName);
@@ -62,7 +62,7 @@ test("1-2. comercial registra o fechamento → cliente em onboarding só com 6 a
   await page.waitForURL(/\/clientes\/[0-9a-f-]{36}$/);
   clientId = page.url().split("/").pop()!;
   const tabs = page.getByRole("navigation", { name: "Seções do cliente" }).getByRole("link");
-  await expect(tabs).toHaveText(["Visão geral", "Ficha", "Materiais", "Reuniões", "Contratos", "Documentos"]);
+  await expect(tabs).toHaveText(["Visão geral", "Ficha", "Materiais", "Reuniões", "Contratos", "Documentos", "Área do cliente"]);
   await expect(page.getByText("Primeiro vídeo em 7 dias")).toBeVisible();
 });
 

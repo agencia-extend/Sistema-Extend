@@ -7,7 +7,7 @@ import { defineAction, must } from "@/lib/actions";
 import { createClient } from "@/lib/supabase/server";
 import type { Json, TablesUpdate } from "@/lib/supabase/database.types";
 import { fail, ok } from "@/domain/shared/result";
-import { MATERIAL_CATEGORIES } from "@/domain/clients";
+import { FILE_FOLDERS, MATERIAL_CATEGORIES } from "@/domain/clients";
 import {
   accountSchema,
   contractSchema,
@@ -331,7 +331,7 @@ const uploadAction = defineAction(
     schema: z.object({
       clientId: z.uuid(),
       category: z.enum(["geral", "fechamento", "reuniao", "identidade", "contrato", "referencia"]),
-      folder: z.enum(["geral", "midias", "trafego"]),
+      folder: z.enum(FILE_FOLDERS),
       meetingId: z.uuid().optional(),
       file: z.instanceof(File, { message: "Escolha um arquivo." }),
     }),
@@ -514,7 +514,7 @@ export const deleteMaterial = defineAction({ schema: z.object({ id: z.uuid(), cl
 });
 
 export const moveFile = defineAction(
-  { schema: z.object({ id: z.uuid(), clientId: z.uuid(), folder: z.enum(["geral", "midias", "trafego"]) }) },
+  { schema: z.object({ id: z.uuid(), clientId: z.uuid(), folder: z.enum(FILE_FOLDERS) }) },
   async ({ id, clientId, folder }) => {
     const supabase = await createClient();
     must(await supabase.from("client_files").update({ folder }).eq("id", id).select("id").single());

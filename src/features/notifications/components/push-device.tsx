@@ -21,7 +21,17 @@ async function registration() {
 }
 
 /** Ativa/desativa o Web Push neste aparelho e envia um teste. */
-export function PushDevice({ vapidKey, userId }: { vapidKey: string | null; userId: string }) {
+export function PushDevice({
+  vapidKey,
+  userId,
+  offHint = "Ative para receber demandas e alertas no celular.",
+  appName = "o Extend",
+}: {
+  vapidKey: string | null;
+  userId: string;
+  offHint?: string;
+  appName?: string;
+}) {
   const [status, setStatus] = useState<Status>("checking");
   const [pending, startTransition] = useTransition();
 
@@ -78,7 +88,7 @@ export function PushDevice({ vapidKey, userId }: { vapidKey: string | null; user
   if (status === "ios-install") {
     return (
       <FormAlert tone="info">
-        No iPhone, as notificações só funcionam com o app instalado: toque em Compartilhar → “Adicionar à Tela de Início”, abra o Extend por
+        No iPhone, as notificações só funcionam com o app instalado: toque em Compartilhar → “Adicionar à Tela de Início”, abra {appName} por
         lá e volte a esta página.
       </FormAlert>
     );
@@ -97,7 +107,7 @@ export function PushDevice({ vapidKey, userId }: { vapidKey: string | null; user
       <div className="grid flex-1 gap-0.5">
         <p className="text-sm font-medium">{status === "on" ? "Notificações ativas neste aparelho" : "Notificações desligadas neste aparelho"}</p>
         <p className="text-sm text-muted-foreground">
-          {status === "on" ? "Você recebe avisos mesmo com o sistema fechado." : "Ative para receber demandas e alertas no celular."}
+          {status === "on" ? "Você recebe avisos mesmo com o sistema fechado." : offHint}
         </p>
       </div>
       {status === "on" ? (
