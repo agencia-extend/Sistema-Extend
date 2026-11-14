@@ -5,7 +5,39 @@ export type Database = {
   
   "public": {
           Tables: {
-            "audit_logs": {
+            "approval_links": {
+                  Row: {
+                    "comment": string | null,"created_at": string,"created_by": string | null,"decided_at": string | null,"decision": string | null,"delivery_id": string | null,"expires_at": string,"id": string,"reviewer_ip": string | null,"reviewer_name": string | null,"revoked_at": string | null,"task_id": string,"token_hash": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "comment"?: string | null,"created_at"?: string,"created_by"?: string | null,"decided_at"?: string | null,"decision"?: string | null,"delivery_id"?: string | null,"expires_at": string,"id"?: string,"reviewer_ip"?: string | null,"reviewer_name"?: string | null,"revoked_at"?: string | null,"task_id": string,"token_hash": string
+                  }
+                  Update: {
+                    "comment"?: string | null,"created_at"?: string,"created_by"?: string | null,"decided_at"?: string | null,"decision"?: string | null,"delivery_id"?: string | null,"expires_at"?: string,"id"?: string,"reviewer_ip"?: string | null,"reviewer_name"?: string | null,"revoked_at"?: string | null,"task_id"?: string,"token_hash"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "approval_links_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "approval_links_delivery_id_fkey"
+      columns: ["delivery_id"]
+isOneToOne: false
+      referencedRelation: "task_deliveries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "approval_links_task_id_fkey"
+      columns: ["task_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"audit_logs": {
                   Row: {
                     "action": string,"actor_id": string | null,"changes": NonNullable<Json>,"created_at": string,"entity_id": string | null,"entity_type": string,"id": number,"organization_id": string | null
                   }
@@ -628,6 +660,116 @@ isOneToOne: false
       columns: ["sold_by"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"creative_library": {
+                  Row: {
+                    "ad_ref": string | null,"angle": string,"approved_at": string,"campaign": string,"client_id": string,"delivery_id": string | null,"description": string | null,"format": string,"headline": string | null,"id": string,"primary_text": string | null,"status": string,"task_id": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad_ref"?: string | null,"angle": string,"approved_at"?: string,"campaign": string,"client_id": string,"delivery_id"?: string | null,"description"?: string | null,"format": string,"headline"?: string | null,"id"?: string,"primary_text"?: string | null,"status"?: string,"task_id": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "ad_ref"?: string | null,"angle"?: string,"approved_at"?: string,"campaign"?: string,"client_id"?: string,"delivery_id"?: string | null,"description"?: string | null,"format"?: string,"headline"?: string | null,"id"?: string,"primary_text"?: string | null,"status"?: string,"task_id"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "creative_library_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "creative_library_delivery_id_fkey"
+      columns: ["delivery_id"]
+isOneToOne: false
+      referencedRelation: "task_deliveries"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "creative_library_task_id_fkey"
+      columns: ["task_id"]
+isOneToOne: true
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"creative_requests": {
+                  Row: {
+                    "angle": string,"audience": string,"campaign": string,"client_id": string,"copy_suggestion": string | null,"created_at": string,"cta": string,"format": string,"notes": string | null,"objective": string,"quantity": number,"reference_links": (string)[],"requested_by": string | null,"source_ad_ref": string | null,"task_id": string,"variations": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "angle": string,"audience": string,"campaign": string,"client_id": string,"copy_suggestion"?: string | null,"created_at"?: string,"cta": string,"format": string,"notes"?: string | null,"objective": string,"quantity"?: number,"reference_links"?: (string)[],"requested_by"?: string | null,"source_ad_ref"?: string | null,"task_id": string,"variations"?: number
+                  }
+                  Update: {
+                    "angle"?: string,"audience"?: string,"campaign"?: string,"client_id"?: string,"copy_suggestion"?: string | null,"created_at"?: string,"cta"?: string,"format"?: string,"notes"?: string | null,"objective"?: string,"quantity"?: number,"reference_links"?: (string)[],"requested_by"?: string | null,"source_ad_ref"?: string | null,"task_id"?: string,"variations"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "creative_requests_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "creative_requests_requested_by_fkey"
+      columns: ["requested_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "creative_requests_task_id_fkey"
+      columns: ["task_id"]
+isOneToOne: true
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"delivery_assets": {
+                  Row: {
+                    "delivery_id": string,"id": string,"kind": string,"mime_type": string | null,"name": string,"size_bytes": number | null,"storage_path": string | null,"url": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "delivery_id": string,"id"?: string,"kind": string,"mime_type"?: string | null,"name": string,"size_bytes"?: number | null,"storage_path"?: string | null,"url"?: string | null
+                  }
+                  Update: {
+                    "delivery_id"?: string,"id"?: string,"kind"?: string,"mime_type"?: string | null,"name"?: string,"size_bytes"?: number | null,"storage_path"?: string | null,"url"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "delivery_assets_delivery_id_fkey"
+      columns: ["delivery_id"]
+isOneToOne: false
+      referencedRelation: "task_deliveries"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"delivery_comments": {
+                  Row: {
+                    "author_id": string,"body": string,"created_at": string,"delivery_id": string,"id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author_id"?: string,"body": string,"created_at"?: string,"delivery_id": string,"id"?: string
+                  }
+                  Update: {
+                    "author_id"?: string,"body"?: string,"created_at"?: string,"delivery_id"?: string,"id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "delivery_comments_author_id_fkey"
+      columns: ["author_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "delivery_comments_delivery_id_fkey"
+      columns: ["delivery_id"]
+isOneToOne: false
+      referencedRelation: "task_deliveries"
       referencedColumns: ["id"]
     }
                   ]
@@ -1471,6 +1613,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"task_deliveries": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"id": string,"note": string | null,"task_id": string,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"note"?: string | null,"task_id": string,"version": number
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"id"?: string,"note"?: string | null,"task_id"?: string,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "task_deliveries_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "task_deliveries_task_id_fkey"
+      columns: ["task_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"task_participants": {
                   Row: {
                     "profile_id": string,"task_id": string
@@ -1931,7 +2099,10 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "admin_set_user_active":
+            "add_delivery":
+{ Args: { "p_assets": Json,"p_note": string,"p_task": string }; Returns: number
+                           },
+"admin_set_user_active":
 { Args: { "p_active": boolean,"p_user": string }; Returns: undefined
                            },
 "admin_set_user_role":
@@ -1961,8 +2132,17 @@ isOneToOne: false
 "complete_onboarding":
 { Args: { "p_client": string }; Returns: number
                            },
+"create_approval_link":
+{ Args: { "p_days"?: number,"p_task": string,"p_token_hash": string }; Returns: string
+                           },
+"create_creative_request":
+{ Args: { "p": Json }; Returns: string
+                           },
 "create_handoff":
 { Args: { "p": Json }; Returns: string
+                           },
+"decide_approval":
+{ Args: { "p_comment": string,"p_decision": string,"p_ip": string,"p_name": string,"p_token_hash": string }; Returns: string
                            },
 "duplicate_role":
 { Args: { "p_name": string,"p_role": string }; Returns: string
@@ -2007,6 +2187,9 @@ isOneToOne: false
                            },
 "rate_limit_reset":
 { Args: { "p_bucket": string }; Returns: undefined
+                           },
+"review_creative":
+{ Args: { "p_comment": string,"p_decision": string,"p_task": string }; Returns: undefined
                            },
 "save_content":
 { Args: { "p": Json,"p_task": string }; Returns: undefined
