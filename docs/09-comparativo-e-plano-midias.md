@@ -8,7 +8,7 @@ Legenda: **Pronto** = funciona hoje · **Parcial** = existe, mas falta parte · 
 
 | Item do briefing | Situação | O que existe hoje | O que falta |
 |---|---|---|---|
-| 2. Papéis e permissões por setor | Pronto | Papéis, matriz de permissões, exceção por usuário, RLS por cliente e setor | Semear o papel "Videomaker" (hoje se chama "Gravação") e conferir nomes: Pricila é design, Juliana é edição, Caliton grava |
+| 2. Papéis e permissões por setor | Pronto | Papéis, matriz de permissões, exceção por usuário, RLS por cliente e setor | Papel "Gravação" renomeado para "Videomaker" (14/11). Ao cadastrar a equipe: Pricila em Designer, Juliana em Editor de vídeo, Caliton em Videomaker |
 | 3.1 Cadastro do cliente | Parcial | Fechamento comercial cria o cliente em onboarding, com serviços, valores, contrato, contatos e contas | Nº/código; responsável pela comunicação; escopo em texto livre; tipo (fixo, avulso, inativo); serviços "Consultoria de perfil" e "Google Meu Negócio" no catálogo; **dia de virada do mês** |
 | 3.1 Visão geral em tabela | Parcial | Grade de cards com filtros por status, serviço, responsável e data de entrada | Visão em tabela com ícone por serviço (como a planilha) e filtro "contrato perto do fim" |
 | 3.2 Central: Visão geral | Pronto | Ficha, serviços, contrato, equipe, contas, contatos, atividades; links rápidos (Instagram, Drive, site, Facebook, TikTok, WhatsApp) no topo de todas as abas (14/11) | — |

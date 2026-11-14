@@ -12,7 +12,7 @@ Formato: `módulo.recurso.ação` com escopo `own` (meu), `clients` (clientes em
 | Social media (gerenciamento) | Madu | Clientes com gerenciamento; cronograma e publicação; aprovações |
 | Editor de vídeo | Priscila, Juliana | Só tarefas atribuídas (`own`) + dados operacionais do cliente (tom, restrições, identidade) |
 | Designer | — | Igual ao editor, para design |
-| Gravação | — | Agenda de gravação + tarefas atribuídas |
+| Videomaker (chave `gravacao`) | — | Agenda de gravação + tarefas atribuídas |
 | Sites | Henrique | Tarefas de site + clientes com site |
 | Comercial | Jorge (também admin) | Funil, leads, prospectador, propostas, fechamento |
 | Atendimento | — | Inbox do WhatsApp, leads (fase 2) |
@@ -20,7 +20,7 @@ Formato: `módulo.recurso.ação` com escopo `own` (meu), `clients` (clientes em
 | Cliente (área do cliente) | usuários dos clientes | Não é papel: perfil marcado com o cliente (`portal_client_id`). Vê só o próprio cliente pelas funções `portal_*` e aprova conteúdos. Convite e acesso em `clients.portal.manage` |
 
 ## Matriz (✔ = sim, escopo entre parênteses)
-| Permissão | Admin | Ger. tráfego | Gestor tráfego | Coord. conteúdo | Social media | Editor/Designer/Gravação | Comercial |
+| Permissão | Admin | Ger. tráfego | Gestor tráfego | Coord. conteúdo | Social media | Editor/Designer/Videomaker | Comercial |
 |---|---|---|---|---|---|---|---|
 | clients.read | all | all¹ | clients | all¹ | clients | clients | all |
 | clients.manage | all | — | — | all | — | — | — |

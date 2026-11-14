@@ -220,7 +220,8 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
 - **Links rápidos:** o topo da central do cliente mostra Instagram, Drive, site, Facebook, TikTok e WhatsApp, montados a partir de “Contas e acessos”. Só entra o que vira endereço válido (`src/domain/clients/quick-links.ts`).
 - **Reuniões:** tipos “Aprovação de estratégia” e “Acompanhamento”.
 - **Catálogo:** “Consultoria de perfil” e “Google Meu Negócio” (setor Gerenciamento, sem unidade mensal). Ajustáveis em Configurações.
-- **Continua com a Extend:** nome do papel “Gravação” × “Videomaker” (renomear em Configurações › Papéis, sem código) e a planilha “Controle de Mídias” para importar.
+- **Papel Videomaker:** o papel “Gravação” passou a se chamar “Videomaker” (só o nome; a chave `gravacao`, o setor e a etapa “Gravação” continuam).
+- **Continua com a Extend:** a planilha “Controle de Mídias” para importar e o cadastro da equipe (hoje só o administrador está no sistema).
 
 ## Decisões da etapa 12 — Área do cliente (14/11/2026)
 - **Quem é o usuário do cliente:** um perfil marcado com `profiles.portal_client_id`, ligado a **um** cliente. Não é um papel: ele não tem papel, setor nem permissão. `private.org_id()` e `private.user_perm_scope()` devolvem nulo para ele, então nenhuma política interna o deixa ler nada (clientes, demandas, comentários, arquivos, contratos, perfis da equipe). Gatilhos impedem dar papel, setor, equipe do cliente, participação ou responsabilidade em demanda a ele.
