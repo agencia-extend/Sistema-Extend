@@ -143,7 +143,7 @@ export function PolicyContent({ c }: { c: Controller }) {
       </Section>
 
       <Section id="mudancas" n={10} title="Mudanças nesta política">
-        <p>Quando esta política mudar, a data no topo é atualizada e quem usa o sistema vê um aviso para ler a versão nova.</p>
+        <p>Quando esta política mudar, a versão nova é publicada nesta página com a data de atualização no topo.</p>
       </Section>
     </div>
   );

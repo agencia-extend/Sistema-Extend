@@ -37,9 +37,16 @@ test.beforeAll(async () => {
   savedController = c;
 });
 
-test("1. política e termos abrem sem login", async ({ page }) => {
+test("1. política e termos abrem sem login; aviso de cookies some depois de aceitar", async ({ page }) => {
   await page.context().clearCookies();
   await page.goto("/login");
+  const cookies = page.getByRole("region", { name: "Aviso de cookies" });
+  await expect(cookies).toBeVisible();
+  await cookies.getByRole("button", { name: "Aceitar" }).click();
+  await expect(cookies).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Entrar" })).toBeVisible();
+  await expect(cookies).toHaveCount(0);
   await page.getByRole("link", { name: "Política de Privacidade" }).click();
   await expect(page).toHaveURL(/\/privacidade$/);
   await expect(page.getByRole("heading", { level: 1, name: "Política de Privacidade" })).toBeVisible();
@@ -49,15 +56,10 @@ test("1. política e termos abrem sem login", async ({ page }) => {
   await expect(page.getByRole("heading", { level: 1, name: "Termos de uso" })).toBeVisible();
 });
 
-test("2. a Madu registra ciência, baixa os dados e faz um pedido", async ({ page }) => {
+test("2. dentro do sistema não há aviso de privacidade; a Madu baixa os dados e faz um pedido", async ({ page }) => {
   await login(page, madu.email, pw);
-  const notice = page.getByRole("region", { name: "Aviso de privacidade" });
-  await expect(notice).toBeVisible();
-  await notice.getByRole("button", { name: "Li e entendi" }).click();
-  await expect(page.getByText("Obrigado. Registramos que você leu a política.")).toBeVisible();
-  await expect(notice).toHaveCount(0);
-  const { count } = await admin.from("privacy_consents").select("version", { count: "exact", head: true }).eq("profile_id", madu.id);
-  expect(count).toBe(1);
+  await expect(page.getByRole("heading", { name: "Minhas pendências" })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Aviso de privacidade" })).toHaveCount(0);
 
   await page.goto("/configuracoes/perfil");
   const download = page.waitForEvent("download");
@@ -66,7 +68,7 @@ test("2. a Madu registra ciência, baixa os dados e faz um pedido", async ({ pag
   expect(file.suggestedFilename()).toMatch(/^meus-dados-extend-\d{4}-\d{2}-\d{2}\.json$/);
   const json = JSON.parse(readFileSync((await file.path())!, "utf8"));
   expect(json.perfil.email).toBe(madu.email);
-  expect(json.ciencia_da_politica).toHaveLength(1);
+  expect(json.ciencia_da_politica).toEqual([]);
 
   await page.getByRole("button", { name: "Fazer um pedido sobre meus dados" }).click();
   await page.getByRole("button", { name: "Enviar pedido" }).click();

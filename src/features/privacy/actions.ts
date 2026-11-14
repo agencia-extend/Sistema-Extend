@@ -4,20 +4,10 @@ import { revalidatePath } from "next/cache";
 import { defineAction, must } from "@/lib/actions";
 import { createClient } from "@/lib/supabase/server";
 import { ok, fail } from "@/domain/shared/result";
-import { PRIVACY_VERSION } from "@/domain/privacy";
-import { answerSchema, consentSchema, controllerSchema, requestSchema } from "./schemas";
+import { answerSchema, controllerSchema, requestSchema } from "./schemas";
 
 const ADMIN = "/configuracoes/privacidade";
 const PROFILE = "/configuracoes/perfil";
-
-/** A pessoa registra que leu a versão atual da política e dos termos. */
-export const acknowledgePolicy = defineAction({ schema: consentSchema }, async ({ version }, { user }) => {
-  if (version !== PRIVACY_VERSION) return fail("business_rule", "A política foi atualizada. Recarregue a página e leia a versão nova.");
-  const supabase = await createClient();
-  must(await supabase.from("privacy_consents").upsert({ profile_id: user.id, version }, { onConflict: "profile_id,version", ignoreDuplicates: true }));
-  revalidatePath("/", "layout");
-  return ok(null, "Obrigado. Registramos que você leu a política.");
-});
 
 export const createPrivacyRequest = defineAction({ schema: requestSchema }, async ({ kind, details }, { user }) => {
   const supabase = await createClient();

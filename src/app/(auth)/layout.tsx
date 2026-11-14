@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { AuthBrand } from "@/components/app/auth-brand";
 import { AuthBackdrop } from "@/components/app/auth-backdrop";
 import { ThemeSwitch } from "@/components/app/theme-switch";
+import { CookieNotice } from "@/components/app/cookie-notice";
 
 /**
  * Entrada do sistema: tudo ao centro, sobre um fundo vivo (linhas de luz que se estendem e
@@ -23,6 +24,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           {children}
         </div>
       </main>
+      <div className="auth-rise px-4 pb-3"><CookieNotice /></div>
       <footer className="auth-rise flex justify-center gap-5 px-6 pb-6 text-xs text-muted-foreground">
         <Link href="/privacidade" className="rounded-sm outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50">Política de Privacidade</Link>
         <Link href="/termos" className="rounded-sm outline-none hover:text-foreground focus-visible:ring-3 focus-visible:ring-ring/50">Termos de uso</Link>

@@ -101,7 +101,7 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
   - **Páginas públicas:** `/privacidade` e `/termos`, com links no login, nos e-mails e no Meu perfil. O texto descreve só o que o sistema faz de fato: dados, bases legais do art. 7º, operadores, transferência para os EUA (o banco Supabase fica em us-east-1), prazos de guarda, segurança, cookies essenciais e direitos do art. 18.
   - **Ciência da política:**
     - quem entra pelo convite precisa marcar "Li e concordo";
-    - quem já usa vê um aviso no topo até tocar "Li e entendi";
+    - (14/11/2026, a pedido do Henrique) não há mais aviso dentro do sistema; as páginas públicas (entrada, política, termos e aprovação do cliente) mostram o aviso de cookies com "Aceitar", guardado no aparelho, e o sistema só usa cookies necessários;
     - fica registrado em `privacy_consents`, por versão (`PRIVACY_VERSION` em `src/domain/privacy`).
     - Quando o texto mudar, troque a versão para todos lerem de novo.
   - **Pedidos dos titulares:**

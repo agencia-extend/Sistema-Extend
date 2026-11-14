@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { LegalNav } from "./legal-nav";
+import { CookieNotice } from "@/components/app/cookie-notice";
 
 /** Páginas legais públicas: abrem sem login (link no rodapé do login, nos e-mails e no sistema). */
 export default function LegalLayout({ children }: { children: ReactNode }) {
@@ -17,6 +18,7 @@ export default function LegalLayout({ children }: { children: ReactNode }) {
         <span className="gold-rule block h-0.5" aria-hidden="true" />
       </header>
       <main className="mx-auto max-w-5xl px-4 py-10 sm:px-6 sm:py-14">{children}</main>
+      <div className="px-4 pb-6"><CookieNotice /></div>
     </div>
   );
 }

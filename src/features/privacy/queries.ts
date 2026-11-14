@@ -19,12 +19,6 @@ export const publicController = cache(async (): Promise<Controller> => {
   return { legalName: data.legal_name, cnpj: data.cnpj, address: data.address, dpoName: data.dpo_name, dpoEmail: data.dpo_email };
 });
 
-export async function hasCurrentConsent(userId: string): Promise<boolean> {
-  const supabase = await createClient();
-  const { count } = await supabase.from("privacy_consents").select("version", { count: "exact", head: true }).eq("profile_id", userId).eq("version", PRIVACY_VERSION);
-  return (count ?? 0) > 0;
-}
-
 export type PrivacyRequestRow = {
   id: string;
   kind: RequestKind;

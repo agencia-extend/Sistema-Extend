@@ -40,4 +40,3 @@ export const controllerSchema = z.object({
     .transform((v) => v || null),
 });
 
-export const consentSchema = z.object({ version: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) });

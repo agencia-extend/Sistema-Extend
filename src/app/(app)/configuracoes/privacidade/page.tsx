@@ -93,7 +93,7 @@ export default async function PrivacidadeAdminPage() {
         <section aria-labelledby="ciencia" className="grid gap-1">
           <h2 id="ciencia" className="text-base font-semibold">Ciência da política</h2>
           <p className="text-sm text-muted-foreground tabular">
-            {coverage.aware} de {coverage.total} pessoas ativas já leram a versão atual. Quem ainda não leu vê um aviso no topo do sistema.
+            {coverage.aware} de {coverage.total} pessoas ativas registraram que leram a versão atual (o aceite é feito ao entrar pelo convite).
           </p>
         </section>
 

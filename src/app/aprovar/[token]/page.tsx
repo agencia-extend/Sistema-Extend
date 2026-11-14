@@ -4,6 +4,7 @@ import { getPublicApproval } from "@/features/creatives/public";
 import { AssetPreview } from "@/features/creatives/components/asset-preview";
 import { formatDateTime } from "@/domain/shared/dates";
 import { DecisionForm } from "./decision-form";
+import { CookieNotice } from "@/components/app/cookie-notice";
 
 // Link privado: não entra em busca nem passa o endereço a outros sites.
 export const metadata: Metadata = { title: "Aprovação", robots: { index: false, follow: false }, referrer: "no-referrer" };
@@ -61,6 +62,7 @@ export default async function AprovarPage({ params }: { params: Promise<{ token:
           </>
         )}
       </main>
+      <div className="px-4 pb-6"><CookieNotice /></div>
     </div>
   );
 }
