@@ -7,6 +7,7 @@ import {
   House,
   Kanban,
   LayoutList,
+  ListChecks,
   Megaphone,
   Palette,
   Settings,
@@ -29,6 +30,7 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   boards: Kanban,
   production: ClipboardCheck,
   training: GraduationCap,
+  playbook: ListChecks,
   settings: Settings,
 };
 

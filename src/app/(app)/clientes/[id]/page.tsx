@@ -15,6 +15,9 @@ import { PromisesCard } from "@/features/clients/components/promises-card";
 import { Section } from "@/features/clients/components/section";
 import { currentMonth, listClientMonths } from "@/features/media/queries";
 import { periodLabel } from "@/domain/media";
+import { todayKey } from "@/domain/media";
+import { listClientRuns } from "@/features/playbooks/queries";
+import { ClientRuns } from "@/features/playbooks/components/client-runs";
 
 export default async function ClientOverviewPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePermission("clients.read");
@@ -22,13 +25,14 @@ export default async function ClientOverviewPage({ params }: { params: Promise<{
   const client = (await getClient(id))!;
   const now = new Date();
   const month = currentMonth(await listClientMonths(id));
-  const [catalog, team, sectors, tasks, timeline, handoff] = await Promise.all([
+  const [catalog, team, sectors, tasks, timeline, handoff, runs] = await Promise.all([
     listCatalog(),
     listTeam(),
     listSectors(),
     month ? listMonthTasks(id, month.startsOn) : Promise.resolve([]),
     listTimeline(id),
     user.permissions["clients.onboarding.read"] ? getHandoff(id) : Promise.resolve(null),
+    listClientRuns(id),
   ]);
   const canManage = Boolean(user.permissions["clients.manage"] || user.permissions["clients.onboarding.manage"]);
   const status = client.status as ClientStatus;
@@ -97,6 +101,7 @@ export default async function ClientOverviewPage({ params }: { params: Promise<{
       </div>
 
       <div className="grid min-w-0 content-start gap-6">
+        <ClientRuns runs={runs} today={todayKey(now)} canApply={Boolean(user.permissions["playbooks.apply"])} />
         <PromisesCard clientId={id} canManage={canManage} promises={client.handoff_promises ?? []} />
         <DataCard
           canManage={canManage}

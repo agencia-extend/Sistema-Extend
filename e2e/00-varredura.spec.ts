@@ -20,7 +20,7 @@ const stamp = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
 const pw = `Senha${stamp}x9`;
 
 const ROLES = ["admin", "gerente_trafego", "gestor_trafego", "coord_conteudo", "social_media", "editor_video", "designer", "gravacao", "sites", "comercial", "atendimento", "leitura"];
-const MENU = ["/inicio", "/tarefas", "/clientes", "/agenda", "/setores", "/quadros", "/producao", "/treinamentos"];
+const MENU = ["/inicio", "/tarefas", "/clientes", "/agenda", "/setores", "/quadros", "/producao", "/playbooks", "/treinamentos"];
 const SETTINGS = [
   "/configuracoes/perfil", "/configuracoes/notificacoes", "/configuracoes/usuarios", "/configuracoes/papeis", "/configuracoes/servicos",
   "/configuracoes/onboarding", "/configuracoes/rotinas", "/configuracoes/fluxos", "/configuracoes/setores", "/configuracoes/auditoria", "/configuracoes/privacidade",

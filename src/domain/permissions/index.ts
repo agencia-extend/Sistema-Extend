@@ -45,6 +45,8 @@ export const PERMISSION_KEYS = [
   "trainings.read",
   "trainings.manage",
   "users.manage",
+  "playbooks.apply",
+  "playbooks.manage",
   "privacy.manage",
   "roles.manage",
   "settings.manage",

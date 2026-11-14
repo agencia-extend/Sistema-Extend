@@ -154,3 +154,14 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
     - entram os conteúdos com data de post no mês ou com o destino "Cronograma" ainda sem data;
     - "Programar" define data, legenda, capa (JPG, PNG ou WebP até 5 MB, `task_content.cover_path`) e link do post publicado, que passa o post para "Postado".
   - Permissões revistas no banco: só as colunas permitidas podem ser alteradas (`20261114000400`).
+- **Playbooks (14/11/2026):** `/playbooks` (menu Produção).
+  - **Permissões:** `playbooks.manage` (admin, coordenação de conteúdo e gerente de tráfego) monta os processos; `playbooks.apply` (esses mais gestor de tráfego e atendimento) aplica, e só em clientes que a pessoa vê.
+  - **Etapas:** cada uma tem prazo D+N (úteis ou corridos), setor, tipo de demanda, marco e orientação.
+  - **Aplicar** (`apply_playbook`):
+    - cria uma demanda por etapa, para a pessoa do setor no cliente (senão o líder do setor), que é avisada;
+    - cria os marcos com a data da última demanda de cada um;
+    - entra na linha do tempo;
+    - antes de confirmar, a tela mostra a prévia das datas.
+  - **Marcos:** fecham sozinhos quando as demandas terminam e reabrem se uma voltar; marco atrasado avisa quem aplicou e o responsável pela comunicação (cron `extend-playbooks`).
+  - **Na central:** a Visão geral do cliente mostra os playbooks aplicados.
+  - **Conteúdo:** nenhum processo inventado. A Extend cadastra os dela. O onboarding continua na ficha do cliente.
