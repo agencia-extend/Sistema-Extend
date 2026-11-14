@@ -16,8 +16,8 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
   const reason = motivo ? REASONS[motivo] : undefined;
   return (
     <div className="grid gap-6">
-      <div className="grid gap-1.5">
-        <h1 className="text-2xl font-semibold">Entrar</h1>
+      <div className="grid gap-1.5 text-center">
+        <h1 className="font-heading text-2xl font-semibold text-balance">Entrar</h1>
         <p className="text-sm text-muted-foreground">Use o e-mail do seu convite. O acesso é liberado pelo administrador.</p>
       </div>
       {reason && <FormAlert tone={reason.tone}>{reason.text}</FormAlert>}

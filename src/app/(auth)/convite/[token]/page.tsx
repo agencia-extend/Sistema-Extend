@@ -20,8 +20,8 @@ export default async function ConvitePage({ params }: { params: Promise<{ token:
   if (inv.state !== "valido") {
     const p = PROBLEM[inv.state];
     return (
-      <div className="grid gap-3">
-        <h1 className="text-2xl font-semibold">{p.title}</h1>
+      <div className="grid justify-items-center gap-3 text-center">
+        <h1 className="font-heading text-2xl font-semibold text-balance">{p.title}</h1>
         <p className="text-sm text-muted-foreground">{p.text}</p>
         <Link href="/login" className="text-sm font-medium text-primary underline-offset-4 hover:underline">
           Ir para o login
@@ -32,8 +32,8 @@ export default async function ConvitePage({ params }: { params: Promise<{ token:
 
   return (
     <div className="grid gap-6">
-      <div className="grid gap-1.5">
-        <h1 className="text-2xl font-semibold">Bem-vindo à Extend</h1>
+      <div className="grid gap-1.5 text-center">
+        <h1 className="font-heading text-2xl font-semibold text-balance">Bem-vindo à Extend</h1>
         <p className="text-sm text-muted-foreground">
           {inv.inviterName ? `${inv.inviterName} convidou você` : "Você foi convidado"} como <strong>{inv.roleName}</strong>. Crie
           sua senha para entrar.
