@@ -2,7 +2,7 @@
 @import "tw-animate-css";
 @import "./shadcn-base.css";
 
-@custom-variant dark (&:is(.dark *):not(.auth-light, .auth-light *));
+@custom-variant dark (&:is(.dark *));
 
 /*
  * Identidade Extend (docs/07-identidade-visual.md)
@@ -234,51 +234,121 @@
     }
   }
   /* ---------------------------------------------------------------------------
-   * Entrada do sistema: fundo branco, marca ao centro. Uma única sequência ao abrir:
-   * a logo se revela, um brilho passa, a linha dourada se estende e o formulário sobe.
+   * Entrada do sistema: fundo vivo nos dois temas. Trama de pontos, linhas de luz que
+   * se estendem pela tela, dois brilhos lentos e uma luz que segue o ponteiro.
+   * Uma única sequência ao abrir: a logo se revela, a linha dourada se estende, o painel sobe.
    * ------------------------------------------------------------------------- */
-  .auth-light {
-    color-scheme: light;
-    --background: #ffffff;
-    --surface: #ffffff;
-    --foreground: #0e1726;
-    --card: #ffffff;
-    --card-foreground: #0e1726;
-    --popover: #ffffff;
-    --popover-foreground: #0e1726;
-    --primary: #1570c4;
-    --primary-foreground: #ffffff;
-    --secondary: #e8eef6;
-    --secondary-foreground: #0e1726;
-    --muted: #f1f4f8;
-    --muted-foreground: #526175;
-    --accent: #e3effc;
-    --accent-foreground: #0d4f8f;
-    --destructive: #c42121;
-    --border: #e1e7ef;
-    --input: #cdd6e2;
-    --ring: #1d8ae6;
-    --success: #157a3c;
-    --success-soft: #e3f4ea;
-    --warning: #9a5b00;
-    --warning-soft: #fdf2dc;
-    --danger: #c42121;
-    --danger-soft: #fdeaea;
-    --info: #1570c4;
-    --info-soft: #e3effc;
-    background: #ffffff;
-    color: var(--foreground);
-  }
-  /* Um halo azul muito suave atrás da marca: dá profundidade sem tirar o branco. */
-  .auth-halo {
+  .auth-backdrop {
+    --mx: 50%;
+    --my: 35%;
+    --ray: rgb(29 138 230 / 0.55);
+    --ray-gold: rgb(247 147 30 / 0.6);
+    --dot: rgb(14 23 38 / 0.09);
+    --dot-lit: rgb(29 138 230 / 0.45);
+    --orb-blue: rgb(29 138 230 / 0.16);
+    --orb-gold: rgb(255 184 0 / 0.12);
+    --spot: rgb(29 138 230 / 0.1);
     position: absolute;
-    left: 50%;
-    top: 0;
-    width: min(56rem, 140vw);
-    height: 30rem;
-    translate: -50% -45%;
-    background: radial-gradient(closest-side, rgb(29 138 230 / 0.07), transparent);
+    inset: 0;
+    z-index: -1;
+    overflow: hidden;
     pointer-events: none;
+  }
+  .dark .auth-backdrop {
+    --ray: rgb(79 164 240 / 0.7);
+    --ray-gold: rgb(255 184 0 / 0.65);
+    --dot: rgb(255 255 255 / 0.07);
+    --dot-lit: rgb(79 164 240 / 0.6);
+    --orb-blue: rgb(29 138 230 / 0.22);
+    --orb-gold: rgb(255 184 0 / 0.1);
+    --spot: rgb(79 164 240 / 0.14);
+  }
+  .auth-backdrop__grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.4px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, black, transparent 85%);
+  }
+  /* A trama acende perto do ponteiro. */
+  .auth-backdrop__grid::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(var(--dot-lit) 1.2px, transparent 1.6px);
+    background-size: 26px 26px;
+    mask-image: radial-gradient(circle 220px at var(--mx) var(--my), black, transparent 100%);
+  }
+  .auth-backdrop__spot {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle 420px at var(--mx) var(--my), var(--spot), transparent 70%);
+  }
+  .auth-backdrop:not([data-pointer]) .auth-backdrop__spot,
+  .auth-backdrop:not([data-pointer]) .auth-backdrop__grid::after {
+    animation: ab-wander 18s ease-in-out infinite alternate;
+  }
+  .auth-backdrop__orb {
+    position: absolute;
+    width: 46rem;
+    height: 46rem;
+    border-radius: 9999px;
+    filter: blur(80px);
+  }
+  .auth-backdrop__orb--blue {
+    left: -14rem;
+    top: -18rem;
+    background: var(--orb-blue);
+    animation: ab-drift 22s ease-in-out infinite alternate;
+  }
+  .auth-backdrop__orb--gold {
+    right: -18rem;
+    bottom: -22rem;
+    background: var(--orb-gold);
+    animation: ab-drift 26s ease-in-out -8s infinite alternate-reverse;
+  }
+  .auth-backdrop__rays span {
+    position: absolute;
+    left: 0;
+    height: 1px;
+    width: 38vw;
+    max-width: 34rem;
+    background: linear-gradient(90deg, transparent, var(--ray), transparent);
+    transform: translateX(-110%);
+    animation: ab-ray 9s cubic-bezier(0.45, 0, 0.2, 1) infinite;
+  }
+  .auth-backdrop__rays span:nth-child(1) { top: 14%; animation-delay: 0.4s; }
+  .auth-backdrop__rays span:nth-child(2) { top: 27%; animation-delay: 3.1s; animation-duration: 11s; }
+  .auth-backdrop__rays span:nth-child(3) { top: 41%; animation-delay: 5.6s; height: 2px; background: linear-gradient(90deg, transparent, var(--ray-gold), transparent); }
+  .auth-backdrop__rays span:nth-child(4) { top: 58%; animation-delay: 1.8s; animation-duration: 12s; }
+  .auth-backdrop__rays span:nth-child(5) { top: 69%; animation-delay: 7.2s; }
+  .auth-backdrop__rays span:nth-child(6) { top: 82%; animation-delay: 4.3s; animation-duration: 10s; }
+  .auth-backdrop__rays span:nth-child(7) { top: 92%; animation-delay: 8.6s; animation-duration: 13s; }
+  .auth-panel {
+    transition: border-color 0.3s;
+  }
+  .auth-panel:focus-within {
+    border-color: rgb(29 138 230 / 0.45);
+  }
+  @keyframes ab-ray {
+    0% { transform: translateX(-110%); opacity: 0; }
+    10% { opacity: 1; }
+    70% { opacity: 1; }
+    100% { transform: translateX(calc(100vw + 10%)); opacity: 0; }
+  }
+  @keyframes ab-drift {
+    to { translate: 6rem 4rem; scale: 1.12; }
+  }
+  @keyframes ab-wander {
+    0% { --mx: 30%; --my: 30%; }
+    50% { --mx: 68%; --my: 42%; }
+    100% { --mx: 45%; --my: 70%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .auth-backdrop__rays,
+    .auth-backdrop__spot { display: none; }
+    .auth-backdrop__orb,
+    .auth-backdrop__grid::after { animation: none; }
   }
   .auth-brand {
     display: grid;
@@ -363,3 +433,7 @@
     background: linear-gradient(90deg, #ffb800, #f7931e);
   }
 }
+
+/* Posição da luz da entrada: registrada para poder ser animada. */
+@property --mx { syntax: "<percentage>"; inherits: true; initial-value: 50%; }
+@property --my { syntax: "<percentage>"; inherits: true; initial-value: 35%; }
