@@ -1,80 +1,82 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Plus } from "lucide-react";
+import { CheckCircle2, Circle, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { addChecklistItem, updateChecklistItem } from "@/features/clients/actions";
+import { addChecklistItem } from "@/features/clients/actions";
 import { handleResult } from "@/lib/action-feedback";
-import { formatDate } from "@/domain/shared/dates";
+import { dayLabel } from "@/domain/trainings";
+import { MILESTONE_KEYS, MILESTONE_STATE_LABEL, milestoneState } from "@/domain/clients/milestones";
 import { Section } from "@/features/clients/components/section";
 import { cn } from "@/lib/utils";
+import { ChecklistRow, type ChecklistItem } from "./checklist-row";
 
-type Item = { id: string; title: string; assigneeId: string | null; assigneeName: string | null; dueAt: string | null; doneAt: string | null };
-const NONE = "__ninguem";
-/** Data (aaaa-mm-dd) em São Paulo para o campo de data. */
-const spDay = (iso: string | null) => (iso ? new Date(new Date(iso).getTime() - 3 * 3600_000).toISOString().slice(0, 10) : "");
+type Milestone = { key: string; title: string; due_on: string | null; done_at: string | null };
 
-/** Checklist do onboarding com responsável e prazo por item (RF-ONB-02). */
-export function Checklist({ clientId, items, team, canManage, userId }: { clientId: string; items: Item[]; team: { id: string; name: string }[]; canManage: boolean; userId: string }) {
+const TONE = { concluido: "text-success", atrasado: "font-medium text-danger", no_prazo: "text-muted-foreground", sem_prazo: "text-muted-foreground" } as const;
+
+/** Passos do onboarding agrupados pelos marcos do Miro, com responsável, prazo e orientação. */
+export function Checklist({
+  clientId,
+  items,
+  milestones,
+  team,
+  canManage,
+  userId,
+  today,
+}: {
+  clientId: string;
+  items: ChecklistItem[];
+  milestones: Milestone[];
+  team: { id: string; name: string }[];
+  canManage: boolean;
+  userId: string;
+  today: string;
+}) {
   const [title, setTitle] = useState("");
   const [pending, startTransition] = useTransition();
   const done = items.filter((i) => i.doneAt).length;
-  const now = new Date().toISOString();
-  const run = (p: Promise<{ ok: boolean; message?: string } & object>) => startTransition(async () => void handleResult((await p) as never));
+  const groups = [
+    ...MILESTONE_KEYS.map((k) => ({ key: k, milestone: milestones.find((m) => m.key === k), items: items.filter((i) => i.milestone === k) })),
+    { key: "outros", milestone: undefined, items: items.filter((i) => !i.milestone || !MILESTONE_KEYS.includes(i.milestone as never)) },
+  ].filter((g) => g.items.length > 0);
+  const final = milestones.find((m) => m.key === "conclusao");
 
   return (
-    <Section title={`Checklist (${done}/${items.length})`}>
-      <ul className="grid gap-2">
-        {items.map((i) => {
-          const late = !i.doneAt && i.dueAt && i.dueAt < now;
-          const editable = canManage || i.assigneeId === userId;
+    <Section title={`Passos do onboarding (${done}/${items.length})`}>
+      <ol className="grid gap-5" aria-label="Marcos do onboarding">
+        {groups.map((g) => {
+          const state = g.milestone ? milestoneState(g.milestone.due_on, g.milestone.done_at, today) : null;
           return (
-            <li key={i.id} className={cn("grid gap-2 rounded-xl border bg-card p-3", late && "border-danger/40")}>
-              <div className="flex items-start gap-3">
-                <Checkbox
-                  id={`ck-${i.id}`}
-                  className="mt-0.5"
-                  checked={Boolean(i.doneAt)}
-                  disabled={!editable || pending}
-                  onCheckedChange={(v) => run(updateChecklistItem({ id: i.id, done: v === true }))}
-                />
-                <label htmlFor={`ck-${i.id}`} className={cn("text-sm", i.doneAt && "text-muted-foreground line-through")}>
-                  {i.title}
-                </label>
-              </div>
-              <div className="flex flex-wrap items-center gap-2 pl-7">
-                {canManage ? (
-                  <>
-                    <Select value={i.assigneeId ?? NONE} onValueChange={(v) => run(updateChecklistItem({ id: i.id, assigneeId: v === NONE ? null : v }))}>
-                      <SelectTrigger size="sm" className="h-8 w-44" aria-label={`Responsável por ${i.title}`}><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value={NONE}>Sem responsável</SelectItem>
-                        {team.map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                    <Input
-                      type="date"
-                      className="h-8 w-40"
-                      aria-label={`Prazo de ${i.title}`}
-                      defaultValue={spDay(i.dueAt)}
-                      onBlur={(e) => {
-                        const v = e.target.value;
-                        if (v !== spDay(i.dueAt)) run(updateChecklistItem({ id: i.id, dueAt: v ? `${v}T23:59:00-03:00` : null }));
-                      }}
-                    />
-                  </>
-                ) : (
-                  <span className="text-xs text-muted-foreground">{i.assigneeName ?? "Sem responsável"}</span>
+            <li key={g.key} className="grid gap-2">
+              <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-0.5">
+                <h3 className="inline-flex items-center gap-1.5 text-sm font-semibold">
+                  {state === "concluido" ? <CheckCircle2 className="size-4 text-success" aria-hidden="true" /> : <Circle className="size-4 text-muted-foreground" aria-hidden="true" />}
+                  {g.milestone?.title ?? "Outros passos"}
+                </h3>
+                {g.milestone && state && (
+                  <span className={cn("text-xs tabular", TONE[state])}>
+                    {MILESTONE_STATE_LABEL[state]}
+                    {g.milestone.due_on && state !== "concluido" ? ` · até ${dayLabel(g.milestone.due_on)}` : ""}
+                  </span>
                 )}
-                {i.dueAt && <span className={cn("text-xs", late ? "font-medium text-danger" : "text-muted-foreground")}>{late ? "Atrasado · " : ""}{formatDate(i.dueAt)}</span>}
               </div>
+              <ul className="grid gap-2">
+                {g.items.map((i) => (
+                  <ChecklistRow key={i.id} item={i} team={team} canManage={canManage} editable={canManage || i.assigneeId === userId} />
+                ))}
+              </ul>
             </li>
           );
         })}
-      </ul>
+      </ol>
+      {final && (
+        <p className={cn("text-xs tabular", TONE[milestoneState(final.due_on, final.done_at, today)])}>
+          {final.title}: {MILESTONE_STATE_LABEL[milestoneState(final.due_on, final.done_at, today)]}
+          {final.due_on && !final.done_at ? ` · previsto para ${dayLabel(final.due_on)}` : ""}
+        </p>
+      )}
       {canManage && (
         <form
           className="flex gap-2"
@@ -85,7 +87,7 @@ export function Checklist({ clientId, items, team, canManage, userId }: { client
             });
           }}
         >
-          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Novo item do checklist…" aria-label="Novo item do checklist" autoComplete="off" />
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Outro passo para este cliente…" aria-label="Novo passo do onboarding" autoComplete="off" />
           <Button type="submit" variant="outline" disabled={pending || title.trim().length < 2}><Plus aria-hidden="true" /> Adicionar</Button>
         </form>
       )}

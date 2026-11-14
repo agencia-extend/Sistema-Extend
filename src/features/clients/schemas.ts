@@ -151,7 +151,10 @@ export const checklistTemplateSchema = z.object({
   id: uuid.optional(),
   title: z.string().trim().min(2, "Descreva o item.").max(160),
   default_sector_id: uuid.nullable(),
-  due_days: z.number().int().min(0).max(90),
+  due_days: z.number().int().min(0, "O prazo não pode ser negativo.").max(90, "Use até 90 dias."),
+  day_kind: z.enum(["uteis", "corridos"]),
+  milestone: z.enum(["abertura", "briefing", "combinados"]).nullable(),
+  guidance: z.string().trim().max(1000, "Use até 1000 caracteres.").nullable().transform((v) => v || null),
   is_active: z.boolean(),
 });
 

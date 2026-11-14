@@ -119,3 +119,18 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
     - revisar o texto com o advogado da agência;
     - avaliar mover o projeto de produção do Supabase para São Paulo (sa-east-1), o que tira a transferência internacional;
     - apagar ou anonimizar, após 5 anos, o histórico de quem saiu (a política promete isso).
+- **Onboarding com os passos do Miro (13/11/2026):** o Onboarding continua sendo o mesmo da central do cliente, com ficha, passos, responsáveis e conclusão obrigatória. Os passos padrão viraram os do fluxograma do Miro:
+  1. repasse para a coordenação;
+  2. grupo de WhatsApp;
+  3. briefing agendado em até 2 dias úteis;
+  4. briefing realizado;
+  5. mídias: metodologia definida e próxima reunião marcada;
+  6. tráfego: orçamento, acessos e criativos de teste;
+  7. obrigações do cliente.
+
+  Cada passo traz a orientação do Miro.
+  - **Prazos:** em dias úteis, sem fim de semana, sem os feriados nacionais e sem a Sexta-feira Santa (`private.add_business_days` e `src/domain/shared/business-days.ts`).
+  - **Marcos:** Abertura, Briefing, Combinados com o cliente e Onboarding concluído (`client_milestones`). Cada marco fecha sozinho quando os passos dele terminam e entra na linha do tempo.
+  - **Avisos:** o responsável é avisado do passo, também quando o passo muda de pessoa. Passo atrasado avisa o responsável; marco atrasado avisa a coordenação e a equipe do cliente (cron `extend-onboarding`, dias úteis às 9h30).
+  - **Ficha:** ganhou a seção "Obrigações do cliente" (versão 2).
+  - **Playbooks genéricos:** continuam como recurso à parte, para outros processos.

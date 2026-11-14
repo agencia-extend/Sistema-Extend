@@ -15,8 +15,8 @@ Recebido em 12/11/2026 (`PROMPT-ERP-OPERACIONAL.md`, enviado pelo Henrique). É 
 | Dashboard operacional (KPIs, alta prioridade, reuniões, saúde dos clientes, entregas por tipo) | Bloco "Operacional" no Início, para quem tem `dashboards.read` (sócios e coordenação), com período e filtro por pessoa | **Feito em 13/11** |
 | Kanban em 5 colunas fixas + status de aprovação | Fluxos por tipo de demanda com etapas e responsável por etapa; quadro do setor com as colunas do Trello | Mantido o modelo da Extend (mais rico); não duplicar |
 | Workspace do cliente com abas | Central do cliente com abas por serviço | Já existia; abas novas (Materiais, Gravações, Cronograma) no plano do `docs/09` |
-| Linha do tempo com marcos | Histórico do cliente | Marcos entram com os Playbooks |
-| Playbooks (etapas com prazo relativo geram tarefas e marcos) | Checklist fixo de onboarding | Planejado: começa pelo checklist do Miro |
+| Linha do tempo com marcos | Histórico do cliente | **Feito em 13/11**: marcos Abertura, Briefing, Combinados e Conclusão no onboarding |
+| Playbooks (etapas com prazo relativo geram tarefas e marcos) | Onboarding com os passos do Miro, dias úteis e marcos | **Onboarding feito em 13/11** (continua sendo o Onboarding da ficha); Playbooks para outros processos: planejado |
 | Tráfego (gasto, CTR, campanhas) | Etapa 05 (API Meta/Google) | No plano; sem tela com dado estático |
 | Portal do cliente | Etapa 12 | No plano |
 | Gamificação (ons, faixas, ranking, missões, carreira) | — | **Não entra** (decisão da Extend em 13/11) |

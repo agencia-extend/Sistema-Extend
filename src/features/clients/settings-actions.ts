@@ -44,7 +44,7 @@ export const saveChecklistTemplate = defineAction({ schema: checklistTemplateSch
     must(await supabase.from("onboarding_checklist_templates").insert({ ...t, organization_id: user.organizationId, position: (count ?? 0) + 1 }));
   }
   revalidatePath("/configuracoes/onboarding");
-  return ok(null, "Checklist padrão salvo. Vale para os próximos clientes.");
+  return ok(null, "Passo salvo. Vale para os próximos clientes.");
 });
 
 export const publishForm = defineAction({ schema: formSectionsSchema, permission: "settings.manage" }, async ({ sections }) => {

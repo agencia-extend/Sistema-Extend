@@ -341,6 +341,26 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"client_milestones": {
+                  Row: {
+                    "client_id": string,"created_at": string,"done_at": string | null,"due_on": string | null,"id": string,"key": string,"position": number,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"done_at"?: string | null,"due_on"?: string | null,"id"?: string,"key": string,"position": number,"title": string
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"done_at"?: string | null,"due_on"?: string | null,"id"?: string,"key"?: string,"position"?: number,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_milestones_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"client_months": {
                   Row: {
                     "client_id": string,"created_at": string,"ends_on": string,"id": string,"number": number,"starts_on": string
@@ -665,14 +685,14 @@ isOneToOne: false
                   ]
                 },"onboarding_checklist_items": {
                   Row: {
-                    "assignee_id": string | null,"client_id": string,"created_at": string,"done_at": string | null,"done_by": string | null,"due_at": string | null,"id": string,"position": number,"title": string
+                    "assignee_id": string | null,"client_id": string,"created_at": string,"done_at": string | null,"done_by": string | null,"due_at": string | null,"guidance": string | null,"id": string,"milestone": string | null,"position": number,"title": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "assignee_id"?: string | null,"client_id": string,"created_at"?: string,"done_at"?: string | null,"done_by"?: string | null,"due_at"?: string | null,"id"?: string,"position"?: number,"title": string
+                    "assignee_id"?: string | null,"client_id": string,"created_at"?: string,"done_at"?: string | null,"done_by"?: string | null,"due_at"?: string | null,"guidance"?: string | null,"id"?: string,"milestone"?: string | null,"position"?: number,"title": string
                   }
                   Update: {
-                    "assignee_id"?: string | null,"client_id"?: string,"created_at"?: string,"done_at"?: string | null,"done_by"?: string | null,"due_at"?: string | null,"id"?: string,"position"?: number,"title"?: string
+                    "assignee_id"?: string | null,"client_id"?: string,"created_at"?: string,"done_at"?: string | null,"done_by"?: string | null,"due_at"?: string | null,"guidance"?: string | null,"id"?: string,"milestone"?: string | null,"position"?: number,"title"?: string
                   }
                   Relationships: [
                     {
@@ -697,14 +717,14 @@ isOneToOne: false
                   ]
                 },"onboarding_checklist_templates": {
                   Row: {
-                    "created_at": string,"default_sector_id": string | null,"due_days": number,"id": string,"is_active": boolean,"organization_id": string,"position": number,"title": string
+                    "created_at": string,"day_kind": string,"default_sector_id": string | null,"due_days": number,"guidance": string | null,"id": string,"is_active": boolean,"milestone": string | null,"organization_id": string,"position": number,"title": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "created_at"?: string,"default_sector_id"?: string | null,"due_days"?: number,"id"?: string,"is_active"?: boolean,"organization_id": string,"position"?: number,"title": string
+                    "created_at"?: string,"day_kind"?: string,"default_sector_id"?: string | null,"due_days"?: number,"guidance"?: string | null,"id"?: string,"is_active"?: boolean,"milestone"?: string | null,"organization_id": string,"position"?: number,"title": string
                   }
                   Update: {
-                    "created_at"?: string,"default_sector_id"?: string | null,"due_days"?: number,"id"?: string,"is_active"?: boolean,"organization_id"?: string,"position"?: number,"title"?: string
+                    "created_at"?: string,"day_kind"?: string,"default_sector_id"?: string | null,"due_days"?: number,"guidance"?: string | null,"id"?: string,"is_active"?: boolean,"milestone"?: string | null,"organization_id"?: string,"position"?: number,"title"?: string
                   }
                   Relationships: [
                     {

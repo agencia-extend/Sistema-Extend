@@ -1,6 +1,7 @@
 import { requirePermission } from "@/lib/auth/dal";
 import { getClient, getMissing, getOnboarding, getOperationalSummary, listTeam } from "@/features/clients/queries";
 import { formatDateTime } from "@/domain/shared/dates";
+import { todayKey } from "@/domain/media";
 import { Section } from "@/features/clients/components/section";
 import { FormAlert } from "@/components/app/form-field";
 import { OnboardingForm } from "./onboarding-form";
@@ -55,7 +56,9 @@ export default async function FichaPage({ params }: { params: Promise<{ id: stri
         )}
         <Checklist
           clientId={id}
-          items={ob.checklist.map((c) => ({ id: c.id, title: c.title, assigneeId: c.assignee_id, assigneeName: c.assignee_name, dueAt: c.due_at, doneAt: c.done_at }))}
+          items={ob.checklist.map((c) => ({ id: c.id, title: c.title, guidance: c.guidance, milestone: c.milestone, assigneeId: c.assignee_id, assigneeName: c.assignee_name, dueAt: c.due_at, doneAt: c.done_at }))}
+          milestones={ob.milestones}
+          today={todayKey(new Date())}
           team={team.map((t) => ({ id: t.id, name: t.name }))}
           canManage={Boolean(user.permissions["clients.onboarding.manage"]) && client.status === "onboarding"}
           userId={user.id}

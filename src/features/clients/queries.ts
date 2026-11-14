@@ -156,13 +156,14 @@ export async function getHandoff(clientId: string) {
 
 export async function getOnboarding(clientId: string) {
   const supabase = await createClient();
-  const [ob, checklist] = await Promise.all([
+  const [ob, checklist, milestones] = await Promise.all([
     supabase.from("client_onboarding").select("answers, completed_at, updated_at, onboarding_forms(sections, version)").eq("client_id", clientId).maybeSingle(),
     supabase
       .from("onboarding_checklist_items")
-      .select("id, title, assignee_id, due_at, done_at, position, profiles!onboarding_checklist_items_assignee_id_fkey(full_name)")
+      .select("id, title, assignee_id, due_at, done_at, position, milestone, guidance, profiles!onboarding_checklist_items_assignee_id_fkey(full_name)")
       .eq("client_id", clientId)
       .order("position"),
+    supabase.from("client_milestones").select("key, title, due_on, done_at").eq("client_id", clientId).order("position"),
   ]);
   const form = arr(ob.data?.onboarding_forms)[0];
   return {
@@ -173,6 +174,7 @@ export async function getOnboarding(clientId: string) {
     sections: (form?.sections ?? []) as unknown as FormSection[],
     version: form?.version ?? null,
     checklist: (checklist.data ?? []).map((c) => ({ ...c, assignee_name: arr(c.profiles)[0]?.full_name ?? null })),
+    milestones: (milestones.data ?? []) as { key: string; title: string; due_on: string | null; done_at: string | null }[],
   };
 }
 

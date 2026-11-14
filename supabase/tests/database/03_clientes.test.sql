@@ -39,7 +39,7 @@ insert into t_ctx select public.create_handoff(jsonb_build_object(
 ));
 select isnt((select client_id from t_ctx), null, 'fechamento cria o cliente');
 select is((select status from public.clients where id = (select client_id from t_ctx)), 'onboarding', 'cliente nasce em onboarding');
-select is((select count(*)::int from public.onboarding_checklist_items where client_id = (select client_id from t_ctx)), 10, 'checklist padrão criado');
+select is((select count(*)::int from public.onboarding_checklist_items where client_id = (select client_id from t_ctx)), 7, 'checklist padrão criado (passos do Miro)');
 select is((select count(*)::int from public.handoff_promises where client_id = (select client_id from t_ctx)), 1, 'promessa registrada');
 
 -- 2. Jacque é avisada (coordenação de conteúdo recebe o aviso por padrão).
