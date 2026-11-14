@@ -95,7 +95,7 @@ export const meetingSchema = z.object({
   id: uuid.optional(),
   clientId: uuid,
   held_at: z.string().min(10, "Informe data e hora."),
-  kind: z.enum(["briefing", "planejamento", "alinhamento", "resultados", "outro"]),
+  kind: z.enum(["briefing", "planejamento", "estrategia", "acompanhamento", "alinhamento", "resultados", "outro"]),
   title: z.string().trim().min(2, "Dê um título.").max(160),
   summary: optText(8000),
   link: z.url("Link inválido.").optional().or(z.literal("")),

@@ -215,6 +215,13 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
 - **WhatsApp (RF-PRO-06)**: até o número da Extend estar ligado ao sistema (etapa 07), “Abrir no WhatsApp” usa o WhatsApp de quem envia (wa.me) com a mensagem do modelo já preenchida. Quando a etapa 07 existir, o mesmo botão passa a enviar pelo número da Extend.
 - **Painel comercial**: ganhou “Propostas enviadas” e “Propostas aceitas” no período.
 
+## Pendências do briefing de mídias (14/11/2026)
+- **Cliente sem retorno (docs/09, 3.9):** conteúdo na etapa de aprovação do cliente, com versão enviada (ou roteiro, ou link de aprovação aberto), parado há **2 dias úteis** avisa o responsável pela comunicação e quem está com a demanda; há **5 dias úteis**, avisa de novo. Um aviso por marco; se a demanda sai da etapa e volta (novo envio ao cliente), a contagem recomeça. Cliente pausado ou encerrado não gera aviso. Cron `extend-cliente-sem-retorno` (dias úteis, 9h45). Tipo de aviso novo nas preferências: “Cliente sem retorno em aprovação”.
+- **Links rápidos:** o topo da central do cliente mostra Instagram, Drive, site, Facebook, TikTok e WhatsApp, montados a partir de “Contas e acessos”. Só entra o que vira endereço válido (`src/domain/clients/quick-links.ts`).
+- **Reuniões:** tipos “Aprovação de estratégia” e “Acompanhamento”.
+- **Catálogo:** “Consultoria de perfil” e “Google Meu Negócio” (setor Gerenciamento, sem unidade mensal). Ajustáveis em Configurações.
+- **Continua com a Extend:** nome do papel “Gravação” × “Videomaker” (renomear em Configurações › Papéis, sem código) e a planilha “Controle de Mídias” para importar.
+
 ## Decisões da etapa 12 — Área do cliente (14/11/2026)
 - **Quem é o usuário do cliente:** um perfil marcado com `profiles.portal_client_id`, ligado a **um** cliente. Não é um papel: ele não tem papel, setor nem permissão. `private.org_id()` e `private.user_perm_scope()` devolvem nulo para ele, então nenhuma política interna o deixa ler nada (clientes, demandas, comentários, arquivos, contratos, perfis da equipe). Gatilhos impedem dar papel, setor, equipe do cliente, participação ou responsabilidade em demanda a ele.
 - **O que ele vê** sai só das funções `portal_*` (security definer, colunas escolhidas):

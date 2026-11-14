@@ -11,13 +11,13 @@ Legenda: **Pronto** = funciona hoje · **Parcial** = existe, mas falta parte · 
 | 2. Papéis e permissões por setor | Pronto | Papéis, matriz de permissões, exceção por usuário, RLS por cliente e setor | Semear o papel "Videomaker" (hoje se chama "Gravação") e conferir nomes: Pricila é design, Juliana é edição, Caliton grava |
 | 3.1 Cadastro do cliente | Parcial | Fechamento comercial cria o cliente em onboarding, com serviços, valores, contrato, contatos e contas | Nº/código; responsável pela comunicação; escopo em texto livre; tipo (fixo, avulso, inativo); serviços "Consultoria de perfil" e "Google Meu Negócio" no catálogo; **dia de virada do mês** |
 | 3.1 Visão geral em tabela | Parcial | Grade de cards com filtros por status, serviço, responsável e data de entrada | Visão em tabela com ícone por serviço (como a planilha) e filtro "contrato perto do fim" |
-| 3.2 Central: Visão geral | Pronto | Ficha, serviços, contrato, equipe, contas, contatos, atividades | Links rápidos em destaque (Instagram, Drive) |
+| 3.2 Central: Visão geral | Pronto | Ficha, serviços, contrato, equipe, contas, contatos, atividades; links rápidos (Instagram, Drive, site, Facebook, TikTok, WhatsApp) no topo de todas as abas (14/11) | — |
 | 3.2 Central: Briefing | Parcial | Aba Ficha com formulário editável pelo admin e versões | Seções A a E do briefing, exibidas conforme os serviços; rascunho salvo sozinho |
 | 3.2 Central: Materiais | Falta | Aba Arquivos (anexos de até 10 MB) | Aba própria por categoria (identidade, catálogo, referências, acessos), com arquivo **ou** link do Drive |
 | 3.2 Central: Controle de Mídias | Parcial | Aba "Demanda do mês": contratado × produzido × aprovado × entregue, um card por slot | Ver item 3.4 |
 | 3.2 Central: Cronograma e grid | Falta | — | Posts por semana e mês com legenda, data, link do post e prévia do feed |
 | 3.2 Central: Gravações | Parcial | Evento "gravação" na agenda, ligado ao cliente e ao card | Registro por diária: quem gravou e link dos takes brutos |
-| 3.2 Central: Reuniões | Pronto | Linha do tempo com tipo, participantes, resumo e link | Tipos "aprovação de estratégia" e "acompanhamento" |
+| 3.2 Central: Reuniões | Pronto | Linha do tempo com tipo (inclui Aprovação de estratégia e Acompanhamento, 14/11), participantes, resumo e link | — |
 | 3.2 Central: Métricas / Relatórios | Falta | — | Previsto nas etapas 05 e 06 |
 | 3.2 Central: Documentos | Parcial | Aba Arquivos sem pastas | Subpastas por setor (Mídias, Tráfego) |
 | 3.2 Central: Histórico de contratos | Falta | Um contrato por cliente (datas no próprio cliente) | Contratos anteriores e o ativo, cada um com seus meses |
@@ -31,7 +31,7 @@ Legenda: **Pronto** = funciona hoje · **Parcial** = existe, mas falta parte · 
 | 3.7 Prazos recorrentes do social media | Falta | — | Sexta: cronograma; segunda: legendas e posts programados |
 | 3.8 Fila de criativos do tráfego | Falta | — | Previsto na etapa 04 |
 | 3.9 Relatório semanal com retorno do cliente | Falta | — | Previsto na etapa 06, acrescentando o retorno (negativo, positivo, sem retorno) |
-| 3.9 Alertas de contrato e de cliente sem retorno | Falta | Alerta de promessa comercial perto de vencer | Contrato perto do fim; cliente sem retorno; relatório atrasado |
+| 3.9 Alertas de contrato e de cliente sem retorno | Parcial | Contrato perto do fim (30 e 7 dias, vencido); cliente sem retorno em aprovação há 2 e 5 dias úteis (14/11) | Relatório atrasado (depende da etapa 06) |
 | 3.10 Portal do cliente | Falta | — | Etapa 12 |
 | 5. Google Drive | Falta | Links manuais | Decisão D1 em aberto; briefing pede pastas automáticas e cita o Drive de 5 TB para brutos |
 | 5. Importar planilhas | Parcial | "Controle de clientes" (CSV) com prévia e desfazer | "Controle de Mídias" |

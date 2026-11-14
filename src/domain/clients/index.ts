@@ -78,6 +78,8 @@ export const ACCOUNT_KINDS: { key: string; label: string; placeholder: string }[
 export const MEETING_KINDS: Record<string, string> = {
   briefing: "Briefing",
   planejamento: "Planejamento",
+  estrategia: "Aprovação de estratégia",
+  acompanhamento: "Acompanhamento",
   alinhamento: "Alinhamento",
   resultados: "Resultados",
   outro: "Outra",

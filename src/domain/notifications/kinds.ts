@@ -6,6 +6,7 @@ export const NOTIFICATION_KINDS = [
   { key: "due_soon", label: "Prazo nas próximas 24 horas" },
   { key: "overdue", label: "Demanda atrasada" },
   { key: "client_approval", label: "Aprovação do cliente recebida" },
+  { key: "client_waiting", label: "Cliente sem retorno em aprovação" },
   { key: "creative_ready", label: "Criativo pronto" },
   { key: "ad_alert", label: "Alertas de anúncios" },
   { key: "client_onboarding", label: "Cliente novo em onboarding" },
