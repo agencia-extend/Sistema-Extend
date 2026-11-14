@@ -11,6 +11,7 @@ export const NOTIFICATION_KINDS = [
   { key: "client_onboarding", label: "Cliente novo em onboarding" },
   { key: "training", label: "Treinamento atribuído, atrasado ou concluído" },
   { key: "crm", label: "Comercial: próximas ações e leads parados" },
+  { key: "proposal", label: "Propostas: aberta pelo cliente, aceita ou vencida" },
   { key: "privacy", label: "Pedidos sobre dados pessoais (LGPD) e respostas" },
   { key: "system", label: "Avisos do sistema e testes" },
 ] as const;

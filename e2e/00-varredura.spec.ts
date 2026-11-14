@@ -23,7 +23,7 @@ const ROLES = ["admin", "gerente_trafego", "gestor_trafego", "coord_conteudo", "
 const MENU = ["/inicio", "/tarefas", "/clientes", "/agenda", "/setores", "/quadros", "/criativos", "/producao", "/playbooks", "/comercial", "/treinamentos"];
 const SETTINGS = [
   "/configuracoes/perfil", "/configuracoes/notificacoes", "/configuracoes/usuarios", "/configuracoes/papeis", "/configuracoes/servicos",
-  "/configuracoes/onboarding", "/configuracoes/rotinas", "/configuracoes/fluxos", "/configuracoes/funis", "/configuracoes/setores", "/configuracoes/auditoria", "/configuracoes/privacidade",
+  "/configuracoes/onboarding", "/configuracoes/rotinas", "/configuracoes/fluxos", "/configuracoes/funis", "/configuracoes/propostas", "/configuracoes/setores", "/configuracoes/auditoria", "/configuracoes/privacidade",
 ];
 const users: string[] = [];
 const timings: { role: string; path: string; ms: number }[] = [];

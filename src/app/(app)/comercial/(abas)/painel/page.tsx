@@ -8,6 +8,7 @@ import { listCrmPeople, listLeadsForPanel, listPipelines } from "@/features/crm/
 import { pickPipeline } from "@/features/crm/defaults";
 import { PipelineSwitch } from "@/features/crm/components/pipeline-switch";
 import { PeriodSwitch } from "@/features/crm/components/period-switch";
+import { proposalCounts } from "@/features/proposals/queries";
 
 export const metadata: Metadata = { title: "Painel comercial" };
 
@@ -15,13 +16,15 @@ const pct = (v: number | null) => (v == null ? "—" : `${Math.round(v * 100)}%`
 
 /** Painel comercial em tabelas: entradas, ganhos, conversão por origem e responsável, motivos de perda. */
 export default async function PainelPage({ searchParams }: { searchParams: Promise<{ funil?: string; periodo?: string }> }) {
-  const [, sp] = await Promise.all([requirePermission("crm.leads.read"), searchParams]);
+  const [user, sp] = await Promise.all([requirePermission("crm.leads.read"), searchParams]);
   const [pipelines, all, people] = await Promise.all([listPipelines(), listLeadsForPanel(), listCrmPeople()]);
   const pipeline = pickPipeline(pipelines, sp.funil);
   if (!pipeline) return <EmptyState icon={BarChart3} title="Nenhum funil configurado" description="Crie um funil em Configurações › Funis comerciais." />;
   const period = isPeriod(sp.periodo) ? sp.periodo : "mes";
   const leads = all.filter((l) => l.pipelineId === pipeline.id);
-  const p = buildPanel(leads, pipeline.stages, new Map(people.map((x) => [x.id, x.name])), periodRange(period));
+  const range = periodRange(period);
+  const p = buildPanel(leads, pipeline.stages, new Map(people.map((x) => [x.id, x.name])), range);
+  const props = user.permissions["proposals.read"] ? await proposalCounts(range.from, range.to) : null;
 
   const totals: [string, string][] = [
     ["Leads que entraram", String(p.totals.leads)],
@@ -30,6 +33,7 @@ export default async function PainelPage({ searchParams }: { searchParams: Promi
     ["Conversão", pct(p.totals.conversion)],
     ["Vendido (mensal)", formatBRL(p.totals.wonCents)],
     ["Em aberto agora", `${p.totals.open} · ${formatBRL(p.totals.openCents)}`],
+    ...(props ? ([["Propostas enviadas", String(props.sent)], ["Propostas aceitas", `${props.accepted} · ${formatBRL(props.acceptedCents)}`]] as [string, string][]) : []),
   ];
 
   return (
@@ -42,7 +46,7 @@ export default async function PainelPage({ searchParams }: { searchParams: Promi
         <EmptyState icon={BarChart3} title="Sem dados ainda" description="O painel se monta sozinho conforme os leads entram e avançam no funil." />
       ) : (
         <>
-          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-3 lg:grid-cols-6">
+          <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-3 lg:grid-cols-4">
             {totals.map(([k, v]) => (
               <div key={k} className="grid gap-0.5 bg-card px-4 py-3">
                 <dt className="text-xs text-muted-foreground">{k}</dt>

@@ -45,7 +45,7 @@
 - [ ] Exportação JSON dos quadros do Trello (cliente ativo + setores de edição e conteúdo).
 - [ ] Briefing de mídias da Jacque (ainda não enviado) e perguntas atuais do onboarding.
 - [ ] Lista definitiva de serviços vendidos e unidades mensais.
-- [ ] Modelo atual de proposta comercial (Jorge) e o que mais muda nele.
+- [ ] Modelo atual de proposta comercial (Jorge) e o que mais muda nele. O modelo inicial do sistema segue os blocos do RF-PRO-01 e é editável em Configurações › Propostas; com o modelo do Jorge em mãos, ajustar o texto e a ordem lá (sem código).
 - [ ] Acessos de administrador nas contas da Extend: Supabase, Vercel, BM da Meta (verificado), MCC do Google Ads, Google Cloud, Drive, domínio/DNS, número de WhatsApp dedicado.
 - [ ] Manual de marca (se houver) — já temos logos e cores do site.
 - [ ] Lista de clientes ativos com serviços e responsáveis (para a carga inicial).
@@ -202,3 +202,15 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
 - Lembretes (job `extend-comercial`, a cada 30 min das 8h às 19h, seg. a sáb.): próxima ação vencendo e lead parado além do prazo da etapa, uma vez por ocorrência.
 - Conversão do painel = ganhos ÷ (ganhos + perdidos) no período. Propostas enviadas/aceitas entram com a etapa 09.
 - **Pendente (depende de contas da Extend):** cadências por WhatsApp (RF-CRM-06) esperam o provedor e o número (D4); prospectador (RF-CRM-07) espera a chave do Google Places com teto mensal (D8).
+
+## Decisões da etapa 09 — Propostas (14/11/2026)
+- **Modelo inicial**: o modelo atual do Jorge ainda não chegou. O sistema nasce com “Proposta padrão” (capa, sobre, diagnóstico, serviços, investimento, condições, próximos passos, contato), todo editável em Configurações › Propostas. Cada salvamento vira uma versão; dá para restaurar versões e duplicar modelos.
+- **Preços**: descrição comercial e preço padrão ficam em `service_offers` (separado do catálogo para que só quem tem `proposals.read` veja preço; quem edita é `proposals.templates.manage`). Os preços começam vazios: a Extend preenche. Na proposta, valor, quantidade e desconto (em reais, por item) são editáveis; itens mensais e de valor único somam separados.
+- **Texto rico**: formatação simples e previsível (parágrafo, lista com “- ”, **negrito**) e variáveis `{cliente}`, `{contato}`, `{vendedor}`, `{servicos}`, `{valor_mensal}`, `{valor_unico}`, `{valor_total}`, `{forma_pagamento}`, `{validade}`, `{data}`, `{numero}`, `{observacoes}`. Variável desconhecida é recusada ao salvar. Bloco de texto vazio some da proposta.
+- **Prévia = PDF**: o mesmo documento (`buildDoc`) alimenta a prévia, a página pública e o PDF (`@react-pdf/renderer`, fontes Inter e Outfit embutidas). O teste compara valores, nome e validade entre os dois.
+- **Versões da proposta**: cada salvamento grava um retrato completo (blocos do modelo + dados). O link mostra só a versão **enviada**; salvar de novo pede “Enviar esta versão”. Proposta aceita não muda mais.
+- **Link público** `/proposta/<código>`: código aleatório de 32 caracteres, sem indexação. Cada abertura é registrada (data/hora); abertura de quem está logado no sistema não conta. O vendedor é avisado (no máximo um aviso por hora por proposta).
+- **Aceite**: nome completo + confirmação. Move o lead para Ganho (com o valor mensal), registra no histórico do lead e avisa o vendedor para registrar o fechamento, que abre preenchido com serviços, valores, taxa única e forma de pagamento.
+- **Vencimento**: job diário `extend-propostas` (00h05 de Brasília) marca “expirada” e avisa o vendedor; a página pública e a lista já mostram vencida antes do job.
+- **WhatsApp (RF-PRO-06)**: até o número da Extend estar ligado ao sistema (etapa 07), “Abrir no WhatsApp” usa o WhatsApp de quem envia (wa.me) com a mensagem do modelo já preenchida. Quando a etapa 07 existir, o mesmo botão passa a enviar pelo número da Extend.
+- **Painel comercial**: ganhou “Propostas enviadas” e “Propostas aceitas” no período.

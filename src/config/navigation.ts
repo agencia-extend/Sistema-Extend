@@ -83,6 +83,7 @@ export const SETTINGS_PAGES: SettingsPage[] = [
   { href: "/configuracoes/rotinas", label: "Rotinas e modelos", description: "Prazos fixos da semana por serviço e modelos de demanda", perm: "tasks.boards.configure" },
   { href: "/configuracoes/fluxos", label: "Fluxos de produção", description: "Etapas de vídeo, design, post, gravação e site", perm: "tasks.boards.configure" },
   { href: "/configuracoes/funis", label: "Funis comerciais", description: "Etapas do funil de vendas e prazo de cada uma", perm: "crm.pipeline.configure" },
+  { href: "/configuracoes/propostas", label: "Propostas", description: "Modelos de proposta e preço padrão de cada serviço", perm: "proposals.templates.manage" },
   { href: "/configuracoes/setores", label: "Setores", description: "Setores da agência e quem faz parte", perm: "settings.manage" },
   { href: "/configuracoes/auditoria", label: "Auditoria", description: "Quem alterou o quê, com antes e depois", perm: "audit.read" },
   { href: "/configuracoes/privacidade", label: "Privacidade (LGPD)", description: "Pedidos sobre dados pessoais e dados do controlador", perm: "privacy.manage" },

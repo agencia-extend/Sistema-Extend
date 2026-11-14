@@ -38,7 +38,17 @@ type Values = {
 const today = () => new Date(Date.now() - 3 * 3600_000).toISOString().slice(0, 10);
 
 /** Dados do lead do comercial que viram o ponto de partida do fechamento. */
-export type HandoffLead = { id: string; name: string; contact: { name: string; phone: string; email: string }; monthlyFee: string; notes: string };
+export type HandoffLead = {
+  id: string;
+  name: string;
+  contact: { name: string; phone: string; email: string };
+  monthlyFee: string;
+  notes: string;
+  /** Vindo de proposta aceita: serviços marcados com o valor de cada um, taxa única e forma de pagamento. */
+  picked?: Record<string, string>;
+  setupFee?: string;
+  paymentMethod?: string;
+};
 
 export function HandoffForm({ services, lead }: { services: Svc[]; lead?: HandoffLead }) {
   const router = useRouter();
@@ -52,11 +62,11 @@ export function HandoffForm({ services, lead }: { services: Svc[]; lead?: Handof
       document: "",
       segment: "",
       contact: { name: lead?.contact.name ?? "", phone: lead?.contact.phone ?? "", email: lead?.contact.email ?? "", role: "" },
-      picked: Object.fromEntries(services.map((s) => [s.id, { on: false, qty: "", price: "" }])),
+      picked: Object.fromEntries(services.map((s) => [s.id, { on: Boolean(lead?.picked?.[s.id]), qty: "", price: lead?.picked?.[s.id] ?? "" }])),
       monthly_fee: lead?.monthlyFee ?? "",
-      setup_fee: "",
+      setup_fee: lead?.setupFee ?? "",
       media_budget: "",
-      payment_method: "",
+      payment_method: lead?.paymentMethod ?? "",
       contract_start: today(),
       contract_months: "12",
       communication_channel: "",

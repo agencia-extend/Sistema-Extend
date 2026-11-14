@@ -1357,6 +1357,154 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"proposal_template_versions": {
+                  Row: {
+                    "blocks": NonNullable<Json>,"created_at": string,"created_by": string | null,"name": string,"template_id": string,"validity_days": number,"version": number,"whatsapp_message": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "blocks": NonNullable<Json>,"created_at"?: string,"created_by"?: string | null,"name": string,"template_id": string,"validity_days": number,"version": number,"whatsapp_message": string
+                  }
+                  Update: {
+                    "blocks"?: NonNullable<Json>,"created_at"?: string,"created_by"?: string | null,"name"?: string,"template_id"?: string,"validity_days"?: number,"version"?: number,"whatsapp_message"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proposal_template_versions_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposal_template_versions_template_id_fkey"
+      columns: ["template_id"]
+isOneToOne: false
+      referencedRelation: "proposal_templates"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"proposal_templates": {
+                  Row: {
+                    "archived_at": string | null,"blocks": NonNullable<Json>,"created_at": string,"created_by": string | null,"id": string,"is_default": boolean,"name": string,"organization_id": string,"updated_at": string,"updated_by": string | null,"validity_days": number,"version": number,"whatsapp_message": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "archived_at"?: string | null,"blocks"?: NonNullable<Json>,"created_at"?: string,"created_by"?: string | null,"id"?: string,"is_default"?: boolean,"name": string,"organization_id"?: string,"updated_at"?: string,"updated_by"?: string | null,"validity_days"?: number,"version"?: number,"whatsapp_message"?: string
+                  }
+                  Update: {
+                    "archived_at"?: string | null,"blocks"?: NonNullable<Json>,"created_at"?: string,"created_by"?: string | null,"id"?: string,"is_default"?: boolean,"name"?: string,"organization_id"?: string,"updated_at"?: string,"updated_by"?: string | null,"validity_days"?: number,"version"?: number,"whatsapp_message"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proposal_templates_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposal_templates_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposal_templates_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"proposal_versions": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"monthly_cents": number,"one_time_cents": number,"proposal_id": string,"snapshot": NonNullable<Json>,"version": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"monthly_cents": number,"one_time_cents": number,"proposal_id": string,"snapshot": NonNullable<Json>,"version": number
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"monthly_cents"?: number,"one_time_cents"?: number,"proposal_id"?: string,"snapshot"?: NonNullable<Json>,"version"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proposal_versions_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposal_versions_proposal_id_fkey"
+      columns: ["proposal_id"]
+isOneToOne: false
+      referencedRelation: "proposals"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"proposal_views": {
+                  Row: {
+                    "id": number,"ip": string | null,"proposal_id": string,"user_agent": string | null,"version": number | null,"viewed_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id"?: never,"ip"?: string | null,"proposal_id": string,"user_agent"?: string | null,"version"?: number | null,"viewed_at"?: string
+                  }
+                  Update: {
+                    "id"?: never,"ip"?: string | null,"proposal_id"?: string,"user_agent"?: string | null,"version"?: number | null,"viewed_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proposal_views_proposal_id_fkey"
+      columns: ["proposal_id"]
+isOneToOne: false
+      referencedRelation: "proposals"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"proposals": {
+                  Row: {
+                    "accepted_at": string | null,"accepted_ip": string | null,"accepted_name": string | null,"client_name": string,"contact_email": string | null,"contact_name": string,"contact_phone": string | null,"created_at": string,"created_by": string | null,"expired_at": string | null,"first_viewed_at": string | null,"id": string,"items": NonNullable<Json>,"last_viewed_at": string | null,"lead_id": string,"monthly_cents": number,"notes": string,"number": number,"one_time_cents": number,"organization_id": string,"owner_id": string | null,"payment_terms": string,"public_token": string,"refused_at": string | null,"refused_reason": string | null,"sent_at": string | null,"sent_version": number | null,"status": string,"template_id": string | null,"updated_at": string,"valid_until": string,"version": number,"view_count": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "accepted_at"?: string | null,"accepted_ip"?: string | null,"accepted_name"?: string | null,"client_name": string,"contact_email"?: string | null,"contact_name"?: string,"contact_phone"?: string | null,"created_at"?: string,"created_by"?: string | null,"expired_at"?: string | null,"first_viewed_at"?: string | null,"id"?: string,"items"?: NonNullable<Json>,"last_viewed_at"?: string | null,"lead_id": string,"monthly_cents"?: number,"notes"?: string,"number": number,"one_time_cents"?: number,"organization_id": string,"owner_id"?: string | null,"payment_terms"?: string,"public_token"?: string,"refused_at"?: string | null,"refused_reason"?: string | null,"sent_at"?: string | null,"sent_version"?: number | null,"status"?: string,"template_id"?: string | null,"updated_at"?: string,"valid_until": string,"version"?: number,"view_count"?: number
+                  }
+                  Update: {
+                    "accepted_at"?: string | null,"accepted_ip"?: string | null,"accepted_name"?: string | null,"client_name"?: string,"contact_email"?: string | null,"contact_name"?: string,"contact_phone"?: string | null,"created_at"?: string,"created_by"?: string | null,"expired_at"?: string | null,"first_viewed_at"?: string | null,"id"?: string,"items"?: NonNullable<Json>,"last_viewed_at"?: string | null,"lead_id"?: string,"monthly_cents"?: number,"notes"?: string,"number"?: number,"one_time_cents"?: number,"organization_id"?: string,"owner_id"?: string | null,"payment_terms"?: string,"public_token"?: string,"refused_at"?: string | null,"refused_reason"?: string | null,"sent_at"?: string | null,"sent_version"?: number | null,"status"?: string,"template_id"?: string | null,"updated_at"?: string,"valid_until"?: string,"version"?: number,"view_count"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "proposals_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposals_lead_id_fkey"
+      columns: ["lead_id"]
+isOneToOne: false
+      referencedRelation: "leads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposals_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposals_owner_id_fkey"
+      columns: ["owner_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "proposals_template_id_fkey"
+      columns: ["template_id"]
+isOneToOne: false
+      referencedRelation: "proposal_templates"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"push_subscriptions": {
                   Row: {
                     "auth": string,"created_at": string,"endpoint": string,"id": string,"last_used_at": string | null,"p256dh": string,"user_agent": string | null,"user_id": string
@@ -1564,6 +1712,38 @@ isOneToOne: false
       columns: ["sector_id"]
 isOneToOne: false
       referencedRelation: "sectors"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"service_offers": {
+                  Row: {
+                    "description": string,"organization_id": string,"price_cents": number | null,"recurrence": string,"service_id": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "description"?: string,"organization_id": string,"price_cents"?: number | null,"recurrence"?: string,"service_id": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "description"?: string,"organization_id"?: string,"price_cents"?: number | null,"recurrence"?: string,"service_id"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "service_offers_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "service_offers_service_id_fkey"
+      columns: ["service_id"]
+isOneToOne: true
+      referencedRelation: "service_catalog"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "service_offers_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
                   ]
@@ -2247,7 +2427,10 @@ isOneToOne: false
             [_ in never]: never
           }
           Functions: {
-            "add_delivery":
+            "accept_proposal":
+{ Args: { "p_ip": string,"p_name": string,"p_token": string }; Returns: string
+                           },
+"add_delivery":
 { Args: { "p_assets": Json,"p_note": string,"p_task": string }; Returns: number
                            },
 "admin_set_user_active":
@@ -2335,6 +2518,9 @@ isOneToOne: false
 "onboarding_missing":
 { Args: { "p_client": string }; Returns: (string)[]
                            },
+"proposal_viewed":
+{ Args: { "p_ip": string,"p_token": string,"p_user_agent": string }; Returns: string
+                           },
 "publish_onboarding_form":
 { Args: { "p_sections": Json }; Returns: number
                            },
@@ -2347,14 +2533,23 @@ isOneToOne: false
 "rate_limit_reset":
 { Args: { "p_bucket": string }; Returns: undefined
                            },
+"refuse_proposal":
+{ Args: { "p_id": string,"p_reason": string }; Returns: undefined
+                           },
 "review_creative":
 { Args: { "p_comment": string,"p_decision": string,"p_task": string }; Returns: undefined
                            },
 "save_content":
 { Args: { "p": Json,"p_task": string }; Returns: undefined
                            },
+"save_proposal":
+{ Args: { "p": Json }; Returns: string
+                           },
 "save_recording":
 { Args: { "p": Json }; Returns: string
+                           },
+"send_proposal":
+{ Args: { "p_id": string }; Returns: string
                            },
 "send_test_notification":
 { Args: { "p_user": string }; Returns: undefined

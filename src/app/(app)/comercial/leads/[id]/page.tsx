@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Fragment } from "react";
-import { Handshake, Mail, MessageCircle, Pencil } from "lucide-react";
+import { FilePlus2, Handshake, Mail, MessageCircle, Pencil } from "lucide-react";
 import { requirePermission } from "@/lib/auth/dal";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -15,6 +15,9 @@ import { ActivityPanel } from "@/features/crm/components/activity-panel";
 import { DeleteLead } from "@/features/crm/components/delete-lead";
 import { LeadDialog } from "@/features/crm/components/lead-dialog";
 import { StagePicker } from "@/features/crm/components/stage-picker";
+import { effectiveStatus } from "@/domain/proposals";
+import { listProposals } from "@/features/proposals/queries";
+import { ProposalStatusBadge } from "@/features/proposals/components/status-badge";
 
 export const metadata: Metadata = { title: "Lead" };
 
@@ -23,7 +26,9 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const canManage = Boolean(user.permissions["crm.leads.manage"]);
   const canHandoff = Boolean(user.permissions["commercial.handoff.create"]);
-  const [lead, pipelines, people] = await Promise.all([getLead(id), listPipelines(), canManage ? listCrmPeople() : Promise.resolve([])]);
+  const canProposals = Boolean(user.permissions["proposals.read"]);
+  const canCreateProposal = Boolean(user.permissions["proposals.manage"]);
+  const [lead, pipelines, people, proposals] = await Promise.all([getLead(id), listPipelines(), canManage ? listCrmPeople() : Promise.resolve([]), canProposals ? listProposals(id) : Promise.resolve([])]);
   if (!lead) notFound();
   const pipeline = pipelines.find((p) => p.id === lead.pipelineId);
   const stage = pipeline?.stages.find((s) => s.id === lead.stageId);
@@ -42,6 +47,9 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
           <div className="flex flex-wrap gap-2">
             {canHandoff && !lead.wonClientId && stage?.kind !== "perdido" && (
               <Link href={`/clientes/novo?lead=${lead.id}`} className={buttonVariants()}><Handshake aria-hidden="true" /> Registrar fechamento</Link>
+            )}
+            {canCreateProposal && !lead.wonClientId && stage?.kind !== "perdido" && (
+              <Link href={`/comercial/propostas/nova?lead=${lead.id}`} className={buttonVariants({ variant: "outline" })}><FilePlus2 aria-hidden="true" /> Criar proposta</Link>
             )}
             {canManage && <LeadDialog initial={leadToForm(lead)} people={people} trigger={<Button variant="outline"><Pencil aria-hidden="true" /> Editar</Button>} />}
             {canManage && !lead.wonClientId && <DeleteLead id={lead.id} name={lead.name} />}
@@ -65,6 +73,20 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
               <Link href={`/clientes/${lead.wonClientId}`} className="text-sm font-medium text-primary hover:underline">Ver o cliente em onboarding</Link>
             )}
           </section>
+
+          {canProposals && proposals.length > 0 && (
+            <section aria-labelledby="propostas" className="grid gap-2 rounded-xl border bg-card p-4 text-sm">
+              <h2 id="propostas" className="text-sm font-semibold">Propostas</h2>
+              <ul className="grid gap-2">
+                {proposals.map((p) => (
+                  <li key={p.id} className="flex items-center justify-between gap-2">
+                    <Link href={`/comercial/propostas/${p.id}`} className="min-w-0 truncate hover:underline">Nº {String(p.number).padStart(4, "0")} · {p.monthlyCents ? `${formatBRL(p.monthlyCents)}/mês` : formatBRL(p.oneTimeCents)}</Link>
+                    <ProposalStatusBadge status={effectiveStatus(p.status, p.validUntil)} />
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <section aria-labelledby="dados" className="grid gap-3 rounded-xl border bg-card p-4 text-sm">
             <h2 id="dados" className="text-sm font-semibold">Contato</h2>

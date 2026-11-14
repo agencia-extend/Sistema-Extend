@@ -47,8 +47,8 @@ export function normalizeEmail(input: string | null | undefined): string | null 
 }
 
 /** Link para abrir conversa no WhatsApp (sem API: abre o app de quem clica). */
-export function whatsappLink(phone: string | null | undefined): string | null {
-  return phone ? `https://wa.me/${phone}` : null;
+export function whatsappLink(phone: string | null | undefined, text?: string): string | null {
+  return phone ? `https://wa.me/${phone}${text ? `?text=${encodeURIComponent(text)}` : ""}` : null;
 }
 
 export type SlaState = { days: number; late: boolean };

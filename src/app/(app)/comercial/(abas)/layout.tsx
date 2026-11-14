@@ -21,7 +21,7 @@ export default async function ComercialLayout({ children }: { children: ReactNod
         }
         className="pb-2"
       />
-      <CommercialNav canImport={Boolean(user.permissions["crm.leads.manage"])} />
+      <CommercialNav canImport={Boolean(user.permissions["crm.leads.manage"])} canProposals={Boolean(user.permissions["proposals.read"])} />
       <div className="px-4 pt-5 pb-10 sm:px-6">{children}</div>
     </>
   );

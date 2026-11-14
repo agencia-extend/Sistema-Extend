@@ -14,6 +14,12 @@ const nextConfig: NextConfig = {
   // O log de Server Functions (só em dev) imprime argumentos, inclusive senhas.
   logging: { serverFunctions: false },
   experimental: { serverActions: { bodySizeLimit: "11mb" } },
+  // PDF das propostas: o renderizador roda no Node e lê as fontes e o logo do disco.
+  serverExternalPackages: ["@react-pdf/renderer"],
+  outputFileTracingIncludes: {
+    "/api/propostas/[id]/pdf": ["./src/features/proposals/pdf/fonts/**", "./public/brand/logo.png"],
+    "/proposta/[token]/pdf": ["./src/features/proposals/pdf/fonts/**", "./public/brand/logo.png"],
+  },
   async headers() {
     return [
       { source: "/:path*", headers: securityHeaders },
