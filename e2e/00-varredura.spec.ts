@@ -20,7 +20,7 @@ const stamp = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
 const pw = `Senha${stamp}x9`;
 
 const ROLES = ["admin", "gerente_trafego", "gestor_trafego", "coord_conteudo", "social_media", "editor_video", "designer", "gravacao", "sites", "comercial", "atendimento", "leitura"];
-const MENU = ["/inicio", "/tarefas", "/clientes", "/agenda", "/setores", "/quadros", "/producao", "/playbooks", "/treinamentos"];
+const MENU = ["/inicio", "/tarefas", "/clientes", "/agenda", "/setores", "/quadros", "/criativos", "/producao", "/playbooks", "/treinamentos"];
 const SETTINGS = [
   "/configuracoes/perfil", "/configuracoes/notificacoes", "/configuracoes/usuarios", "/configuracoes/papeis", "/configuracoes/servicos",
   "/configuracoes/onboarding", "/configuracoes/rotinas", "/configuracoes/fluxos", "/configuracoes/setores", "/configuracoes/auditoria", "/configuracoes/privacidade",
@@ -75,7 +75,7 @@ for (const role of ROLES) {
         await expect(page.locator("h1").first()).not.toHaveText("Sem acesso");
         expect(page.url(), `${role} abre ${path}`).not.toContain("sem-acesso");
       } else {
-        await page.goto(path);
+        await page.goto(path).catch(() => undefined); // o redirecionamento pode interromper o carregamento
         await expect(page, `${role} não deveria abrir ${path}`).toHaveURL(/sem-acesso/);
       }
     }
@@ -88,7 +88,7 @@ for (const role of ROLES) {
       if (settingsVisible.has(path)) {
         await visit(page, role, path, problems);
       } else {
-        await page.goto(path);
+        await page.goto(path).catch(() => undefined); // o redirecionamento pode interromper o carregamento
         await expect(page, `${role} não deveria abrir ${path}`).toHaveURL(/sem-acesso/);
       }
     }

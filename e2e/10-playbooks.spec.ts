@@ -106,7 +106,7 @@ test("2. o gestor de tráfego aplica no cliente: demandas para o Ben e marcos na
 test("3. social media não vê Playbooks no menu nem abre a página", async ({ page }) => {
   await login(page, people.Madu.email);
   await expect(page.getByRole("navigation", { name: "Menu principal" }).getByRole("link", { name: "Playbooks" })).toHaveCount(0);
-  await page.goto("/playbooks");
+  await page.goto("/playbooks").catch(() => undefined); // o redirecionamento pode interromper o carregamento
   await expect(page).toHaveURL(/sem-acesso/);
 });
 

@@ -64,7 +64,7 @@ test("1-2. convite → editor define senha, vê só o permitido e é bloqueado e
   await page.waitForURL("**/inicio**");
   await expect(page.getByRole("heading", { name: /Editor/ })).toBeVisible();
 
-  await page.goto("/configuracoes/usuarios");
+  await page.goto("/configuracoes/usuarios").catch(() => undefined); // o redirecionamento pode interromper o carregamento
   await expect(page).toHaveURL(/sem-acesso/);
 });
 

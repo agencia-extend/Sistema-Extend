@@ -195,7 +195,7 @@ test("6. outra editora não vê o card nem o conteúdo; editora não abre o Cont
   await login(page, people.OutraEditora.email, pw);
   await page.goto("/setores/edicao");
   await expect(page.getByText("Nenhum conteúdo no quadro ainda")).toBeVisible();
-  await page.goto("/producao");
+  await page.goto("/producao").catch(() => undefined); // o redirecionamento pode interromper o carregamento
   await expect(page).toHaveURL(/sem-acesso/);
 
   const anon = createClient(url, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, { auth: { persistSession: false } });

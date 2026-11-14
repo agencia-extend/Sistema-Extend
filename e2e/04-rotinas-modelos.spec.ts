@@ -128,7 +128,7 @@ test("4. social media não vê Rotinas e modelos no menu nem abre a página", as
   await login(page, people.Madu.email, pw);
   await page.goto("/configuracoes");
   await expect(page.getByRole("link", { name: /Rotinas e modelos/ })).toHaveCount(0);
-  await page.goto("/configuracoes/rotinas");
+  await page.goto("/configuracoes/rotinas").catch(() => undefined); // o redirecionamento pode interromper o carregamento
   await expect(page).toHaveURL(/sem-acesso/);
   await page.goto("/tarefas?aba=todas");
   await expect(page.getByRole("link", { name: new RegExp(routineTitle) }).filter({ visible: true })).toBeVisible();

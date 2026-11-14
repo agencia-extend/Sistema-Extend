@@ -81,7 +81,7 @@ test("2. a Madu registra ciência, baixa os dados e faz um pedido", async ({ pag
   await expect(mine).toContainText("Aberto");
 
   // Não abre a área de quem atende.
-  await page.goto("/configuracoes/privacidade");
+  await page.goto("/configuracoes/privacidade").catch(() => undefined); // o redirecionamento pode interromper o carregamento
   await expect(page).toHaveURL(/sem-acesso/);
 });
 

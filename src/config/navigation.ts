@@ -47,6 +47,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/setores", label: "Visão do setor", icon: "dashboard", anyOf: ["sector.dashboard.read"] },
       { href: "/quadros", label: "Quadros", icon: "boards", anyOf: ["tasks.read"] },
+      { href: "/criativos", label: "Criativos", icon: "creatives", anyOf: ["creatives.request.create", "creatives.produce", "creatives.review", "creatives.library.manage"] },
       { href: "/producao", label: "Controle geral", icon: "production", anyOf: ["dashboards.read"] },
       { href: "/playbooks", label: "Playbooks", icon: "playbook", anyOf: ["playbooks.apply", "playbooks.manage"] },
     ],

@@ -134,7 +134,7 @@ test("4. o admin bloqueia Treinamentos para a Madu → some do menu e a página 
   await login(page, people.Madu.email, pw);
   await expect(page.getByRole("heading", { name: "Minhas pendências" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Treinamentos" })).toHaveCount(0);
-  await page.goto("/treinamentos");
+  await page.goto("/treinamentos").catch(() => undefined); // o redirecionamento pode interromper o carregamento
   await expect(page).toHaveURL(/sem-acesso/);
   // E o banco também fecha (não é só o menu): com a sessão dela, a RLS não devolve nada.
   const asMadu = createClient(url, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, { auth: { persistSession: false } });

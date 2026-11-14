@@ -165,3 +165,26 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
   - **Marcos:** fecham sozinhos quando as demandas terminam e reabrem se uma voltar; marco atrasado avisa quem aplicou e o responsável pela comunicação (cron `extend-playbooks`).
   - **Na central:** a Visão geral do cliente mostra os playbooks aplicados.
   - **Conteúdo:** nenhum processo inventado. A Extend cadastra os dela. O onboarding continua na ficha do cliente.
+- **Etapa 04 — Criativos (14/11/2026):** `/criativos` (menu Produção), com Quadro, Lista, Meus pedidos e Biblioteca.
+  - **Permissões:** usa as que já existiam desde a fundação: `creatives.request.create` (pedir), `creatives.produce` (produzir), `creatives.review` (aprovar internamente) e `creatives.library.manage` (organizar a biblioteca).
+  - **Fluxo próprio** (tipo `criativo`): Solicitado → Em produção → Em revisão → Ajustes solicitados → Aprovação do cliente → Aprovado → Entregue → No ar.
+  - **Pedido** (`create_creative_request`):
+    - os campos obrigatórios bloqueiam o envio;
+    - o painel lateral mostra o resumo do onboarding e os últimos vencedores, fadigados e reprovados;
+    - o pedido vai para a pessoa da Edição (vídeo e reels) ou do Design (o resto) no cliente; se não houver ninguém marcado, vai para o líder do setor.
+  - **Versões** (`task_deliveries`, `delivery_assets`, `delivery_comments`; função `add_delivery`):
+    - genéricas, servem para qualquer demanda;
+    - o arquivo vai do navegador direto para o Storage (até 10 MB); vídeos maiores entram como link do Drive, com player embutido;
+    - a entrega muda a etapa para "Em revisão" e avisa quem pediu (`creative_ready`).
+  - **Revisão interna** (`review_creative`): pedir ajuste (com comentário obrigatório), aprovar e enviar ao cliente, aprovar direto, entregue e no ar.
+  - **Link do cliente** (`approval_links`):
+    - o código fica só no navegador de quem gerou, e o banco guarda o hash SHA-256;
+    - vale 7 dias e aceita uma decisão;
+    - gerar outro substitui o anterior;
+    - a página pública `/aprovar/[código]` registra nome, data, hora e IP;
+    - a decisão (`decide_approval`) só pode ser chamada pelo servidor;
+    - funciona também para demandas comuns com etapa de cliente;
+    - há botões "Copiar link" e "Enviar no WhatsApp" (wa.me).
+  - **Biblioteca** (`creative_library`): o aprovado entra com a copy. Situações: em teste, vencedor, fadigado, reprovado pela Meta e arquivado. A exportação do mês sai em CSV e PDF (pdf-lib).
+  - **Pendente para a etapa 05:** a performance (RF-BIB-03) e o botão "pedir novo criativo" a partir do anúncio (RF-CRI-08). O banco já tem `creative_requests.source_ad_ref` e `creative_library.ad_ref`, e nada falso aparece na tela.
+  - **Limitação conhecida:** a página do criativo, para quem não tem acesso, mostra "Página não encontrada" com código HTTP 200. A tela de carregamento começa a responder antes do 404, e nenhum dado do criativo é enviado.
