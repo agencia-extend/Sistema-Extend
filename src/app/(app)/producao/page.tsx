@@ -9,7 +9,8 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { addMonths, todayKey } from "@/domain/media";
-import { buildReport } from "@/domain/media/report";
+import { DRILL_LABEL, buildReport, drillTasks, parseDrill, type DrillKind } from "@/domain/media/report";
+import { DrillList } from "./drill-list";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Controle geral" };
@@ -32,7 +33,7 @@ function presets(today: string) {
 }
 
 /** Controle Geral: produção por pessoa no período, entregue × contratado por cliente, gargalos e atrasos. */
-export default async function ProducaoPage({ searchParams }: { searchParams: Promise<{ de?: string; ate?: string }> }) {
+export default async function ProducaoPage({ searchParams }: { searchParams: Promise<{ de?: string; ate?: string; ver?: string }> }) {
   await requirePermission("dashboards.read");
   const sp = await searchParams;
   const today = todayKey();
@@ -44,12 +45,19 @@ export default async function ProducaoPage({ searchParams }: { searchParams: Pro
   const data = await productionData(de, ate);
   const r = buildReport(data.finished, data.open, data.months, data.slots, { from: de, to: ate });
   const maxStep = Math.max(1, ...r.steps.map((s) => s.count));
-  const totals: [string, number, string][] = [
-    ["Finalizados no período", r.totals.finished, ""],
-    ["Em produção agora", r.totals.open, ""],
-    ["Atrasados", r.totals.late, r.totals.late ? "text-danger" : ""],
-    ["Alterações pedidas", r.totals.rework, r.totals.rework ? "text-warning" : ""],
+  const totals: [string, number, string, DrillKind][] = [
+    ["Finalizados no período", r.totals.finished, "", "finalizados"],
+    ["Em produção agora", r.totals.open, "", "abertos"],
+    ["Atrasados", r.totals.late, r.totals.late ? "text-danger" : "", "atrasados"],
+    ["Alterações pedidas", r.totals.rework, r.totals.rework ? "text-warning" : "", "alteracoes"],
   ];
+  // Cada número abre a lista que o compõe (parâmetro "ver").
+  const base = `/producao?de=${de}&ate=${ate}`;
+  const see = (v: string) => `${base}&ver=${encodeURIComponent(v)}#lista`;
+  const drill = parseDrill(sp.ver);
+  const drillRows = drill ? drillTasks(drill, data.finished, data.open, { from: de, to: ate }) : [];
+  const drillTitle = !drill ? "" : drill.kind === "etapa" ? `Em produção na etapa ${drill.step}` : DRILL_LABEL[drill.kind] + (drill.personId ? ` · ${r.people.find((p) => p.id === drill.personId)?.name ?? ""}` : "");
+  const cell = (n: number, v: string, cls?: string) => (n > 0 ? <Link href={see(v)} scroll={false} className={cn("underline-offset-2 hover:underline", cls)}>{n}</Link> : <span className={cls}>{n}</span>);
 
   return (
     <>
@@ -89,13 +97,15 @@ export default async function ProducaoPage({ searchParams }: { searchParams: Pro
         </div>
 
         <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border lg:grid-cols-4">
-          {totals.map(([l, v, c]) => (
+          {totals.map(([l, v, c, k]) => (
             <div key={l} className="grid gap-1 bg-card p-4">
               <dt className="text-sm text-muted-foreground">{l}</dt>
-              <dd className={cn("font-heading text-3xl font-semibold tabular", c)}>{v}</dd>
+              <dd className={cn("font-heading text-3xl font-semibold tabular", c)}>{v > 0 ? <Link href={see(k)} scroll={false} aria-label={`${l}: ${v}. Ver a lista`} className="underline-offset-4 hover:underline">{v}</Link> : v}</dd>
             </div>
           ))}
         </dl>
+
+        {drill && <DrillList title={drillTitle} tasks={drillRows} closeHref={base} />}
 
         <section aria-labelledby="pessoas" className="grid gap-3">
           <div>
@@ -123,13 +133,13 @@ export default async function ProducaoPage({ searchParams }: { searchParams: Pro
                   {r.people.map((p) => (
                     <tr key={p.id}>
                       <th scope="row" className="px-4 py-2.5 text-left font-medium">{p.name}</th>
-                      <td className="px-3 py-2.5 text-right text-base font-semibold">{p.finished}</td>
-                      <td className="px-3 py-2.5 text-right">{p.video}</td>
-                      <td className="px-3 py-2.5 text-right">{p.design}</td>
-                      <td className="px-3 py-2.5 text-right">{p.open}</td>
-                      <td className={cn("px-3 py-2.5 text-right", p.late > 0 && "font-medium text-danger")}>{p.late}</td>
-                      <td className={cn("px-3 py-2.5 text-right", p.rework > 0 && "text-warning")}>{p.rework}</td>
-                      <td className="px-3 py-2.5 text-right">{p.recorded}</td>
+                      <td className="px-3 py-2.5 text-right text-base font-semibold">{cell(p.finished, `pessoa:${p.id}:finalizados`)}</td>
+                      <td className="px-3 py-2.5 text-right">{cell(p.video, `pessoa:${p.id}:videos`)}</td>
+                      <td className="px-3 py-2.5 text-right">{cell(p.design, `pessoa:${p.id}:artes`)}</td>
+                      <td className="px-3 py-2.5 text-right">{cell(p.open, `pessoa:${p.id}:abertos`)}</td>
+                      <td className="px-3 py-2.5 text-right">{cell(p.late, `pessoa:${p.id}:atrasados`, p.late > 0 ? "font-medium text-danger" : undefined)}</td>
+                      <td className="px-3 py-2.5 text-right">{cell(p.rework, `pessoa:${p.id}:alteracoes`, p.rework > 0 ? "text-warning" : undefined)}</td>
+                      <td className="px-3 py-2.5 text-right">{cell(p.recorded, `pessoa:${p.id}:gravacoes`)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -185,7 +195,7 @@ export default async function ProducaoPage({ searchParams }: { searchParams: Pro
                   <li key={s.name} className="grid gap-1">
                     <span className="flex justify-between gap-3 text-sm">
                       <span className="truncate">{s.name}</span>
-                      <span className="font-semibold tabular">{s.count}</span>
+                      <Link href={see(`etapa:${s.name}`)} scroll={false} aria-label={`${s.count} em ${s.name}. Ver a lista`} className="font-semibold tabular underline-offset-2 hover:underline">{s.count}</Link>
                     </span>
                     <span className="h-1.5 rounded-full bg-muted" aria-hidden="true">
                       <span className="block h-full rounded-full" style={{ width: `${(s.count / maxStep) * 100}%`, background: s.color }} />

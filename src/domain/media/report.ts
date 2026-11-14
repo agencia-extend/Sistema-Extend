@@ -3,6 +3,7 @@ import { periodLabel } from "./index";
 
 export type ReportTask = {
   id: string;
+  title: string;
   type: string;
   status: string;
   dueAt: string | null;
@@ -109,4 +110,55 @@ export function peopleCsv(rows: PersonRow[]): string {
   const esc = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
   const lines = rows.map((p) => [p.name, p.finished, p.video, p.design, p.open, p.late, p.rework, p.recorded].map(esc).join(";"));
   return `﻿${head.map(esc).join(";")}\r\n${lines.join("\r\n")}`;
+}
+
+/** O que está por trás de cada número do Controle geral (parâmetro "ver" da página). */
+export type DrillKind = "finalizados" | "abertos" | "atrasados" | "alteracoes" | "videos" | "artes" | "gravacoes";
+export const DRILL_LABEL: Record<DrillKind, string> = {
+  finalizados: "Finalizados no período",
+  abertos: "Em produção agora",
+  atrasados: "Atrasados",
+  alteracoes: "Com alterações pedidas",
+  videos: "Vídeos finalizados",
+  artes: "Artes finalizadas",
+  gravacoes: "Gravações no período",
+};
+
+export type Drill = { kind: DrillKind; personId?: string } | { kind: "etapa"; step: string };
+
+/** "atrasados", "pessoa:<id>:videos" ou "etapa:<nome>". Inválido = null. */
+export function parseDrill(v: string | undefined): Drill | null {
+  if (!v) return null;
+  if (v.startsWith("etapa:")) return v.length > 6 ? { kind: "etapa", step: v.slice(6) } : null;
+  const parts = v.split(":");
+  const kind = (parts.length === 3 && parts[0] === "pessoa" ? parts[2] : parts[0]) as DrillKind;
+  if (!(kind in DRILL_LABEL)) return null;
+  if (parts.length === 3) return /^[0-9a-f-]{36}$/.test(parts[1]) ? { kind, personId: parts[1] } : null;
+  return parts.length === 1 ? { kind } : null;
+}
+
+/** Demandas que compõem o número escolhido, com as mesmas regras de buildReport. */
+export function drillTasks(d: Drill, finished: ReportTask[], open: ReportTask[], range: { from: string; to: string }, now: Date = new Date()): ReportTask[] {
+  const nowIso = now.toISOString();
+  const late = (t: ReportTask) => Boolean(t.dueAt && t.dueAt < nowIso);
+  if (d.kind === "etapa") return open.filter((t) => t.stepName === d.step);
+  const mine = (t: ReportTask) => !d.personId || t.editorId === d.personId;
+  switch (d.kind) {
+    case "finalizados":
+      return finished.filter(mine);
+    case "videos":
+      return finished.filter((t) => mine(t) && t.type === "video");
+    case "artes":
+      return finished.filter((t) => mine(t) && t.type !== "video");
+    case "abertos":
+      return open.filter(mine);
+    case "atrasados":
+      return open.filter((t) => mine(t) && late(t));
+    case "alteracoes":
+      return [...finished, ...open].filter((t) => mine(t) && t.reworkCount > 0);
+    case "gravacoes":
+      return [...finished, ...open].filter(
+        (t) => (!d.personId || t.recorderId === d.personId) && t.recorderId && t.recordingOn && t.recordingOn >= range.from && t.recordingOn <= range.to,
+      );
+  }
 }

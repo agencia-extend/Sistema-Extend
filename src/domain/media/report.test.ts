@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { buildReport, peopleCsv, type ReportTask } from "./report";
+import { buildReport, drillTasks, parseDrill, peopleCsv, type ReportTask } from "./report";
 
 const now = new Date("2026-11-20T15:00:00Z");
 const task = (over: Partial<ReportTask>): ReportTask => ({
   id: Math.random().toString(36),
+  title: "Conteúdo",
   type: "video",
   status: "concluido",
   dueAt: null,
@@ -60,5 +61,27 @@ describe("relatório de produção", () => {
   it("exporta CSV com ponto e vírgula", () => {
     const csv = peopleCsv(r.people);
     expect(csv.split("\r\n")[1]).toBe('"Juliana";"2";"2";"0";"2";"1";"2";"0"');
+  });
+});
+
+describe("números que abrem a lista", () => {
+  const range = { from: "2026-11-01", to: "2026-11-30" };
+  const finished = [task({ id: "f1", editorId: "juliana" }), task({ id: "f2", type: "design", editorId: "bia" })];
+  const open = [
+    task({ id: "o1", status: "em_andamento", editorId: "juliana", dueAt: "2026-11-19T21:00:00Z", stepName: "Edição", reworkCount: 1 }),
+    task({ id: "o2", status: "em_andamento", editorId: "bia", dueAt: "2026-11-25T21:00:00Z", stepName: "Roteiro" }),
+  ];
+  it("lê o parâmetro", () => {
+    expect(parseDrill("atrasados")).toEqual({ kind: "atrasados" });
+    expect(parseDrill("etapa:Edição")).toEqual({ kind: "etapa", step: "Edição" });
+    expect(parseDrill("pessoa:00000000-0000-4000-a000-000000000001:videos")).toEqual({ kind: "videos", personId: "00000000-0000-4000-a000-000000000001" });
+    expect(parseDrill("qualquer")).toBeNull();
+    expect(parseDrill("pessoa:x:videos")).toBeNull();
+  });
+  it("filtra com as mesmas regras do relatório", () => {
+    expect(drillTasks({ kind: "atrasados" }, finished, open, range, now).map((t) => t.id)).toEqual(["o1"]);
+    expect(drillTasks({ kind: "artes" }, finished, open, range, now).map((t) => t.id)).toEqual(["f2"]);
+    expect(drillTasks({ kind: "etapa", step: "Roteiro" }, finished, open, range, now).map((t) => t.id)).toEqual(["o2"]);
+    expect(drillTasks({ kind: "alteracoes" }, finished, open, range, now).map((t) => t.id)).toEqual(["o1"]);
   });
 });

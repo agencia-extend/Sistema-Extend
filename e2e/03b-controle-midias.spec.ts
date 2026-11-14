@@ -178,6 +178,14 @@ test("5. relatório: quantos vídeos cada editora finalizou no período (tela e 
   await expect(row.getByRole("cell").nth(5)).toHaveText("1"); // alterações
   await expect(page.getByRole("link", { name: new RegExp(`Teste Imobiliária ${stamp}`) })).toContainText("1 de 2");
 
+  // O número abre a lista das demandas que o compõem.
+  await row.getByRole("cell").nth(0).getByRole("link", { name: "1" }).click();
+  const list = page.getByRole("region", { name: new RegExp(`Finalizados no período · ${people.Juliana.name}`) });
+  await expect(list).toBeVisible();
+  await expect(list.getByRole("row")).toHaveCount(2); // cabeçalho + 1 demanda
+  await list.getByRole("link", { name: "Fechar" }).click();
+  await expect(list).toHaveCount(0);
+
   const csv = await page.request.get("/producao/exportar");
   expect(csv.ok()).toBeTruthy();
   expect(await csv.text()).toContain(`"${people.Juliana.name}";"1";"1";"0"`);

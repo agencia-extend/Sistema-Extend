@@ -179,7 +179,7 @@ export async function productionData(fromKey: string, toKey: string): Promise<{ 
   const today = todayKey();
   const types = ["video", "design", "conteudo"];
   const sel =
-    "id, type, status, due_at, client_id, clients(name), workflow_steps(name, color, position), task_content(editor_id, recorder_id, recording_on, rework_count, editor:profiles!task_content_editor_id_fkey(full_name), recorder:profiles!task_content_recorder_id_fkey(full_name))";
+    "id, title, type, status, due_at, client_id, clients(name), workflow_steps(name, color, position), task_content(editor_id, recorder_id, recording_on, rework_count, editor:profiles!task_content_editor_id_fkey(full_name), recorder:profiles!task_content_recorder_id_fkey(full_name))";
   const [finished, open, months] = await Promise.all([
     supabase.from("tasks").select(sel).is("deleted_at", null).eq("status", "concluido").gte("completed_at", from).lte("completed_at", to).in("type", types).limit(5000),
     supabase.from("tasks").select(sel).is("deleted_at", null).not("status", "in", "(concluido,cancelado)").in("type", types).limit(5000),
@@ -200,6 +200,7 @@ export async function productionData(fromKey: string, toKey: string): Promise<{ 
       const step = one(t.workflow_steps as { name: string; color: string; position: number } | null);
       return {
         id: t.id as string,
+        title: (t.title as string) ?? "",
         type: t.type as string,
         status: t.status as string,
         dueAt: (t.due_at as string) ?? null,

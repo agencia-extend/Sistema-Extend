@@ -87,7 +87,7 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
 
 ## Pendências da etapa 03B
 - Do `docs/09` ficaram para a próxima fatia: código/tipo do cliente, responsável pela comunicação, escopo em texto, lista de clientes em tabela, histórico de contratos, abas Materiais/Documentos/Gravações, briefing por seções A–E, checklist do Miro em dias úteis, cronograma com grid, prazos recorrentes de sexta e segunda, importação da planilha "Controle de Mídias".
-- No Controle geral os números ainda não abrem a lista que os compõe (só a linha do cliente leva ao Controle de Mídias dele).
+- ~~No Controle geral os números ainda não abrem a lista que os compõe~~: feito em 14/11. Totais, cada número da produção por pessoa e cada etapa abrem a lista das demandas (`?ver=`), com as mesmas regras do relatório (`drillTasks`).
 - Rodar `prompts/99-REVISAO-FUNCIONAL.md` completo para as etapas 03 e 03B.
 
 ## Correções de 13/11/2026
