@@ -102,7 +102,11 @@ export default async function ClientOverviewPage({ params }: { params: Promise<{
           canManage={canManage}
           client={{
             id: client.id,
+            code: client.code,
             name: client.name,
+            owner_id: client.owner_id,
+            owner_name: team.find((t) => t.id === client.owner_id)?.name ?? null,
+            scope_text: client.scope_text ?? "",
             legal_name: client.legal_name ?? "",
             document: client.document ?? "",
             segment: client.segment ?? "",
@@ -116,6 +120,7 @@ export default async function ClientOverviewPage({ params }: { params: Promise<{
             notes: client.notes ?? "",
           }}
           showValues={Boolean(user.permissions["clients.onboarding.read"])}
+          team={team.map((t) => ({ id: t.id, name: t.name }))}
         />
         {handoff && (
           <Section title="Fechamento comercial">

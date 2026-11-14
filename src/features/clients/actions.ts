@@ -9,6 +9,7 @@ import type { Json, TablesUpdate } from "@/lib/supabase/database.types";
 import { fail, ok } from "@/domain/shared/result";
 import {
   accountSchema,
+  contractSchema,
   answersSchema,
   checklistItemSchema,
   clientDataSchema,
@@ -47,28 +48,27 @@ export const createHandoff = defineAction({ schema: handoffSchema, permission: "
 
 export const updateClientData = defineAction({ schema: clientDataSchema }, async ({ id, ...d }) => {
   const supabase = await createClient();
-  must(
-    await supabase
-      .from("clients")
-      .update({
-        name: d.name,
-        legal_name: nil(d.legal_name),
-        document: nil(d.document),
-        segment: nil(d.segment),
-        contract_start: nil(d.contract_start),
-        contract_end: nil(d.contract_end),
-        renewal_date: nil(d.renewal_date),
-        media_budget_cents: d.media_budget_cents ?? null,
-        monthly_fee_cents: d.monthly_fee_cents ?? null,
-        payment_method: nil(d.payment_method),
-        communication_channel: nil(d.communication_channel),
-        notes: nil(d.notes),
-      })
-      .eq("id", id)
-      .select("id")
-      .single(),
-  );
+  const { error } = await supabase
+    .from("clients")
+    .update({
+      name: d.name,
+      code: d.code,
+      owner_id: d.owner_id,
+      legal_name: nil(d.legal_name),
+      document: nil(d.document),
+      segment: nil(d.segment),
+      media_budget_cents: d.media_budget_cents ?? null,
+      payment_method: nil(d.payment_method),
+      communication_channel: nil(d.communication_channel),
+      notes: nil(d.notes),
+    })
+    .eq("id", id)
+    .select("id")
+    .single();
+  if (error?.code === "23505") return fail("conflict", "Este nº já é de outro cliente. Escolha outro.", { code: ["Este nº já é de outro cliente."] });
+  if (error) throw error;
   refresh(id);
+  revalidatePath("/clientes");
   return ok(null, "Dados do cliente salvos.");
 });
 
@@ -406,4 +406,30 @@ export const undoImport = defineAction({ schema: idSchema, permission: "clients.
   revalidatePath("/clientes");
   revalidatePath("/clientes/importar");
   return ok(null, `Importação desfeita: ${n} cliente(s) removido(s).`);
+});
+
+// --- Contratos -----------------------------------------------------------------
+
+export const saveContract = defineAction({ schema: contractSchema }, async ({ id, clientId, startsOn, endsOn, scopeText, feeCents, notes }) => {
+  const supabase = await createClient();
+  const row = {
+    starts_on: startsOn,
+    ends_on: endsOn,
+    scope_text: scopeText || null,
+    notes: notes || null,
+    ...(feeCents !== undefined ? { monthly_fee_cents: feeCents } : {}),
+  };
+  if (id) must(await supabase.from("client_contracts").update(row).eq("id", id).select("id").single());
+  else must(await supabase.from("client_contracts").insert({ ...row, client_id: clientId }).select("id").single());
+  refresh(clientId);
+  return ok(null, id ? "Contrato atualizado." : "Contrato registrado. O cadastro do cliente já usa as datas novas.");
+});
+
+export const deleteContract = defineAction({ schema: z.object({ id: z.uuid(), clientId: z.uuid() }) }, async ({ id, clientId }) => {
+  const supabase = await createClient();
+  const { count } = await supabase.from("client_contracts").select("id", { count: "exact", head: true }).eq("client_id", clientId);
+  if ((count ?? 0) <= 1) return fail("business_rule", "Este é o único contrato do cliente. Edite as datas em vez de excluir.");
+  must(await supabase.from("client_contracts").delete().eq("id", id).select("id").single());
+  refresh(clientId);
+  return ok(null, "Contrato excluído.");
 });

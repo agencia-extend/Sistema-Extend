@@ -33,11 +33,15 @@ export const listCatalog = cache(async (): Promise<CatalogService[]> => {
 
 export type ClientCard = {
   id: string;
+  code: number;
   name: string;
+  ownerId: string | null;
+  ownerName: string | null;
+  scopeText: string | null;
   segment: string | null;
   status: ClientStatus;
   contract_end: string | null;
-  services: { name: string; qty: number; tabs: string[] }[];
+  services: { id: string; name: string; qty: number; tabs: string[] }[];
   members: { id: string; name: string; sector: string }[];
   monthTotal: number;
   monthDone: number;
@@ -57,10 +61,10 @@ export async function listClients(): Promise<ClientCard[]> {
     supabase
       .from("clients")
       .select(
-        "id, name, segment, status, contract_end, created_at, client_services(monthly_qty, starts_on, ends_on, service_catalog(name, tabs)), client_members(profile_id, profiles(full_name, email), sectors(name))",
+        "id, code, name, segment, status, contract_end, created_at, owner_id, scope_text, owner:profiles!clients_owner_id_fkey(full_name, email), client_services(monthly_qty, starts_on, ends_on, service_catalog(id, name, tabs)), client_members(profile_id, profiles(full_name, email), sectors(name))",
       )
       .is("deleted_at", null)
-      .order("name"),
+      .order("code"),
     supabase.from("tasks").select("client_id, status, due_at, slot_month").not("client_id", "is", null),
     supabase.from("onboarding_checklist_items").select("client_id, done_at"),
     supabase.from("client_months").select("client_id, starts_on").lte("starts_on", today).gte("ends_on", today),
@@ -91,16 +95,21 @@ export async function listClients(): Promise<ClientCard[]> {
   return clients.data.map((c) => {
     const t = taskAgg.get(c.id) ?? { total: 0, done: 0, overdue: 0 };
     const ob = obAgg.get(c.id) ?? { done: 0, total: 0 };
+    const owner = arr(c.owner)[0];
     return {
       id: c.id,
+      code: c.code,
       name: c.name,
+      ownerId: c.owner_id,
+      ownerName: owner ? owner.full_name || owner.email : null,
+      scopeText: c.scope_text,
       segment: c.segment,
       status: c.status as ClientStatus,
       contract_end: c.contract_end,
       created_at: c.created_at,
       services: arr(c.client_services)
         .filter((s) => s.starts_on <= today && (!s.ends_on || s.ends_on >= today))
-        .flatMap((s) => arr(s.service_catalog).map((sc) => ({ name: sc.name, qty: s.monthly_qty, tabs: sc.tabs }))),
+        .flatMap((s) => arr(s.service_catalog).map((sc) => ({ id: sc.id, name: sc.name, qty: s.monthly_qty, tabs: sc.tabs }))),
       members: arr(c.client_members).map((m) => {
         const p = arr(m.profiles)[0];
         return { id: m.profile_id, name: p?.full_name || p?.email || "", sector: arr(m.sectors)[0]?.name ?? "" };
@@ -261,4 +270,26 @@ export async function listMonthTasks(clientId: string, month: string) {
     .order("slot_index");
   if (error) throw error;
   return data.map((t) => ({ ...t, assignee: arr(t.profiles)[0]?.full_name ?? null, service: arr(t.service_catalog)[0]?.name ?? "Avulsa", step: arr(t.workflow_steps)[0] ?? null }));
+}
+
+export type ContractRow = {
+  id: string;
+  startsOn: string;
+  endsOn: string | null;
+  scopeText: string | null;
+  notes: string | null;
+  /** null = sem valor registrado ou a pessoa não vê valores. */
+  feeCents: number | null;
+};
+
+/** Contratos do cliente, do mais recente ao mais antigo. O valor vem por função (só para quem vê valores). */
+export async function listContracts(clientId: string): Promise<ContractRow[]> {
+  const supabase = await createClient();
+  const [rows, fees] = await Promise.all([
+    supabase.from("client_contracts").select("id, starts_on, ends_on, scope_text, notes").eq("client_id", clientId).order("starts_on", { ascending: false }),
+    supabase.rpc("client_contract_fees", { p_client: clientId }),
+  ]);
+  if (rows.error) throw rows.error;
+  const fee = new Map((fees.data ?? []).map((f) => [f.id, f.monthly_fee_cents]));
+  return rows.data.map((r) => ({ id: r.id, startsOn: r.starts_on, endsOn: r.ends_on, scopeText: r.scope_text, notes: r.notes, feeCents: fee.get(r.id) ?? null }));
 }

@@ -1,16 +1,26 @@
 import { describe, expect, it } from "vitest";
-import { clientTabs, deliveredPercent, journeyStage } from "./index";
+import { clientCode, clientTabs, contractWindow, deliveredPercent, journeyStage } from "./index";
 import { buildRows, guessMapping, parseDateBR, parseServiceCell } from "./import";
 import { centsToInput, formatBRL, parseBRL } from "@/domain/shared/money";
 
 describe("abas do cliente", () => {
-  it("em onboarding mostra só visão geral, ficha, reuniões e arquivos", () => {
+  it("em onboarding mostra só visão geral, ficha, reuniões, contratos e arquivos", () => {
     expect(clientTabs("onboarding", ["videos"], { "tasks.read": "all" }).map((t) => t.label)).toEqual([
       "Visão geral",
       "Ficha",
       "Reuniões",
+      "Contratos",
       "Arquivos",
     ]);
+  });
+  it("nº com três dígitos e situação do fim do contrato", () => {
+    expect(clientCode(7)).toBe("007");
+    expect(clientCode(1234)).toBe("1234");
+    expect(contractWindow(null, "2026-11-14")).toBe("sem");
+    expect(contractWindow("2026-11-13", "2026-11-14")).toBe("vencido");
+    expect(contractWindow("2026-11-20", "2026-11-14")).toBe("termina_logo");
+    expect(contractWindow("2026-12-10", "2026-11-14")).toBe("termina");
+    expect(contractWindow("2027-03-01", "2026-11-14")).toBe("ok");
   });
   it("ativo com vídeos e permissão mostra demanda do mês", () => {
     const keys = clientTabs("ativo", ["videos"], { "tasks.read": "own" }).map((t) => t.key);

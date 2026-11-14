@@ -33,11 +33,11 @@ const ALWAYS: ClientTab[] = [
  * Abas de módulos que ainda não existem não entram (regra nº 1).
  */
 export function clientTabs(status: ClientStatus, serviceTabs: string[], perms: PermissionMap): ClientTab[] {
-  if (status === "onboarding") return [...ALWAYS, { key: "arquivos", label: "Arquivos" }];
+  if (status === "onboarding") return [...ALWAYS, { key: "contratos", label: "Contratos" }, { key: "arquivos", label: "Arquivos" }];
   const tabs = [...ALWAYS];
   const hasProduction = serviceTabs.some((t) => ["videos", "design", "conteudo", "gerenciamento", "gravacao", "site"].includes(t));
   if (hasProduction && perms["tasks.read"]) tabs.push({ key: "midias", label: "Controle de Mídias" }, { key: "quadros", label: "Quadros" });
-  tabs.push({ key: "ideias", label: "Ideias e referências" }, { key: "arquivos", label: "Arquivos" }, { key: "historico", label: "Histórico" });
+  tabs.push({ key: "contratos", label: "Contratos" }, { key: "ideias", label: "Ideias e referências" }, { key: "arquivos", label: "Arquivos" }, { key: "historico", label: "Histórico" });
   return tabs;
 }
 
@@ -85,3 +85,20 @@ export const UNIT_LABEL: Record<string, string> = {
   gravacoes: "gravações/mês",
   nenhuma: "",
 };
+
+/** Nº do cliente como na planilha (001, 002…). */
+export function clientCode(code: number): string {
+  return String(code).padStart(3, "0");
+}
+
+export type ContractWindow = "sem" | "vencido" | "termina_logo" | "termina" | "ok";
+
+/** Situação do fim do contrato em relação a hoje ("AAAA-MM-DD"). */
+export function contractWindow(endsOn: string | null, today: string): ContractWindow {
+  if (!endsOn) return "sem";
+  if (endsOn < today) return "vencido";
+  const days = (Date.parse(`${endsOn}T00:00:00Z`) - Date.parse(`${today}T00:00:00Z`)) / 86_400_000;
+  if (days <= 7) return "termina_logo";
+  if (days <= 30) return "termina";
+  return "ok";
+}

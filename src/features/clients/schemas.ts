@@ -28,14 +28,12 @@ export const handoffSchema = z.object({
 export const clientDataSchema = z.object({
   id: uuid,
   name: z.string().trim().min(2, "Informe o nome do cliente.").max(120),
+  code: z.number({ message: "Informe o nº do cliente." }).int("Use um número inteiro.").min(1, "Use um número de 1 a 99999.").max(99999, "Use um número de 1 a 99999."),
+  owner_id: uuid.nullable(),
   legal_name: optText(160),
   document: optText(20),
   segment: optText(80),
-  contract_start: optDate,
-  contract_end: optDate,
-  renewal_date: optDate,
   media_budget_cents: cents,
-  monthly_fee_cents: cents,
   payment_method: optText(80),
   communication_channel: optText(300),
   notes: optText(4000),
@@ -177,3 +175,18 @@ export const formSectionsSchema = z.object({
 
 export type FormSection = z.infer<typeof formSectionsSchema>["sections"][number];
 export type FormQuestion = z.infer<typeof questionSchema>;
+
+const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida.");
+
+export const contractSchema = z
+  .object({
+    id: uuid.optional(),
+    clientId: uuid,
+    startsOn: day,
+    endsOn: day.nullable(),
+    scopeText: z.string().trim().max(500, "Use até 500 caracteres.").default(""),
+    /** undefined = não mexe no valor (quem não vê valores não envia). */
+    feeCents: z.number().int().min(0).max(1e12).nullable().optional(),
+    notes: z.string().trim().max(2000, "Use até 2000 caracteres.").default(""),
+  })
+  .refine((v) => !v.endsOn || v.endsOn >= v.startsOn, { path: ["endsOn"], message: "O fim precisa ser depois do início." });

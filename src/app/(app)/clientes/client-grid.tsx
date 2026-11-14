@@ -1,32 +1,34 @@
 "use client";
 
-import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
-import { AlertTriangle, Search, Users } from "lucide-react";
+import { Search, Users } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { EmptyState, NoResults } from "@/components/app/states";
 import { Button } from "@/components/ui/button";
-import { deliveredPercent, journeyStage, STATUS_LABEL, type ClientStatus } from "@/domain/clients";
+import { STATUS_LABEL, contractWindow, type ClientStatus } from "@/domain/clients";
 import type { ClientCard } from "@/features/clients/queries";
-import { Avatars, ClientStatusBadge, ProgressBar } from "@/features/clients/components/bits";
-import { cn } from "@/lib/utils";
+import { todayKey } from "@/domain/media";
 import { daysAgoMs } from "@/domain/shared/dates";
+import { cn } from "@/lib/utils";
+import { ClientTable } from "./client-table";
 
 const ALL = "__todos";
 const STATUSES: (ClientStatus | "todos")[] = ["todos", "ativo", "onboarding", "pausado", "encerrado"];
 const PERIODS: Record<string, string> = { "7": "Entraram nos últimos 7 dias", "30": "Últimos 30 dias", "90": "Últimos 90 dias" };
+const CONTRACT: Record<string, string> = { "30": "Contrato termina em até 30 dias", vencido: "Contrato vencido" };
 
+/** Lista de clientes (planilha "Controle de Clientes"): abas de status, busca e filtros na URL. */
 export function ClientGrid({
   clients,
   services,
-  people,
+  owners,
   canCreate,
 }: {
   clients: ClientCard[];
   services: { id: string; name: string }[];
-  people: { id: string; name: string }[];
+  owners: { id: string; name: string }[];
   canCreate: boolean;
 }) {
   const router = useRouter();
@@ -35,8 +37,10 @@ export function ClientGrid({
   const status = sp.get("status") ?? "todos";
   const q = sp.get("q") ?? "";
   const service = sp.get("servico") ?? "";
-  const person = sp.get("responsavel") ?? "";
+  const owner = sp.get("responsavel") ?? "";
   const period = sp.get("periodo") ?? "";
+  const contract = sp.get("contrato") ?? "";
+  const today = todayKey(new Date());
 
   const set = (patch: Record<string, string>) => {
     const next = new URLSearchParams(sp.toString());
@@ -49,16 +53,21 @@ export function ClientGrid({
 
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
+    // Só número (ou #número): busca pelo Nº do cliente.
+    const codeTerm = /^#?\d+$/.test(term) ? Number(term.replace("#", "")) : null;
     const since = period ? daysAgoMs(Number(period)) : 0;
-    return clients.filter(
-      (c) =>
+    return clients.filter((c) => {
+      const w = contractWindow(c.contract_end, today);
+      return (
         (status === "todos" || c.status === status) &&
-        (!term || c.name.toLowerCase().includes(term) || c.segment?.toLowerCase().includes(term)) &&
-        (!service || c.services.some((s) => s.name === service)) &&
-        (!person || c.members.some((m) => m.id === person)) &&
-        (!since || new Date(c.created_at).getTime() >= since),
-    );
-  }, [clients, status, q, service, person, period]);
+        (!term || (codeTerm !== null ? c.code === codeTerm : c.name.toLowerCase().includes(term) || c.segment?.toLowerCase().includes(term))) &&
+        (!service || c.services.some((s) => s.id === service)) &&
+        (!owner || (owner === "sem" ? !c.ownerId : c.ownerId === owner)) &&
+        (!since || new Date(c.created_at).getTime() >= since) &&
+        (!contract || (contract === "vencido" ? w === "vencido" : w === "termina" || w === "termina_logo"))
+      );
+    });
+  }, [clients, status, q, service, owner, period, contract, today]);
 
   const count = (s: string) => (s === "todos" ? clients.length : clients.filter((c) => c.status === s).length);
 
@@ -96,109 +105,34 @@ export function ClientGrid({
         ))}
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        <div className="relative w-full sm:w-64">
+      <div className="grid gap-2 sm:flex sm:flex-wrap">
+        <div className="relative sm:w-64">
           <Search className="pointer-events-none absolute top-1/2 left-3 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden="true" />
-          <Input
-            defaultValue={q}
-            onChange={(e) => set({ q: e.target.value })}
-            placeholder="Buscar cliente ou nicho…"
-            aria-label="Buscar cliente"
-            className="pl-9"
-            autoComplete="off"
-          />
+          <Input defaultValue={q} onChange={(e) => set({ q: e.target.value })} placeholder="Buscar por nome, nicho ou nº…" aria-label="Buscar cliente" className="pl-9" autoComplete="off" />
         </div>
-        <Select value={service || ALL} onValueChange={(v) => set({ servico: v })}>
-          <SelectTrigger className="w-full sm:w-52" aria-label="Filtrar por serviço">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Todos os serviços</SelectItem>
-            {services.map((s) => (
-              <SelectItem key={s.id} value={s.id}>
-                {s.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={person || ALL} onValueChange={(v) => set({ responsavel: v })}>
-          <SelectTrigger className="w-full sm:w-52" aria-label="Filtrar por responsável">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Todos os responsáveis</SelectItem>
-            {people.map((p) => (
-              <SelectItem key={p.id} value={p.id}>
-                {p.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <Select value={period || ALL} onValueChange={(v) => set({ periodo: v })}>
-          <SelectTrigger className="w-full sm:w-56" aria-label="Período de entrada">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value={ALL}>Qualquer data de entrada</SelectItem>
-            {Object.entries(PERIODS).map(([k, v]) => (
-              <SelectItem key={k} value={k}>
-                {v}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Filter label="Filtrar por serviço" value={service} onChange={(v) => set({ servico: v })} all="Todos os serviços" options={services.map((s) => [s.id, s.name])} />
+        <Filter label="Filtrar por responsável" value={owner} onChange={(v) => set({ responsavel: v })} all="Todos os responsáveis" options={[...owners.map((p) => [p.id, p.name] as [string, string]), ["sem", "Sem responsável"]]} />
+        <Filter label="Filtrar por contrato" value={contract} onChange={(v) => set({ contrato: v })} all="Qualquer contrato" options={Object.entries(CONTRACT)} />
+        <Filter label="Período de entrada" value={period} onChange={(v) => set({ periodo: v })} all="Qualquer data de entrada" options={Object.entries(PERIODS)} />
       </div>
 
       {filtered.length === 0 ? (
-        <NoResults
-          query={q}
-          onClear={
-            <Button variant="outline" onClick={() => router.replace(pathname)}>
-              Limpar filtros
-            </Button>
-          }
-        />
+        <NoResults query={q} onClear={<Button variant="outline" onClick={() => router.replace(pathname)}>Limpar filtros</Button>} />
       ) : (
-        <ul className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3 min-[1800px]:grid-cols-4">
-          {filtered.map((c) => (
-            <li key={c.id}>
-              <ClientCardView c={c} />
-            </li>
-          ))}
-        </ul>
+        <ClientTable clients={filtered} today={today} />
       )}
     </div>
   );
 }
 
-function ClientCardView({ c }: { c: ClientCard }) {
-  const onboarding = c.status === "onboarding";
-  const pct = onboarding ? deliveredPercent(c.onboardingDone, c.onboardingTotal) : deliveredPercent(c.monthDone, c.monthTotal);
+function Filter({ label, value, onChange, all, options }: { label: string; value: string; onChange: (v: string) => void; all: string; options: [string, string][] }) {
   return (
-    <Link href={`/clientes/${c.id}`} className="grid h-full gap-3 rounded-xl border bg-card p-4 transition-colors hover:border-brand/50">
-      <div className="flex items-start justify-between gap-2">
-        <div className="grid min-w-0 gap-0.5">
-          <h2 className="truncate text-base font-semibold">{c.name}</h2>
-          <p className="truncate text-xs text-muted-foreground">{[c.segment, journeyStage(c.status, c.onboardingDone, c.onboardingTotal)].filter(Boolean).join(" · ")}</p>
-        </div>
-        <ClientStatusBadge status={c.status} />
-      </div>
-      <p className="line-clamp-2 min-h-8 text-xs text-muted-foreground">
-        {c.services.map((s) => (s.qty ? `${s.name} (${s.qty})` : s.name)).join(" · ") || "Sem serviços vigentes"}
-      </p>
-      <ProgressBar
-        value={pct}
-        label={onboarding ? "Checklist de onboarding" : c.monthTotal ? `Entregue no mês (${c.monthDone}/${c.monthTotal})` : "Entregue no mês"}
-        tone={onboarding ? "warning" : "info"}
-      />
-      <div className="flex items-center justify-between gap-2">
-        <Avatars people={c.members} />
-        {c.overdue > 0 && (
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-danger">
-            <AlertTriangle className="size-3.5" aria-hidden="true" /> {c.overdue} atrasada{c.overdue > 1 ? "s" : ""}
-          </span>
-        )}
-      </div>
-    </Link>
+    <Select value={value || ALL} onValueChange={onChange}>
+      <SelectTrigger className="w-full sm:w-56" aria-label={label}><SelectValue /></SelectTrigger>
+      <SelectContent>
+        <SelectItem value={ALL}>{all}</SelectItem>
+        {options.map(([k, v]) => <SelectItem key={k} value={k}>{v}</SelectItem>)}
+      </SelectContent>
+    </Select>
   );
 }

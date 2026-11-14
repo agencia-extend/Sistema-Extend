@@ -12,7 +12,7 @@ export const metadata: Metadata = { title: "Clientes" };
 export default async function ClientesPage() {
   const user = await requirePermission("clients.read");
   const [clients, catalog] = await Promise.all([listClients(), listCatalog()]);
-  const people = [...new Map(clients.flatMap((c) => c.members).map((m) => [m.id, { id: m.id, name: m.name }])).values()].sort((a, b) =>
+  const owners = [...new Map(clients.filter((c) => c.ownerId).map((c) => [c.ownerId!, { id: c.ownerId!, name: c.ownerName ?? "" }])).values()].sort((a, b) =>
     a.name.localeCompare(b.name),
   );
 
@@ -20,7 +20,7 @@ export default async function ClientesPage() {
     <>
       <PageHeader
         title="Clientes"
-        description="Cada cliente com o que contratou, quem cuida e quanto do mês já foi entregue."
+        description="Cada cliente com o que contratou, quem atende, quando o contrato termina e quanto do mês já foi entregue."
         actions={
           <>
             {user.permissions["clients.import"] && (
@@ -39,8 +39,8 @@ export default async function ClientesPage() {
       <PageBody>
         <ClientGrid
           clients={clients}
-          services={catalog.filter((s) => s.is_active).map((s) => ({ id: s.name, name: s.name }))}
-          people={people}
+          services={catalog.filter((s) => s.is_active).map((s) => ({ id: s.id, name: s.name }))}
+          owners={owners}
           canCreate={Boolean(user.permissions["commercial.handoff.create"])}
         />
       </PageBody>

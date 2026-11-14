@@ -134,3 +134,14 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
   - **Avisos:** o responsável é avisado do passo, também quando o passo muda de pessoa. Passo atrasado avisa o responsável; marco atrasado avisa a coordenação e a equipe do cliente (cron `extend-onboarding`, dias úteis às 9h30).
   - **Ficha:** ganhou a seção "Obrigações do cliente" (versão 2).
   - **Playbooks genéricos:** continuam como recurso à parte, para outros processos.
+- **Central do cliente, parte A (14/11/2026):**
+  - **Código do cliente:** todo cliente tem Nº (automático e editável, sem repetir). A busca por número procura pelo Nº.
+  - **Responsável pela comunicação:** `clients.owner_id`. A pessoa é avisada ao ser escolhida e recebe os avisos de contrato.
+  - **Lista de clientes:** virou tabela, com Nº, serviços, responsável, fim do contrato e andamento. Filtros por serviço, responsável, contrato (termina em até 30 dias ou vencido) e data de entrada. No celular, cada linha vira um cartão.
+  - **Aba Contratos** (`client_contracts`):
+    - histórico com renovação (sugere o dia seguinte e a mesma duração) e sem sobreposição;
+    - o contrato mais recente alimenta o fim, a renovação, a mensalidade e o escopo do cadastro;
+    - o início do relacionamento (`contract_start`) não muda, porque ancora o ciclo do mês;
+    - o valor só é lido por quem tem `clients.onboarding.read` (função `client_contract_fees`; a coluna não é liberada na tabela).
+  - **Avisos de fim de contrato:** 30 e 7 dias antes e no dia seguinte ao vencimento sem renovação (cron `extend-contratos`).
+  - **Cartão "Dados do cliente":** deixou de editar datas e valor do contrato, que agora ficam só em Contratos.

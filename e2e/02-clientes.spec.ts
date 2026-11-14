@@ -46,7 +46,7 @@ test.beforeAll(async () => {
   await makeUser("OutroEditor", "editor_video", "edicao");
 });
 
-test("1-2. comercial registra o fechamento → cliente em onboarding só com 4 abas", async ({ page }) => {
+test("1-2. comercial registra o fechamento → cliente em onboarding só com 5 abas", async ({ page }) => {
   await login(page, adminEmail, adminPassword);
   await page.goto("/clientes/novo");
   await page.getByLabel(/^Nome do cliente/).fill(clientName);
@@ -62,7 +62,7 @@ test("1-2. comercial registra o fechamento → cliente em onboarding só com 4 a
   await page.waitForURL(/\/clientes\/[0-9a-f-]{36}$/);
   clientId = page.url().split("/").pop()!;
   const tabs = page.getByRole("navigation", { name: "Seções do cliente" }).getByRole("link");
-  await expect(tabs).toHaveText(["Visão geral", "Ficha", "Reuniões", "Arquivos"]);
+  await expect(tabs).toHaveText(["Visão geral", "Ficha", "Reuniões", "Contratos", "Arquivos"]);
   await expect(page.getByText("Primeiro vídeo em 7 dias")).toBeVisible();
 });
 
@@ -103,7 +103,7 @@ test("4-5. preencher ficha, checklist e equipe → ativo com 4 vídeos da Prisci
 test("6. visibilidade: Priscila vê só o resumo; editor não marcado não vê o cliente", async ({ page }) => {
   await login(page, people.Priscila.email, pw);
   await page.goto("/clientes");
-  await expect(page.getByRole("heading", { name: clientName })).toBeVisible();
+  await expect(page.getByRole("link", { name: clientName })).toBeVisible();
   await page.goto(`/clientes/${clientId}/ficha`);
   await expect(page.getByText("Este é o resumo operacional da ficha")).toBeVisible();
 

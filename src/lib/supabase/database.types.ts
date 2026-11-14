@@ -193,6 +193,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"client_contracts": {
+                  Row: {
+                    "client_id": string,"created_at": string,"created_by": string | null,"ends_on": string | null,"id": string,"monthly_fee_cents": number | null,"notes": string | null,"scope_text": string | null,"starts_on": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"created_by"?: string | null,"ends_on"?: string | null,"id"?: string,"monthly_fee_cents"?: number | null,"notes"?: string | null,"scope_text"?: string | null,"starts_on": string
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"created_by"?: string | null,"ends_on"?: string | null,"id"?: string,"monthly_fee_cents"?: number | null,"notes"?: string | null,"scope_text"?: string | null,"starts_on"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_contracts_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_contracts_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"client_files": {
                   Row: {
                     "category": string,"client_id": string,"created_at": string,"id": string,"meeting_id": string | null,"mime_type": string | null,"name": string,"size_bytes": number | null,"storage_path": string,"uploaded_by": string | null
@@ -505,14 +531,14 @@ isOneToOne: false
                   ]
                 },"clients": {
                   Row: {
-                    "communication_channel": string | null,"contract_end": string | null,"contract_start": string | null,"created_at": string,"created_by": string | null,"deleted_at": string | null,"document": string | null,"id": string,"import_id": string | null,"legal_name": string | null,"media_budget_cents": number | null,"monthly_fee_cents": number | null,"name": string,"notes": string | null,"onboarding_completed_at": string | null,"onboarding_legacy": boolean,"organization_id": string,"payment_method": string | null,"renewal_date": string | null,"segment": string | null,"status": string,"updated_at": string
+                    "code": number,"communication_channel": string | null,"contract_end": string | null,"contract_start": string | null,"created_at": string,"created_by": string | null,"deleted_at": string | null,"document": string | null,"id": string,"import_id": string | null,"legal_name": string | null,"media_budget_cents": number | null,"monthly_fee_cents": number | null,"name": string,"notes": string | null,"onboarding_completed_at": string | null,"onboarding_legacy": boolean,"organization_id": string,"owner_id": string | null,"payment_method": string | null,"renewal_date": string | null,"scope_text": string | null,"segment": string | null,"status": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "communication_channel"?: string | null,"contract_end"?: string | null,"contract_start"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"document"?: string | null,"id"?: string,"import_id"?: string | null,"legal_name"?: string | null,"media_budget_cents"?: number | null,"monthly_fee_cents"?: number | null,"name": string,"notes"?: string | null,"onboarding_completed_at"?: string | null,"onboarding_legacy"?: boolean,"organization_id": string,"payment_method"?: string | null,"renewal_date"?: string | null,"segment"?: string | null,"status"?: string,"updated_at"?: string
+                    "code": number,"communication_channel"?: string | null,"contract_end"?: string | null,"contract_start"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"document"?: string | null,"id"?: string,"import_id"?: string | null,"legal_name"?: string | null,"media_budget_cents"?: number | null,"monthly_fee_cents"?: number | null,"name": string,"notes"?: string | null,"onboarding_completed_at"?: string | null,"onboarding_legacy"?: boolean,"organization_id": string,"owner_id"?: string | null,"payment_method"?: string | null,"renewal_date"?: string | null,"scope_text"?: string | null,"segment"?: string | null,"status"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "communication_channel"?: string | null,"contract_end"?: string | null,"contract_start"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"document"?: string | null,"id"?: string,"import_id"?: string | null,"legal_name"?: string | null,"media_budget_cents"?: number | null,"monthly_fee_cents"?: number | null,"name"?: string,"notes"?: string | null,"onboarding_completed_at"?: string | null,"onboarding_legacy"?: boolean,"organization_id"?: string,"payment_method"?: string | null,"renewal_date"?: string | null,"segment"?: string | null,"status"?: string,"updated_at"?: string
+                    "code"?: number,"communication_channel"?: string | null,"contract_end"?: string | null,"contract_start"?: string | null,"created_at"?: string,"created_by"?: string | null,"deleted_at"?: string | null,"document"?: string | null,"id"?: string,"import_id"?: string | null,"legal_name"?: string | null,"media_budget_cents"?: number | null,"monthly_fee_cents"?: number | null,"name"?: string,"notes"?: string | null,"onboarding_completed_at"?: string | null,"onboarding_legacy"?: boolean,"organization_id"?: string,"owner_id"?: string | null,"payment_method"?: string | null,"renewal_date"?: string | null,"scope_text"?: string | null,"segment"?: string | null,"status"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -532,6 +558,12 @@ isOneToOne: false
       columns: ["organization_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "clients_owner_id_fkey"
+      columns: ["owner_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
                   ]
@@ -1685,6 +1717,11 @@ isOneToOne: false
 "claim_pending_pushes":
 { Args: { "p_limit"?: number }; Returns: {
               "body": string,"href": string,"id": string,"kind": string,"title": string,"user_id": string
+            }[]
+                           },
+"client_contract_fees":
+{ Args: { "p_client": string }; Returns: {
+              "id": string,"monthly_fee_cents": number
             }[]
                            },
 "client_operational_summary":
