@@ -33,12 +33,14 @@ export function UploadButton({
   clientId,
   category,
   meetingId,
+  folder = "geral",
   label = "Enviar arquivo",
   variant = "ghost",
 }: {
   clientId: string;
   category: "geral" | "fechamento" | "reuniao" | "identidade" | "contrato" | "referencia";
   meetingId?: string;
+  folder?: "geral" | "midias" | "trafego";
   label?: string;
   variant?: "ghost" | "outline" | "default";
 }) {
@@ -60,6 +62,7 @@ export function UploadButton({
               const fd = new FormData();
               fd.set("clientId", clientId);
               fd.set("category", category);
+              fd.set("folder", folder);
               if (meetingId) fd.set("meetingId", meetingId);
               fd.set("file", f);
               handleResult(await uploadClientFile(fd));

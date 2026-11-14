@@ -238,7 +238,7 @@ export async function listFiles(clientId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("client_files")
-    .select("id, name, storage_path, mime_type, size_bytes, category, created_at, uploaded_by, profiles!client_files_uploaded_by_fkey(full_name)")
+    .select("id, name, storage_path, mime_type, size_bytes, category, folder, created_at, uploaded_by, profiles!client_files_uploaded_by_fkey(full_name)")
     .eq("client_id", clientId)
     .order("created_at", { ascending: false });
   if (error) throw error;
@@ -292,4 +292,40 @@ export async function listContracts(clientId: string): Promise<ContractRow[]> {
   if (rows.error) throw rows.error;
   const fee = new Map((fees.data ?? []).map((f) => [f.id, f.monthly_fee_cents]));
   return rows.data.map((r) => ({ id: r.id, startsOn: r.starts_on, endsOn: r.ends_on, scopeText: r.scope_text, notes: r.notes, feeCents: fee.get(r.id) ?? null }));
+}
+
+export type MaterialRow = {
+  id: string;
+  category: string;
+  title: string;
+  url: string | null;
+  notes: string | null;
+  file: { id: string; name: string; path: string } | null;
+  createdBy: string | null;
+  author: string;
+  createdAt: string;
+};
+
+export async function listMaterials(clientId: string): Promise<MaterialRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("client_materials")
+    .select("id, category, title, url, notes, created_by, created_at, client_files(id, name, storage_path), profiles!client_materials_created_by_fkey(full_name)")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false });
+  if (error) throw error;
+  return data.map((m) => {
+    const f = arr(m.client_files)[0];
+    return {
+      id: m.id,
+      category: m.category,
+      title: m.title,
+      url: m.url,
+      notes: m.notes,
+      file: f ? { id: f.id, name: f.name, path: f.storage_path } : null,
+      createdBy: m.created_by,
+      author: arr(m.profiles)[0]?.full_name ?? "",
+      createdAt: m.created_at,
+    };
+  });
 }

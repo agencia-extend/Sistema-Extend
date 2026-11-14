@@ -4,13 +4,14 @@ import { buildRows, guessMapping, parseDateBR, parseServiceCell } from "./import
 import { centsToInput, formatBRL, parseBRL } from "@/domain/shared/money";
 
 describe("abas do cliente", () => {
-  it("em onboarding mostra só visão geral, ficha, reuniões, contratos e arquivos", () => {
+  it("em onboarding mostra só visão geral, ficha, materiais, reuniões, contratos e documentos", () => {
     expect(clientTabs("onboarding", ["videos"], { "tasks.read": "all" }).map((t) => t.label)).toEqual([
       "Visão geral",
       "Ficha",
+      "Materiais",
       "Reuniões",
       "Contratos",
-      "Arquivos",
+      "Documentos",
     ]);
   });
   it("nº com três dígitos e situação do fim do contrato", () => {
@@ -26,6 +27,14 @@ describe("abas do cliente", () => {
     const keys = clientTabs("ativo", ["videos"], { "tasks.read": "own" }).map((t) => t.key);
     expect(keys).toContain("midias");
     expect(keys).toContain("historico");
+  });
+  it("cronograma só com gerenciamento; gravações com vídeos", () => {
+    const g = clientTabs("ativo", ["gerenciamento"], { "tasks.read": "all" }).map((t) => t.key);
+    expect(g).toContain("cronograma");
+    expect(g).not.toContain("gravacoes");
+    const v = clientTabs("ativo", ["videos"], { "tasks.read": "all" }).map((t) => t.key);
+    expect(v).toContain("gravacoes");
+    expect(v).not.toContain("cronograma");
   });
   it("só tráfego não mostra demanda do mês", () => {
     expect(clientTabs("ativo", ["anuncios"], { "tasks.read": "all" }).map((t) => t.key)).not.toContain("midias");

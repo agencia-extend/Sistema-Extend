@@ -7,6 +7,7 @@ import { defineAction, must } from "@/lib/actions";
 import { createClient } from "@/lib/supabase/server";
 import type { Json, TablesUpdate } from "@/lib/supabase/database.types";
 import { fail, ok } from "@/domain/shared/result";
+import { MATERIAL_CATEGORIES } from "@/domain/clients";
 import {
   accountSchema,
   contractSchema,
@@ -318,6 +319,7 @@ export async function uploadClientFile(form: FormData) {
   return uploadAction({
     clientId: form.get("clientId"),
     category: form.get("category") ?? "geral",
+    folder: form.get("folder") || "geral",
     meetingId: form.get("meetingId") || undefined,
     file: form.get("file"),
   });
@@ -328,11 +330,12 @@ const uploadAction = defineAction(
     schema: z.object({
       clientId: z.uuid(),
       category: z.enum(["geral", "fechamento", "reuniao", "identidade", "contrato", "referencia"]),
+      folder: z.enum(["geral", "midias", "trafego"]),
       meetingId: z.uuid().optional(),
       file: z.instanceof(File, { message: "Escolha um arquivo." }),
     }),
   },
-  async ({ clientId, category, meetingId, file }, { user }) => {
+  async ({ clientId, category, folder, meetingId, file }, { user }) => {
     if (file.size === 0) return fail("validation", "O arquivo está vazio.");
     if (file.size > MAX_FILE) return fail("validation", "Arquivo maior que 10 MB. Vídeos e arquivos grandes devem ficar no Drive do cliente.");
     if (/^video\//.test(file.type)) return fail("validation", "Vídeos não são guardados no sistema. Envie pelo Drive e cole o link.");
@@ -347,6 +350,7 @@ const uploadAction = defineAction(
       mime_type: file.type || null,
       size_bytes: file.size,
       category,
+      folder,
       meeting_id: meetingId ?? null,
       uploaded_by: user.id,
     });
@@ -433,3 +437,87 @@ export const deleteContract = defineAction({ schema: z.object({ id: z.uuid(), cl
   refresh(clientId);
   return ok(null, "Contrato excluído.");
 });
+
+// --- Materiais -----------------------------------------------------------------
+
+const materialSchema = z
+  .object({
+    clientId: z.uuid(),
+    category: z.enum(MATERIAL_CATEGORIES, { message: "Escolha a categoria." }),
+    title: z.string().trim().min(2, "Dê um nome ao material.").max(160, "Use até 160 caracteres."),
+    url: z.string().trim().max(600).refine((v) => !v || /^https:\/\//.test(v), "O link precisa começar com https://").default(""),
+    notes: z.string().trim().max(1000, "Use até 1000 caracteres.").default(""),
+    file: z.instanceof(File).optional(),
+  })
+  .refine((v) => v.url || (v.file && v.file.size > 0), { path: ["url"], message: "Envie um arquivo ou cole o link do Drive." });
+
+/** Material com arquivo (até 10 MB, guardado em Documentos → Mídias) ou com link do Drive. */
+export async function addMaterial(form: FormData) {
+  const file = form.get("file");
+  return addMaterialAction({
+    clientId: form.get("clientId"),
+    category: form.get("category") || undefined,
+    title: form.get("title") ?? "",
+    url: form.get("url") ?? "",
+    notes: form.get("notes") ?? "",
+    file: file instanceof File && file.size > 0 ? file : undefined,
+  });
+}
+
+const addMaterialAction = defineAction({ schema: materialSchema }, async ({ clientId, category, title, url, notes, file }, { user }) => {
+  const supabase = await createClient();
+  let fileId: string | null = null;
+  let path: string | null = null;
+  if (file) {
+    if (file.size > MAX_FILE) return fail("validation", "Arquivo maior que 10 MB. Coloque no Drive do cliente e cole o link.", { file: ["Maior que 10 MB."] });
+    if (/^video\//.test(file.type)) return fail("validation", "Vídeos não são guardados no sistema. Envie pelo Drive e cole o link.", { file: ["Vídeo: use o link do Drive."] });
+    path = `clientes/${clientId}/${randomUUID()}-${safeName(file.name)}`;
+    const up = await supabase.storage.from("anexos").upload(path, file, { contentType: file.type || "application/octet-stream" });
+    if (up.error) return fail("forbidden", "Não foi possível enviar o arquivo. Verifique se você tem acesso a este cliente.");
+    const row = await supabase
+      .from("client_files")
+      .insert({ client_id: clientId, storage_path: path, name: file.name.slice(0, 200), mime_type: file.type || null, size_bytes: file.size,
+        category: category === "identidade" ? "identidade" : category === "referencias" ? "referencia" : "geral", folder: "midias", uploaded_by: user.id })
+      .select("id")
+      .single();
+    if (row.error) {
+      await supabase.storage.from("anexos").remove([path]);
+      throw row.error;
+    }
+    fileId = row.data.id;
+  }
+  const { error } = await supabase.from("client_materials").insert({ client_id: clientId, category, title, url: url || null, notes: notes || null, file_id: fileId });
+  if (error) {
+    if (fileId) await supabase.from("client_files").delete().eq("id", fileId);
+    if (path) await supabase.storage.from("anexos").remove([path]);
+    throw error;
+  }
+  refresh(clientId);
+  return ok(null, "Material adicionado.");
+});
+
+export const deleteMaterial = defineAction({ schema: z.object({ id: z.uuid(), clientId: z.uuid() }) }, async ({ id, clientId }) => {
+  const supabase = await createClient();
+  const m = must(await supabase.from("client_materials").select("file_id, client_files(storage_path)").eq("id", id).single()) as {
+    file_id: string | null;
+    client_files: { storage_path: string } | { storage_path: string }[] | null;
+  };
+  must(await supabase.from("client_materials").delete().eq("id", id).select("id").single());
+  if (m.file_id) {
+    const f = Array.isArray(m.client_files) ? m.client_files[0] : m.client_files;
+    await supabase.from("client_files").delete().eq("id", m.file_id);
+    if (f) await supabase.storage.from("anexos").remove([f.storage_path]);
+  }
+  refresh(clientId);
+  return ok(null, "Material excluído.");
+});
+
+export const moveFile = defineAction(
+  { schema: z.object({ id: z.uuid(), clientId: z.uuid(), folder: z.enum(["geral", "midias", "trafego"]) }) },
+  async ({ id, clientId, folder }) => {
+    const supabase = await createClient();
+    must(await supabase.from("client_files").update({ folder }).eq("id", id).select("id").single());
+    refresh(clientId);
+    return ok(null, "Documento movido.");
+  },
+);

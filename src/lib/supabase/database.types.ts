@@ -221,14 +221,14 @@ isOneToOne: false
                   ]
                 },"client_files": {
                   Row: {
-                    "category": string,"client_id": string,"created_at": string,"id": string,"meeting_id": string | null,"mime_type": string | null,"name": string,"size_bytes": number | null,"storage_path": string,"uploaded_by": string | null
+                    "category": string,"client_id": string,"created_at": string,"folder": string,"id": string,"meeting_id": string | null,"mime_type": string | null,"name": string,"size_bytes": number | null,"storage_path": string,"uploaded_by": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "category"?: string,"client_id": string,"created_at"?: string,"id"?: string,"meeting_id"?: string | null,"mime_type"?: string | null,"name": string,"size_bytes"?: number | null,"storage_path": string,"uploaded_by"?: string | null
+                    "category"?: string,"client_id": string,"created_at"?: string,"folder"?: string,"id"?: string,"meeting_id"?: string | null,"mime_type"?: string | null,"name": string,"size_bytes"?: number | null,"storage_path": string,"uploaded_by"?: string | null
                   }
                   Update: {
-                    "category"?: string,"client_id"?: string,"created_at"?: string,"id"?: string,"meeting_id"?: string | null,"mime_type"?: string | null,"name"?: string,"size_bytes"?: number | null,"storage_path"?: string,"uploaded_by"?: string | null
+                    "category"?: string,"client_id"?: string,"created_at"?: string,"folder"?: string,"id"?: string,"meeting_id"?: string | null,"mime_type"?: string | null,"name"?: string,"size_bytes"?: number | null,"storage_path"?: string,"uploaded_by"?: string | null
                   }
                   Relationships: [
                     {
@@ -306,6 +306,38 @@ isOneToOne: false
       columns: ["undone_by"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"client_materials": {
+                  Row: {
+                    "category": string,"client_id": string,"created_at": string,"created_by": string,"file_id": string | null,"id": string,"notes": string | null,"title": string,"url": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "category": string,"client_id": string,"created_at"?: string,"created_by"?: string,"file_id"?: string | null,"id"?: string,"notes"?: string | null,"title": string,"url"?: string | null
+                  }
+                  Update: {
+                    "category"?: string,"client_id"?: string,"created_at"?: string,"created_by"?: string,"file_id"?: string | null,"id"?: string,"notes"?: string | null,"title"?: string,"url"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_materials_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_materials_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_materials_file_id_fkey"
+      columns: ["file_id"]
+isOneToOne: false
+      referencedRelation: "client_files"
       referencedColumns: ["id"]
     }
                   ]
@@ -971,6 +1003,84 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"recording_contents": {
+                  Row: {
+                    "session_id": string,"task_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "session_id": string,"task_id": string
+                  }
+                  Update: {
+                    "session_id"?: string,"task_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "recording_contents_session_id_fkey"
+      columns: ["session_id"]
+isOneToOne: false
+      referencedRelation: "recording_sessions"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "recording_contents_task_id_fkey"
+      columns: ["task_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"recording_people": {
+                  Row: {
+                    "profile_id": string,"session_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "profile_id": string,"session_id": string
+                  }
+                  Update: {
+                    "profile_id"?: string,"session_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "recording_people_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "recording_people_session_id_fkey"
+      columns: ["session_id"]
+isOneToOne: false
+      referencedRelation: "recording_sessions"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"recording_sessions": {
+                  Row: {
+                    "client_id": string,"created_at": string,"created_by": string | null,"id": string,"location": string | null,"notes": string | null,"raw_url": string | null,"recorded_on": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"location"?: string | null,"notes"?: string | null,"raw_url"?: string | null,"recorded_on": string
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"location"?: string | null,"notes"?: string | null,"raw_url"?: string | null,"recorded_on"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "recording_sessions_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "recording_sessions_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"role_permissions": {
                   Row: {
                     "permission_key": string,"role_id": string,"scope": Database["public"]['Enums']["permission_scope"]
@@ -1221,14 +1331,14 @@ isOneToOne: false
                   ]
                 },"task_content": {
                   Row: {
-                    "caption": string | null,"destination": (string)[],"editor_id": string | null,"final_url": string | null,"format": string | null,"objective": string | null,"post_on": string | null,"post_url": string | null,"raw_url": string | null,"recorder_id": string | null,"recording_on": string | null,"rework_count": number,"script": string | null,"task_id": string,"updated_at": string,"updated_by": string | null
+                    "caption": string | null,"cover_path": string | null,"destination": (string)[],"editor_id": string | null,"final_url": string | null,"format": string | null,"objective": string | null,"post_on": string | null,"post_url": string | null,"raw_url": string | null,"recorder_id": string | null,"recording_on": string | null,"rework_count": number,"script": string | null,"task_id": string,"updated_at": string,"updated_by": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "caption"?: string | null,"destination"?: (string)[],"editor_id"?: string | null,"final_url"?: string | null,"format"?: string | null,"objective"?: string | null,"post_on"?: string | null,"post_url"?: string | null,"raw_url"?: string | null,"recorder_id"?: string | null,"recording_on"?: string | null,"rework_count"?: number,"script"?: string | null,"task_id": string,"updated_at"?: string,"updated_by"?: string | null
+                    "caption"?: string | null,"cover_path"?: string | null,"destination"?: (string)[],"editor_id"?: string | null,"final_url"?: string | null,"format"?: string | null,"objective"?: string | null,"post_on"?: string | null,"post_url"?: string | null,"raw_url"?: string | null,"recorder_id"?: string | null,"recording_on"?: string | null,"rework_count"?: number,"script"?: string | null,"task_id": string,"updated_at"?: string,"updated_by"?: string | null
                   }
                   Update: {
-                    "caption"?: string | null,"destination"?: (string)[],"editor_id"?: string | null,"final_url"?: string | null,"format"?: string | null,"objective"?: string | null,"post_on"?: string | null,"post_url"?: string | null,"raw_url"?: string | null,"recorder_id"?: string | null,"recording_on"?: string | null,"rework_count"?: number,"script"?: string | null,"task_id"?: string,"updated_at"?: string,"updated_by"?: string | null
+                    "caption"?: string | null,"cover_path"?: string | null,"destination"?: (string)[],"editor_id"?: string | null,"final_url"?: string | null,"format"?: string | null,"objective"?: string | null,"post_on"?: string | null,"post_url"?: string | null,"raw_url"?: string | null,"recorder_id"?: string | null,"recording_on"?: string | null,"rework_count"?: number,"script"?: string | null,"task_id"?: string,"updated_at"?: string,"updated_by"?: string | null
                   }
                   Relationships: [
                     {
@@ -1782,6 +1892,9 @@ isOneToOne: false
 "save_content":
 { Args: { "p": Json,"p_task": string }; Returns: undefined
                            },
+"save_recording":
+{ Args: { "p": Json }; Returns: string
+                           },
 "send_test_notification":
 { Args: { "p_user": string }; Returns: undefined
                            },
@@ -1790,6 +1903,9 @@ isOneToOne: false
                            },
 "set_client_status":
 { Args: { "p_client": string,"p_status": string }; Returns: undefined
+                           },
+"set_content_cover":
+{ Args: { "p_path": string,"p_task": string }; Returns: undefined
                            },
 "set_onboarding_recipients":
 { Args: { "p_ids": (string)[] }; Returns: undefined

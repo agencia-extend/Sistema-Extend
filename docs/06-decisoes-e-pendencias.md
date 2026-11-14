@@ -145,3 +145,12 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
     - o valor só é lido por quem tem `clients.onboarding.read` (função `client_contract_fees`; a coluna não é liberada na tabela).
   - **Avisos de fim de contrato:** 30 e 7 dias antes e no dia seguinte ao vencimento sem renovação (cron `extend-contratos`).
   - **Cartão "Dados do cliente":** deixou de editar datas e valor do contrato, que agora ficam só em Contratos.
+- **Central do cliente, parte B (14/11/2026):**
+  - **Materiais** (`client_materials`): por categoria (identidade visual, catálogo, instruções de perfil, banco de imagens, referências, acessos e outros), cada um com arquivo de até 10 MB ou link do Drive. Quem é da equipe do cliente adiciona; o arquivo vai para Documentos → Mídias. Acessos: só links e instruções, nunca senhas.
+  - **Documentos** (aba antiga "Arquivos"): pastas por setor (Geral, Mídias, Tráfego) em `client_files.folder`, com envio para a pasta aberta e opção de mover.
+  - **Gravações** (`recording_sessions`, `save_recording`): registro por diária, com data, local, quem gravou, link dos brutos e conteúdos gravados. Os conteúdos recebem data, quem gravou e link dos brutos (sem apagar o que já tinham), e quem edita é avisado. A aba aparece para clientes com vídeos ou gravação.
+  - **Cronograma** (aba para clientes com Gerenciamento):
+    - lista por semana do mês e grid do Instagram;
+    - entram os conteúdos com data de post no mês ou com o destino "Cronograma" ainda sem data;
+    - "Programar" define data, legenda, capa (JPG, PNG ou WebP até 5 MB, `task_content.cover_path`) e link do post publicado, que passa o post para "Postado".
+  - Permissões revistas no banco: só as colunas permitidas podem ser alteradas (`20261114000400`).

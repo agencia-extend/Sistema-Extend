@@ -23,6 +23,7 @@ export type ClientTab = { key: string; label: string };
 const ALWAYS: ClientTab[] = [
   { key: "", label: "Visão geral" },
   { key: "ficha", label: "Ficha" },
+  { key: "materiais", label: "Materiais" },
   { key: "reunioes", label: "Reuniões" },
 ];
 
@@ -33,11 +34,14 @@ const ALWAYS: ClientTab[] = [
  * Abas de módulos que ainda não existem não entram (regra nº 1).
  */
 export function clientTabs(status: ClientStatus, serviceTabs: string[], perms: PermissionMap): ClientTab[] {
-  if (status === "onboarding") return [...ALWAYS, { key: "contratos", label: "Contratos" }, { key: "arquivos", label: "Arquivos" }];
+  if (status === "onboarding") return [...ALWAYS, { key: "contratos", label: "Contratos" }, { key: "arquivos", label: "Documentos" }];
   const tabs = [...ALWAYS];
   const hasProduction = serviceTabs.some((t) => ["videos", "design", "conteudo", "gerenciamento", "gravacao", "site"].includes(t));
   if (hasProduction && perms["tasks.read"]) tabs.push({ key: "midias", label: "Controle de Mídias" }, { key: "quadros", label: "Quadros" });
-  tabs.push({ key: "contratos", label: "Contratos" }, { key: "ideias", label: "Ideias e referências" }, { key: "arquivos", label: "Arquivos" }, { key: "historico", label: "Histórico" });
+  // Cronograma só para quem tem Gerenciamento (briefing: cliente sem gerenciamento não tem cronograma).
+  if (serviceTabs.includes("gerenciamento") && perms["tasks.read"]) tabs.push({ key: "cronograma", label: "Cronograma" });
+  if (serviceTabs.some((t) => t === "videos" || t === "gravacao") && perms["tasks.read"]) tabs.push({ key: "gravacoes", label: "Gravações" });
+  tabs.push({ key: "contratos", label: "Contratos" }, { key: "ideias", label: "Ideias e referências" }, { key: "arquivos", label: "Documentos" }, { key: "historico", label: "Histórico" });
   return tabs;
 }
 
@@ -102,3 +106,21 @@ export function contractWindow(endsOn: string | null, today: string): ContractWi
   if (days <= 30) return "termina";
   return "ok";
 }
+
+export const MATERIAL_CATEGORIES = ["identidade", "catalogo", "perfil", "imagens", "referencias", "acessos", "outros"] as const;
+export type MaterialCategory = (typeof MATERIAL_CATEGORIES)[number];
+
+/** Materiais do cliente (briefing de mídias, item 3.2): o que é e o que guardar em cada um. */
+export const MATERIAL_CATEGORY: Record<MaterialCategory, { label: string; hint: string }> = {
+  identidade: { label: "Identidade visual", hint: "Logo em alta, manual de marca, cores e fontes." },
+  catalogo: { label: "Catálogo", hint: "Produtos, serviços, preços e tabelas." },
+  perfil: { label: "Instruções de perfil", hint: "Tom de voz, o que pode e o que não pode postar, bio." },
+  imagens: { label: "Banco de imagens", hint: "Fotos profissionais, do espaço e da equipe (de preferência pasta do Drive)." },
+  referencias: { label: "Referências", hint: "Perfis, vídeos e anúncios que o cliente gosta." },
+  acessos: { label: "Acessos", hint: "Links e instruções de acesso. Nunca escreva senhas aqui." },
+  outros: { label: "Outros", hint: "O que não se encaixa nas categorias acima." },
+};
+
+export const FILE_FOLDERS = ["geral", "midias", "trafego"] as const;
+export type FileFolder = (typeof FILE_FOLDERS)[number];
+export const FILE_FOLDER_LABEL: Record<FileFolder, string> = { geral: "Geral", midias: "Mídias", trafego: "Tráfego" };
