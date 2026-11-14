@@ -31,7 +31,7 @@
 | D2 | Agendas por setor | Internas × Google Agenda compartilhada × ambas | Internas no sistema + sincronização opcional por pessoa com Google | 03 |
 | D3 | Fluxo de etapas por tipo de demanda | Proposta em RF-TAR-03 | Validar com a Jacque usando os quadros do Trello | 03 |
 | D4 | WhatsApp | WAHA (grupos, risco) × Cloud API (oficial, sem grupos) × ambos | WAHA para relatórios/alertas em grupo; Cloud API para atendimento comercial se houver volume | 06/07 |
-| D5 | Nomenclatura de campanhas | Sugestão em `docs/02` | Validar com o Luiz | 05 |
+| D5 | Nomenclatura de campanhas | Sugestão em `docs/02` | **Decidido (14/11/2026): usar a sugestão do `docs/02`, editável em Configurações** | 05 |
 | D6 | Limites de fadiga e alertas | Sugestão em `docs/02` | Validar com o Luiz | 06 |
 | D7 | Migrar histórico do Trello | Sim × só clientes ativos × não | Só quadros ativos | 03 |
 | D8 | Prospectador | Google Places (pago por uso) × outra fonte | Google Places com teto mensal | 08 |

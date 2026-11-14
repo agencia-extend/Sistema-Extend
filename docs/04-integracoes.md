@@ -25,7 +25,7 @@ Projeto no time da Extend, região gru1, domínio **[CONFIRMAR: ex. sistema.agen
 ## Google Ads
 1. Conta administradora (MCC) da Extend com todas as contas de clientes vinculadas.
 2. Projeto no Google Cloud da Extend: Google Ads API ativada, tela de consentimento OAuth (externa, em produção), credenciais Web.
-3. **Developer token**: verificar na documentação oficial se ainda é exigido e em qual nível de acesso (o código do HubSystem traz comentário dizendo que foi aposentado em 09/2026 — confirmar antes de implementar).
+3. **Developer token: não é mais exigido** (aposentado pelo Google em 09/09/2026; conferido na documentação oficial em 14/11/2026). O nível de acesso agora é do projeto do Google Cloud: começa em Test (só contas de teste); para contas reais, pedir **Explorer** (aprovação automática) ou **Basic** (exige verificação da marca). O código não envia o token. Versão atual da API: v26.
 4. `login-customer-id` = ID da MCC, **guardado por conta** no banco.
 5. Escopo `https://www.googleapis.com/auth/adwords`, `access_type=offline`, `prompt=consent`.
 
