@@ -123,6 +123,5 @@ export async function decideApproval(raw: unknown): Promise<ActionResult<null>> 
     return fail("unknown", "Não foi possível registrar a decisão agora. Tente de novo em instantes.");
   }
   if (data !== "ok") return fail("business_rule", DECISION_STATE[data as string] ?? DECISION_STATE.invalido);
-  revalidatePath(`/aprovar/${token}`);
   return ok(null, decision === "aprovado" ? "Obrigado! Aprovação registrada." : "Obrigado! Seu pedido de alteração foi enviado para a equipe.");
 }

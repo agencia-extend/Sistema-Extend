@@ -1,6 +1,5 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { LoaderCircle, ThumbsDown, ThumbsUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -11,7 +10,6 @@ import { decideApproval } from "@/features/creatives/actions";
 
 /** Aprovar ou pedir alteração (o texto é obrigatório para pedir alteração). */
 export function DecisionForm({ token }: { token: string }) {
-  const router = useRouter();
   const [mode, setMode] = useState<"aprovado" | "ajustes" | null>(null);
   const [name, setName] = useState("");
   const [comment, setComment] = useState("");
@@ -27,8 +25,8 @@ export function DecisionForm({ token }: { token: string }) {
     if (Object.keys(e).length) return;
     start(async () => {
       const res = await decideApproval({ token, decision, comment, name });
+      // Sem recarregar: o cliente vê o agradecimento (ao abrir de novo, a página mostra a decisão).
       setResult({ ok: res.ok, message: res.ok ? (res.message ?? "") : res.message });
-      if (res.ok) router.refresh();
     });
   };
 
