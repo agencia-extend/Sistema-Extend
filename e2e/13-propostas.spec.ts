@@ -170,7 +170,9 @@ test("4. aceitar → lead em Ganho e fechamento pré-preenchido", async ({ page,
   await client.getByLabel(/^Seu nome completo/).fill("Marcos da Silva");
   await client.getByRole("checkbox", { name: /Li a proposta/ }).check();
   await client.getByRole("button", { name: "Aceitar proposta" }).click();
-  await expect(client.getByText(/Proposta aceita\. Obrigado!/)).toBeVisible();
+  await expect(client.getByText(/Proposta aceita.*Obrigado!/).first()).toBeVisible();
+  // O aceite não recarrega a página: não conta abertura a mais.
+  expect((await admin.from("proposals").select("view_count").eq("id", proposalId).single()).data?.view_count).toBe(2);
   await ctx.close();
 
   const { data: l } = await admin.from("leads").select("pipeline_stages(kind)").eq("id", leadId).single();

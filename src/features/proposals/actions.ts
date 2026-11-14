@@ -157,6 +157,6 @@ export async function acceptProposal(raw: unknown): Promise<ActionResult<null>> 
     return fail("unknown", error.code === "P0001" ? error.message : "Não foi possível registrar o aceite. Tente de novo.");
   }
   if (data !== "ok") return fail("business_rule", MESSAGES[data as string] ?? MESSAGES.invalido);
-  revalidatePath("/comercial", "layout");
+  // Sem revalidatePath: recarregar a página pública contaria uma abertura a mais. As telas internas são dinâmicas.
   return ok(null, "Proposta aceita. Obrigado! A Agência Extend vai falar com você para os próximos passos.");
 }
