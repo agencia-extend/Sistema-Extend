@@ -10,6 +10,7 @@ export const NOTIFICATION_KINDS = [
   { key: "ad_alert", label: "Alertas de anúncios" },
   { key: "client_onboarding", label: "Cliente novo em onboarding" },
   { key: "training", label: "Treinamento atribuído, atrasado ou concluído" },
+  { key: "crm", label: "Comercial: próximas ações e leads parados" },
   { key: "privacy", label: "Pedidos sobre dados pessoais (LGPD) e respostas" },
   { key: "system", label: "Avisos do sistema e testes" },
 ] as const;

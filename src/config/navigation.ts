@@ -53,6 +53,10 @@ export const NAV_GROUPS: NavGroup[] = [
     ],
   },
   {
+    label: "Comercial",
+    items: [{ href: "/comercial", label: "Comercial", icon: "commercial", anyOf: ["crm.leads.read"] }],
+  },
+  {
     label: "Equipe",
     items: [{ href: "/treinamentos", label: "Treinamentos", icon: "training", anyOf: ["trainings.read", "trainings.manage"] }],
   },
@@ -78,6 +82,7 @@ export const SETTINGS_PAGES: SettingsPage[] = [
   { href: "/configuracoes/onboarding", label: "Onboarding", description: "Ficha, checklist e quem é avisado de cliente novo", perm: "settings.manage" },
   { href: "/configuracoes/rotinas", label: "Rotinas e modelos", description: "Prazos fixos da semana por serviço e modelos de demanda", perm: "tasks.boards.configure" },
   { href: "/configuracoes/fluxos", label: "Fluxos de produção", description: "Etapas de vídeo, design, post, gravação e site", perm: "tasks.boards.configure" },
+  { href: "/configuracoes/funis", label: "Funis comerciais", description: "Etapas do funil de vendas e prazo de cada uma", perm: "crm.pipeline.configure" },
   { href: "/configuracoes/setores", label: "Setores", description: "Setores da agência e quem faz parte", perm: "settings.manage" },
   { href: "/configuracoes/auditoria", label: "Auditoria", description: "Quem alterou o quê, com antes e depois", perm: "audit.read" },
   { href: "/configuracoes/privacidade", label: "Privacidade (LGPD)", description: "Pedidos sobre dados pessoais e dados do controlador", perm: "privacy.manage" },

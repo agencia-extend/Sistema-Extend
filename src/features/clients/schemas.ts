@@ -23,6 +23,8 @@ export const handoffSchema = z.object({
   communication_channel: optText(300),
   notes: optText(4000),
   promises: z.array(z.object({ description: z.string().trim().min(2, "Descreva a promessa.").max(300), due_at: z.string().min(10, "Informe o prazo.") })).max(20),
+  /** Lead do comercial que virou este fechamento (vai para Ganho e fica ligado ao cliente). */
+  lead_id: uuid.optional(),
 });
 
 export const clientDataSchema = z.object({

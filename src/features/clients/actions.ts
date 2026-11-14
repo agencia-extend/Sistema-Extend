@@ -42,6 +42,7 @@ export const createHandoff = defineAction({ schema: handoffSchema, permission: "
   const id = must(await supabase.rpc("create_handoff", { p: input })) as string;
   revalidatePath("/clientes");
   revalidatePath("/inicio");
+  if (input.lead_id) revalidatePath("/comercial", "layout");
   return ok({ id }, "Fechamento registrado. A equipe de onboarding foi avisada.");
 });
 

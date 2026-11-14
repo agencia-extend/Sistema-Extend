@@ -20,10 +20,10 @@ const stamp = `${Date.now()}${Math.floor(Math.random() * 1000)}`;
 const pw = `Senha${stamp}x9`;
 
 const ROLES = ["admin", "gerente_trafego", "gestor_trafego", "coord_conteudo", "social_media", "editor_video", "designer", "gravacao", "sites", "comercial", "atendimento", "leitura"];
-const MENU = ["/inicio", "/tarefas", "/clientes", "/agenda", "/setores", "/quadros", "/criativos", "/producao", "/playbooks", "/treinamentos"];
+const MENU = ["/inicio", "/tarefas", "/clientes", "/agenda", "/setores", "/quadros", "/criativos", "/producao", "/playbooks", "/comercial", "/treinamentos"];
 const SETTINGS = [
   "/configuracoes/perfil", "/configuracoes/notificacoes", "/configuracoes/usuarios", "/configuracoes/papeis", "/configuracoes/servicos",
-  "/configuracoes/onboarding", "/configuracoes/rotinas", "/configuracoes/fluxos", "/configuracoes/setores", "/configuracoes/auditoria", "/configuracoes/privacidade",
+  "/configuracoes/onboarding", "/configuracoes/rotinas", "/configuracoes/fluxos", "/configuracoes/funis", "/configuracoes/setores", "/configuracoes/auditoria", "/configuracoes/privacidade",
 ];
 const users: string[] = [];
 const timings: { role: string; path: string; ms: number }[] = [];
@@ -105,6 +105,11 @@ for (const role of ROLES) {
           for (const tab of tabs.slice(1)) await visit(page, role, tab, problems);
         }
       }
+    }
+    if (visible.has("/comercial")) {
+      await page.goto("/comercial");
+      const tabs = await page.getByRole("navigation", { name: "Seções do comercial" }).getByRole("link").evaluateAll((as) => as.map((a) => a.getAttribute("href")!));
+      for (const tab of tabs.slice(1)) await visit(page, role, tab, problems);
     }
     if (visible.has("/treinamentos")) {
       await page.goto("/treinamentos");

@@ -837,6 +837,114 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"lead_activities": {
+                  Row: {
+                    "body": string,"created_at": string,"created_by": string | null,"done_at": string | null,"due_at": string | null,"id": string,"kind": string,"lead_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"created_at"?: string,"created_by"?: string | null,"done_at"?: string | null,"due_at"?: string | null,"id"?: string,"kind": string,"lead_id": string
+                  }
+                  Update: {
+                    "body"?: string,"created_at"?: string,"created_by"?: string | null,"done_at"?: string | null,"due_at"?: string | null,"id"?: string,"kind"?: string,"lead_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "lead_activities_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "lead_activities_lead_id_fkey"
+      columns: ["lead_id"]
+isOneToOne: false
+      referencedRelation: "leads"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"lead_imports": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"duplicates": number,"file_name": string,"id": string,"organization_id": string,"row_count": number,"undone_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"duplicates"?: number,"file_name": string,"id"?: string,"organization_id"?: string,"row_count"?: number,"undone_at"?: string | null
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"duplicates"?: number,"file_name"?: string,"id"?: string,"organization_id"?: string,"row_count"?: number,"undone_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "lead_imports_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "lead_imports_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"leads": {
+                  Row: {
+                    "company": string | null,"created_at": string,"created_by": string | null,"email": string | null,"id": string,"import_id": string | null,"lost_at": string | null,"lost_reason": string | null,"name": string,"notes": string | null,"organization_id": string,"owner_id": string | null,"phone": string | null,"pipeline_id": string,"source": string,"stage_changed_at": string,"stage_id": string,"updated_at": string,"utm_campaign": string | null,"utm_content": string | null,"utm_medium": string | null,"utm_source": string | null,"utm_term": string | null,"value_cents": number | null,"won_at": string | null,"won_client_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "company"?: string | null,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"id"?: string,"import_id"?: string | null,"lost_at"?: string | null,"lost_reason"?: string | null,"name": string,"notes"?: string | null,"organization_id"?: string,"owner_id"?: string | null,"phone"?: string | null,"pipeline_id": string,"source"?: string,"stage_changed_at"?: string,"stage_id": string,"updated_at"?: string,"utm_campaign"?: string | null,"utm_content"?: string | null,"utm_medium"?: string | null,"utm_source"?: string | null,"utm_term"?: string | null,"value_cents"?: number | null,"won_at"?: string | null,"won_client_id"?: string | null
+                  }
+                  Update: {
+                    "company"?: string | null,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"id"?: string,"import_id"?: string | null,"lost_at"?: string | null,"lost_reason"?: string | null,"name"?: string,"notes"?: string | null,"organization_id"?: string,"owner_id"?: string | null,"phone"?: string | null,"pipeline_id"?: string,"source"?: string,"stage_changed_at"?: string,"stage_id"?: string,"updated_at"?: string,"utm_campaign"?: string | null,"utm_content"?: string | null,"utm_medium"?: string | null,"utm_source"?: string | null,"utm_term"?: string | null,"value_cents"?: number | null,"won_at"?: string | null,"won_client_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "leads_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "leads_import_id_fkey"
+      columns: ["import_id"]
+isOneToOne: false
+      referencedRelation: "lead_imports"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "leads_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "leads_owner_id_fkey"
+      columns: ["owner_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "leads_pipeline_id_fkey"
+      columns: ["pipeline_id"]
+isOneToOne: false
+      referencedRelation: "pipelines"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "leads_stage_id_fkey"
+      columns: ["stage_id"]
+isOneToOne: false
+      referencedRelation: "pipeline_stages"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "leads_won_client_id_fkey"
+      columns: ["won_client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"notification_preferences": {
                   Row: {
                     "in_app": boolean,"kind": string,"push": boolean,"updated_at": string,"user_id": string
@@ -1000,6 +1108,46 @@ isOneToOne: false
                   }
                   Relationships: [
                     
+                  ]
+                },"pipeline_stages": {
+                  Row: {
+                    "color": string,"id": string,"kind": string,"name": string,"pipeline_id": string,"position": number,"sla_days": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "color"?: string,"id"?: string,"kind"?: string,"name": string,"pipeline_id": string,"position": number,"sla_days"?: number | null
+                  }
+                  Update: {
+                    "color"?: string,"id"?: string,"kind"?: string,"name"?: string,"pipeline_id"?: string,"position"?: number,"sla_days"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pipeline_stages_pipeline_id_fkey"
+      columns: ["pipeline_id"]
+isOneToOne: false
+      referencedRelation: "pipelines"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"pipelines": {
+                  Row: {
+                    "created_at": string,"id": string,"is_default": boolean,"name": string,"organization_id": string,"position": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"id"?: string,"is_default"?: boolean,"name": string,"organization_id"?: string,"position"?: number
+                  }
+                  Update: {
+                    "created_at"?: string,"id"?: string,"is_default"?: boolean,"name"?: string,"organization_id"?: string,"position"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "pipelines_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
                   ]
                 },"playbook_runs": {
                   Row: {
@@ -2141,6 +2289,11 @@ isOneToOne: false
 "create_handoff":
 { Args: { "p": Json }; Returns: string
                            },
+"crm_people":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "full_name": string,"id": string
+            }[]
+                           },
 "decide_approval":
 { Args: { "p_comment": string,"p_decision": string,"p_ip": string,"p_name": string,"p_token_hash": string }; Returns: string
                            },
@@ -2156,8 +2309,14 @@ isOneToOne: false
 "import_clients":
 { Args: { "p_file": string,"p_mode": string,"p_rows": Json }; Returns: string
                            },
+"import_leads":
+{ Args: { "p_file": string,"p_pipeline": string,"p_rows": Json }; Returns: Json
+                           },
 "mark_all_notifications_read":
 { Args: Record<PropertyKey, never>; Returns: number
+                           },
+"move_lead":
+{ Args: { "p_lead": string,"p_reason"?: string,"p_stage": string }; Returns: undefined
                            },
 "move_task":
 { Args: { "p_column": string,"p_position": number,"p_step": string,"p_task": string }; Returns: undefined
@@ -2219,6 +2378,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
 "undo_import":
+{ Args: { "p_import": string }; Returns: number
+                           },
+"undo_lead_import":
 { Args: { "p_import": string }; Returns: number
                            },
 "user_effective_permissions":

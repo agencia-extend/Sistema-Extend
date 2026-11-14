@@ -195,3 +195,10 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
   - **Valores sensíveis:** investimento, ticket, meta de faturamento, acessos e forma de pagamento dos anúncios ficam só para quem vê a ficha completa.
   - **Gerador:** a ficha é gerada por `scripts/gen-briefing.mjs`.
 - **Arquivos escolhidos antes de a página ficar interativa se perdiam** (envio de versões do criativo e importação de planilha). O campo agora só fica ativo depois do carregamento.
+
+## Decisões da etapa 08 — Comercial (14/11/2026)
+- Feito agora: leads com origem, UTMs e sem duplicar telefone/e-mail (telefone gravado só com dígitos e DDI 55); funis configuráveis em quadro com cor e prazo de parada por etapa; perda só com motivo; histórico e próximas ações com lembrete; importação com prévia, deduplicação e desfazer; Ganho → fechamento pré-preenchido → cliente em onboarding ligado ao lead; painel em tabelas (por origem, responsável, funil e motivos de perda).
+- Visibilidade: escopo "todos" vê o comercial inteiro; "só os meus" (atendimento) vê os leads que tem ou cadastrou. Responsável só pode ser quem tem acesso ao comercial e é avisado ao receber um lead.
+- Lembretes (job `extend-comercial`, a cada 30 min das 8h às 19h, seg. a sáb.): próxima ação vencendo e lead parado além do prazo da etapa, uma vez por ocorrência.
+- Conversão do painel = ganhos ÷ (ganhos + perdidos) no período. Propostas enviadas/aceitas entram com a etapa 09.
+- **Pendente (depende de contas da Extend):** cadências por WhatsApp (RF-CRM-06) esperam o provedor e o número (D4); prospectador (RF-CRM-07) espera a chave do Google Places com teto mensal (D8).

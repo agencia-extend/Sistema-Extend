@@ -37,27 +37,30 @@ type Values = {
 
 const today = () => new Date(Date.now() - 3 * 3600_000).toISOString().slice(0, 10);
 
-export function HandoffForm({ services }: { services: Svc[] }) {
+/** Dados do lead do comercial que viram o ponto de partida do fechamento. */
+export type HandoffLead = { id: string; name: string; contact: { name: string; phone: string; email: string }; monthlyFee: string; notes: string };
+
+export function HandoffForm({ services, lead }: { services: Svc[]; lead?: HandoffLead }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [files, setFiles] = useState<File[]>([]);
   const [error, setError] = useState<string | null>(null);
   const form = useForm<Values>({
     defaultValues: {
-      name: "",
+      name: lead?.name ?? "",
       legal_name: "",
       document: "",
       segment: "",
-      contact: { name: "", phone: "", email: "", role: "" },
+      contact: { name: lead?.contact.name ?? "", phone: lead?.contact.phone ?? "", email: lead?.contact.email ?? "", role: "" },
       picked: Object.fromEntries(services.map((s) => [s.id, { on: false, qty: "", price: "" }])),
-      monthly_fee: "",
+      monthly_fee: lead?.monthlyFee ?? "",
       setup_fee: "",
       media_budget: "",
       payment_method: "",
       contract_start: today(),
       contract_months: "12",
       communication_channel: "",
-      notes: "",
+      notes: lead?.notes ?? "",
       promises: [],
     },
   });
@@ -76,6 +79,7 @@ export function HandoffForm({ services }: { services: Svc[] }) {
       media_budget_cents: parseBRL(v.media_budget),
       contract_months: v.contract_months ? Number(v.contract_months) : null,
       promises: v.promises.map((p) => ({ description: p.description, due_at: p.due_at ? new Date(p.due_at).toISOString() : "" })),
+      lead_id: lead?.id,
     };
     const parsed = handoffSchema.safeParse(payload);
     if (!parsed.success) {
