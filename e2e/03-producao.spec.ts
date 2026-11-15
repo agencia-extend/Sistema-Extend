@@ -77,6 +77,8 @@ test("1. Jacque move o vídeo até Gravação → responsável muda e a pessoa d
 test("2. agendar a gravação → aparece na agenda do setor e do responsável", async ({ page }) => {
   await login(page, people.Jacque.email, pw);
   await page.goto(`/tarefas/${taskId}`);
+  // Nomes longos no tempo por etapa não podem alargar a página no celular.
+  expect(await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(0);
   await page.getByRole("button", { name: "Agendar gravação" }).click();
   await page.getByLabel(/^Início/).fill(new Date(Date.now() + 2 * 86_400_000 - 3 * 3600_000).toISOString().slice(0, 11) + "10:00");
   await page.getByLabel(/^Fim/).fill(new Date(Date.now() + 2 * 86_400_000 - 3 * 3600_000).toISOString().slice(0, 11) + "12:00");

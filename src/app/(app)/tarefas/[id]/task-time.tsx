@@ -63,9 +63,9 @@ export function TaskTime({ taskId, running, entries, history }: { taskId: string
             <p className="text-xs font-medium text-muted-foreground">Tempo em cada etapa</p>
             <ol className="grid gap-1 text-sm">
               {history.map((h) => (
-                <li key={h.id} className="flex justify-between gap-2" title={`Entrou ${formatDateTime(h.entered_at)}`}>
+                <li key={h.id} className="grid grid-cols-[minmax(0,1fr)_auto] gap-2" title={`Entrou ${formatDateTime(h.entered_at)}`}>
                   <span className="truncate">{h.step_name}{h.assignee ? ` · ${h.assignee}` : ""}</span>
-                  <span className="shrink-0 tabular text-muted-foreground">{h.left_at ? formatDuration(new Date(h.left_at).getTime() - new Date(h.entered_at).getTime()) : "agora"}</span>
+                  <span className="text-right tabular text-muted-foreground">{h.left_at ? formatDuration(new Date(h.left_at).getTime() - new Date(h.entered_at).getTime()) : "agora"}</span>
                 </li>
               ))}
             </ol>

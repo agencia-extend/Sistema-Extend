@@ -60,6 +60,7 @@ export const stepSchema = z.object({
   sectorId: uuid.nullable(),
   status: z.enum(["pendente", "em_andamento", "aguardando_aprovacao", "aprovado", "concluido"]),
   waitsClient: z.boolean(),
+  isRework: z.boolean().default(false),
   color: z.string().regex(/^#[0-9A-Fa-f]{6}$/),
 });
 

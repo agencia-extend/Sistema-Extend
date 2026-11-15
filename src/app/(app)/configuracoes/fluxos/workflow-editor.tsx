@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { ArrowDown, ArrowUp, Hourglass, LoaderCircle, Pencil, Plus, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Hourglass, RotateCcw, LoaderCircle, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -15,7 +15,7 @@ import { handleResult } from "@/lib/action-feedback";
 import { TASK_STATUS_LABEL } from "@/domain/tasks/status";
 
 const NONE = "__nenhum";
-type Step = { id?: string; name: string; sectorId: string | null; status: string; waitsClient: boolean; color: string };
+type Step = { id?: string; name: string; sectorId: string | null; status: string; waitsClient: boolean; isRework: boolean; color: string };
 
 export function WorkflowEditor({ workflow, sectors }: { workflow: Workflow; sectors: { id: string; name: string }[] }) {
   const [edit, setEdit] = useState<Step | null>(null);
@@ -26,7 +26,7 @@ export function WorkflowEditor({ workflow, sectors }: { workflow: Workflow; sect
     <section aria-labelledby={`wf-${workflow.id}`} className="grid gap-3">
       <div className="flex items-center justify-between gap-2">
         <h2 id={`wf-${workflow.id}`} className="text-base font-semibold">{workflow.name}</h2>
-        <Button variant="outline" size="sm" onClick={() => setEdit({ name: "", sectorId: null, status: "em_andamento", waitsClient: false, color: "#64748B" })}><Plus aria-hidden="true" /> Etapa</Button>
+        <Button variant="outline" size="sm" onClick={() => setEdit({ name: "", sectorId: null, status: "em_andamento", waitsClient: false, isRework: false, color: "#64748B" })}><Plus aria-hidden="true" /> Etapa</Button>
       </div>
       <ol className="divide-y rounded-xl border bg-card">
         {workflow.steps.map((s, i) => (
@@ -38,6 +38,7 @@ export function WorkflowEditor({ workflow, sectors }: { workflow: Workflow; sect
               {[s.sectorId ? sectorName.get(s.sectorId) : "Sem setor", TASK_STATUS_LABEL[s.status as keyof typeof TASK_STATUS_LABEL]].join(" · ")}
             </span>
             {s.waitsClient && <Hourglass className="size-4 text-warning" aria-label="Aguarda o cliente" />}
+            {s.isRework && <RotateCcw className="size-4 text-danger" aria-label="Conta como retrabalho" />}
             <span className="flex">
               <Button variant="ghost" size="icon" aria-label={`Subir ${s.name}`} disabled={pending || i === 0} onClick={() => run(moveStep({ id: s.id, direction: "up" }))}><ArrowUp /></Button>
               <Button variant="ghost" size="icon" aria-label={`Descer ${s.name}`} disabled={pending || i === workflow.steps.length - 1} onClick={() => run(moveStep({ id: s.id, direction: "down" }))}><ArrowDown /></Button>
@@ -51,7 +52,7 @@ export function WorkflowEditor({ workflow, sectors }: { workflow: Workflow; sect
         <DialogContent>
           <DialogHeader>
             <DialogTitle>{edit?.id ? "Editar etapa" : "Nova etapa"} · {workflow.name}</DialogTitle>
-            <DialogDescription>O setor define quem recebe o card nesta etapa. O status alimenta o Controle de Mídias do cliente.</DialogDescription>
+            <DialogDescription>O setor define quem recebe o card nesta etapa. O status alimenta o Controle de Mídias do cliente. Entrar numa etapa de retrabalho soma 1 em “Em alteração” e marca o card no quadro do setor.</DialogDescription>
           </DialogHeader>
           {edit && (
             <div className="grid gap-4">
@@ -59,7 +60,7 @@ export function WorkflowEditor({ workflow, sectors }: { workflow: Workflow; sect
               <div className="grid gap-4 sm:grid-cols-2">
                 <FormField label="Setor da etapa">
                   <Select value={edit.sectorId ?? NONE} onValueChange={(v) => setEdit({ ...edit, sectorId: v === NONE ? null : v })}>
-                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-full" aria-label="Setor da etapa"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       <SelectItem value={NONE}>Sem setor (mantém o responsável)</SelectItem>
                       {sectors.map((s) => <SelectItem key={s.id} value={s.id}>{s.name}</SelectItem>)}
@@ -68,7 +69,7 @@ export function WorkflowEditor({ workflow, sectors }: { workflow: Workflow; sect
                 </FormField>
                 <FormField label="Conta como">
                   <Select value={edit.status} onValueChange={(v) => setEdit({ ...edit, status: v })}>
-                    <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                    <SelectTrigger className="w-full" aria-label="Conta como"><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {(["pendente", "em_andamento", "aguardando_aprovacao", "aprovado", "concluido"] as const).map((k) => <SelectItem key={k} value={k}>{TASK_STATUS_LABEL[k]}</SelectItem>)}
                     </SelectContent>
@@ -79,6 +80,10 @@ export function WorkflowEditor({ workflow, sectors }: { workflow: Workflow; sect
                 <div className="flex items-center gap-2">
                   <Switch id={`wc-${workflow.id}`} checked={edit.waitsClient} onCheckedChange={(v) => setEdit({ ...edit, waitsClient: v })} />
                   <Label htmlFor={`wc-${workflow.id}`} className="font-normal">Aguarda o cliente</Label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch id={`rw-${workflow.id}`} checked={edit.isRework} onCheckedChange={(v) => setEdit({ ...edit, isRework: v })} />
+                  <Label htmlFor={`rw-${workflow.id}`} className="font-normal">Conta como retrabalho</Label>
                 </div>
                 <div className="flex items-center gap-2">
                   <input id={`cor-${workflow.id}`} type="color" value={edit.color} onChange={(e) => setEdit({ ...edit, color: e.target.value })} className="size-9 rounded border p-0.5" />

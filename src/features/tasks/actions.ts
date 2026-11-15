@@ -286,9 +286,9 @@ export const deleteColumn = defineAction({ schema: z.object({ id: uuid }), permi
 
 // --- Fluxos -------------------------------------------------------------------------
 
-export const saveStep = defineAction({ schema: stepSchema, permission: "tasks.boards.configure" }, async ({ id, workflowId, name, sectorId, status, waitsClient, color }) => {
+export const saveStep = defineAction({ schema: stepSchema, permission: "tasks.boards.configure" }, async ({ id, workflowId, name, sectorId, status, waitsClient, isRework, color }) => {
   const supabase = await createClient();
-  const row = { name, sector_id: sectorId, status, waits_client: waitsClient, color };
+  const row = { name, sector_id: sectorId, status, waits_client: waitsClient, is_rework: isRework, color };
   if (id) must(await supabase.from("workflow_steps").update(row).eq("id", id).select("id").single());
   else {
     const { data: last } = await supabase.from("workflow_steps").select("position").eq("workflow_id", workflowId).order("position", { ascending: false }).limit(1).maybeSingle();

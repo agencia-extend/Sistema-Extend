@@ -75,8 +75,8 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
         }
         actions={canManage ? <DeleteTask id={id} /> : undefined}
       />
-      <PageBody className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="grid content-start gap-6">
+      <PageBody className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="grid min-w-0 content-start gap-6">
           <StagePicker
             taskId={id}
             canMove={canManage}
@@ -100,7 +100,7 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
           <TaskAttachments taskId={id} items={extras.attachments} userId={user.id} canManage={canManage} />
           <TaskComments taskId={id} comments={extras.comments} team={teamOpts} userId={user.id} />
         </div>
-        <aside className="grid content-start gap-6">
+        <aside className="grid min-w-0 content-start gap-6">
           <TaskFields
             task={{ id, assigneeId: task.assigneeId, dueAt: task.dueAt, priority: task.priority, blockedBy: task.blocker?.id ?? null, waitingNote: task.waitingNote, tags: task.tags, repeatUnit: task.repeatUnit, repeatEvery: task.repeatEvery, repeatNextId: task.repeatNextId }}
             participants={extras.participants}
