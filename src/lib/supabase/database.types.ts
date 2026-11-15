@@ -179,6 +179,44 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"budget_approvals": {
+                  Row: {
+                    "amount_cents": number,"approved_by": string,"approved_on": string,"channel": string,"client_id": string,"created_at": string,"created_by": string | null,"id": string,"notes": string | null,"organization_id": string,"period_end": string,"period_start": string,"platform": string,"proof_file_id": string | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount_cents": number,"approved_by": string,"approved_on": string,"channel": string,"client_id": string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"notes"?: string | null,"organization_id"?: string,"period_end": string,"period_start": string,"platform": string,"proof_file_id"?: string | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "amount_cents"?: number,"approved_by"?: string,"approved_on"?: string,"channel"?: string,"client_id"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"notes"?: string | null,"organization_id"?: string,"period_end"?: string,"period_start"?: string,"platform"?: string,"proof_file_id"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "budget_approvals_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "budget_approvals_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "budget_approvals_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "budget_approvals_proof_file_id_fkey"
+      columns: ["proof_file_id"]
+isOneToOne: false
+      referencedRelation: "client_files"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"calendar_attendees": {
                   Row: {
                     "event_id": string,"profile_id": string
@@ -272,6 +310,44 @@ isOneToOne: false
       columns: ["task_id"]
 isOneToOne: false
       referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"change_logs": {
+                  Row: {
+                    "ad_account_id": string | null,"category": string,"client_id": string,"created_at": string,"created_by": string | null,"happened_on": string,"id": string,"organization_id": string,"platform": string | null,"source": string,"updated_at": string,"what": string,"why": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad_account_id"?: string | null,"category": string,"client_id": string,"created_at"?: string,"created_by"?: string | null,"happened_on"?: string,"id"?: string,"organization_id"?: string,"platform"?: string | null,"source"?: string,"updated_at"?: string,"what": string,"why": string
+                  }
+                  Update: {
+                    "ad_account_id"?: string | null,"category"?: string,"client_id"?: string,"created_at"?: string,"created_by"?: string | null,"happened_on"?: string,"id"?: string,"organization_id"?: string,"platform"?: string | null,"source"?: string,"updated_at"?: string,"what"?: string,"why"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "change_logs_ad_account_id_fkey"
+      columns: ["ad_account_id"]
+isOneToOne: false
+      referencedRelation: "ad_accounts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "change_logs_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "change_logs_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "change_logs_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
       referencedColumns: ["id"]
     }
                   ]

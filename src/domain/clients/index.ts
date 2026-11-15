@@ -42,6 +42,7 @@ export function clientTabs(status: ClientStatus, serviceTabs: string[], perms: P
   // Cronograma só para quem tem Gerenciamento (briefing: cliente sem gerenciamento não tem cronograma).
   if (serviceTabs.includes("gerenciamento") && perms["tasks.read"]) tabs.push({ key: "cronograma", label: "Cronograma" });
   if (serviceTabs.some((t) => t === "videos" || t === "gravacao") && perms["tasks.read"]) tabs.push({ key: "gravacoes", label: "Gravações" });
+  if (serviceTabs.includes("anuncios") && (perms["ads.read"] || perms["optimization.manage"])) tabs.push({ key: "trafego", label: "Tráfego" });
   tabs.push({ key: "contratos", label: "Contratos" }, { key: "ideias", label: "Ideias e referências" }, { key: "arquivos", label: "Documentos" }, { key: "historico", label: "Histórico" }, portal);
   return tabs;
 }

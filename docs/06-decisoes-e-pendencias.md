@@ -296,3 +296,23 @@ Pedido do Henrique: deixar o sistema pronto para conectar a agência (BM e MCC) 
   - agenda com o escopo mínimo (`calendar.app.created`).
   - **Ordem combinada (docs/11):** a análise da Meta (acesso avançado) só pode ser enviada depois da sincronização, do painel e das páginas (fase 3), porque cada permissão precisa de um vídeo com o dado em uso. Os textos em inglês para as análises estão prontos no docs/11.
   - **Para a fase 3:** a Meta pede uso real de `pages_show_list` e `pages_read_engagement`, que são dependências de `business_management`. Entram com a lista de páginas e o vínculo ao cliente, e os últimos posts ao lado do cronograma. Também uma conta de revisor.
+
+## Briefing do Luiz: verba aprovada e registro de alterações (15/11/2026)
+Feito sem depender das chaves da Meta e do Google.
+- **Aba Tráfego no cliente** (`/clientes/[id]/trafego`):
+  - aparece para clientes com serviço de anúncios (aba de serviço `anuncios`);
+  - quem vê: tem `ads.read` ou `optimization.manage`;
+  - quando a sincronização existir, o painel de números entra nesta mesma aba.
+- **Verba aprovada pelo cliente (RF-T2-03):**
+  - campos: valor, plataforma, período, quem aprovou no cliente, data e canal (WhatsApp, e-mail, reunião, ligação);
+  - comprovante (print, áudio ou PDF até 10 MB) guardado em Documentos › Tráfego;
+  - a tela destaca a verba vigente e a média por dia;
+  - registrar avisa a equipe de tráfego do cliente e entra no histórico;
+  - quem otimiza o cliente (`optimization.manage`) registra, completa e apaga.
+  - **Fica para a sincronização:** o alerta de gasto acima da verba aprovada.
+- **Registro de alterações (RF-OTI-03, parte manual):**
+  - campos: o que mudou, quando, por quê, tipo e plataforma; o autor vem do login;
+  - aparece agrupado por mês e entra no histórico do cliente;
+  - só quem registrou corrige ou apaga; a origem (`source`) não vem do formulário;
+  - registros automáticos (`source = 'sync'`, mudança de orçamento/status detectada) entram com a sincronização e não podem ser alterados.
+- **Permissões no banco:** RLS por cliente (`can_client`), colunas liberadas uma a uma, organização e autor preenchidos por gatilho. Coberto por `24_registro_trafego.test.sql` e `e2e/21`.
