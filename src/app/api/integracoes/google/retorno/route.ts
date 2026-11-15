@@ -1,5 +1,6 @@
 import type { NextRequest } from "next/server";
-import { GoogleError, googleExchangeCode, googlePrimaryCalendar } from "@/lib/integrations/google";
+import { APP_CALENDAR_NAME, GoogleError, ensureAppCalendar, googleExchangeCode } from "@/lib/integrations/google";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { checkCallback } from "@/lib/integrations/oauth";
 import { discoverAccounts, getConnection, recordFailure, saveConnection } from "@/lib/integrations/store";
 
@@ -12,10 +13,16 @@ export async function GET(request: NextRequest) {
   let accountName: string;
   try {
     const t = await googleExchangeCode(c.code);
-    const needed = purpose === "calendar" ? "https://www.googleapis.com/auth/calendar.events" : "https://www.googleapis.com/auth/adwords";
+    const needed = purpose === "calendar" ? "https://www.googleapis.com/auth/calendar.app.created" : "https://www.googleapis.com/auth/adwords";
     if (!t.scopes.includes(needed)) return c.back("erro=escopo");
     accountName = t.email;
-    if (purpose === "calendar") accountName = (await googlePrimaryCalendar(t.access_token)).name;
+    let resourceId: string | undefined;
+    if (purpose === "calendar") {
+      // Reconectar reaproveita a agenda "Sistema Extend" que já existe na conta.
+      const { data: prev } = await createAdminClient().from("integration_connections").select("resource_id").eq("profile_id", c.user.id).eq("provider", "google").eq("purpose", "calendar").maybeSingle();
+      resourceId = await ensureAppCalendar(t.access_token, prev?.resource_id ?? null);
+      accountName = `Agenda “${APP_CALENDAR_NAME}” em ${t.email}`;
+    }
     id = await saveConnection({
       organizationId: c.user.organizationId,
       provider: "google",
@@ -31,6 +38,7 @@ export async function GET(request: NextRequest) {
       refreshToken: t.refresh_token ?? null,
       expiresAt: new Date(Date.now() + t.expires_in * 1000).toISOString(),
       connectedBy: c.user.id,
+      resourceId,
     });
   } catch (e) {
     return c.back(`erro=troca&detalhe=${encodeURIComponent(e instanceof GoogleError ? e.message : "Não foi possível concluir a conexão com o Google.")}`);

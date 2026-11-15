@@ -2,6 +2,7 @@ import { buttonVariants } from "@/components/ui/button";
 import { FormAlert } from "@/components/app/form-field";
 import type { ConnectionView } from "@/features/integrations/queries";
 import { ConnectionPanel } from "./connection-panel";
+import { GoogleButton } from "./google-button";
 
 const ERRORS: Record<string, string> = {
   configuracao: "A conexão ainda não está configurada no servidor.",
@@ -46,12 +47,12 @@ export function PersonalConnections({
         <div className="grid gap-3 rounded-xl border bg-card p-4">
           <div className="grid gap-1">
             <h3 className="text-sm font-semibold">Google Agenda</h3>
-            <p className="text-sm text-muted-foreground">Leva para a sua agenda do Google as gravações, reuniões e eventos do sistema em que você participa.</p>
+            <p className="text-sm text-muted-foreground">Cria na sua conta do Google uma agenda separada, chamada “Sistema Extend”, com as gravações, reuniões e eventos do sistema em que você participa. O sistema não vê as suas outras agendas.</p>
           </div>
           {calendar.conn ? (
             <ConnectionPanel conn={calendar.conn} title="a sua Google Agenda" showAccounts={false} reconnectHref="/api/integracoes/google/conectar?para=agenda" />
           ) : (
-            <a href="/api/integracoes/google/conectar?para=agenda" className={buttonVariants({ variant: "outline" }) + " justify-self-start"}>Conectar Google Agenda</a>
+            <GoogleButton href="/api/integracoes/google/conectar?para=agenda" />
           )}
         </div>
       )}

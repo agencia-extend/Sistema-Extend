@@ -3,28 +3,12 @@ import { googleEventBody } from "@/domain/integrations";
 import { publicEnv } from "@/lib/env";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { configured } from "./config";
-import { GoogleError } from "./google";
+import { appCalendarEvent, ensureAppCalendar } from "./google";
 import { accessToken, recordFailure, type StoredConnection } from "./store";
 
-// Eventos do sistema → Google Agenda de cada participante conectado (e de quem criou).
-// Nunca quebra a ação de quem salvou: falha fica registrada na conexão da pessoa (Meu perfil › Conexões).
-
-const API = "https://www.googleapis.com/calendar/v3/calendars/primary/events";
-
-async function call(token: string, method: string, url: string, body?: unknown) {
-  const res = await fetch(url, {
-    method,
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: body ? JSON.stringify(body) : undefined,
-    cache: "no-store",
-    signal: AbortSignal.timeout(20_000),
-  });
-  // Já apagado na agenda da pessoa: tudo bem.
-  if (method === "DELETE" && (res.status === 404 || res.status === 410)) return null;
-  const data = (await res.json().catch(() => ({}))) as { id?: string; error?: { status?: string } };
-  if (!res.ok) throw new GoogleError(data.error?.status, res.status);
-  return data;
-}
+// Eventos do sistema → agenda "Sistema Extend" (criada pelo app) de cada participante conectado e de quem criou.
+// Escopo calendar.app.created: o app não enxerga nenhuma outra agenda da pessoa.
+// Nunca quebra a ação de quem salvou: a falha fica registrada na conexão da pessoa (Meu perfil › Conexões).
 
 async function calendarConnections(profileIds: string[]): Promise<Map<string, StoredConnection>> {
   if (!profileIds.length) return new Map();
@@ -36,6 +20,16 @@ async function calendarConnections(profileIds: string[]): Promise<Map<string, St
     .eq("owner_kind", "user")
     .in("profile_id", profileIds);
   return new Map(((data ?? []) as StoredConnection[]).map((c) => [c.profile_id!, c]));
+}
+
+/** Agenda do app da pessoa; se ela apagou a agenda no Google, cria outra e guarda o novo id. */
+async function calendarOf(conn: StoredConnection, token: string, forceNew = false): Promise<string> {
+  const id = await ensureAppCalendar(token, forceNew ? null : conn.resource_id);
+  if (id !== conn.resource_id) {
+    await createAdminClient().from("integration_connections").update({ resource_id: id }).eq("id", conn.id);
+    conn.resource_id = id;
+  }
+  return id;
 }
 
 /** Cria, atualiza ou tira o evento das agendas conforme os participantes atuais. */
@@ -71,13 +65,21 @@ export async function syncEventToGoogle(eventId: string) {
     try {
       const token = await accessToken(conn);
       if (body && people.has(profileId)) {
-        if (googleId) await call(token, "PATCH", `${API}/${encodeURIComponent(googleId)}`, body);
-        else {
-          const created = await call(token, "POST", API, body);
-          if (created?.id) await db.from("calendar_event_links").upsert({ event_id: eventId, profile_id: profileId, connection_id: conn.id, google_event_id: created.id });
+        let cal = await calendarOf(conn, token);
+        let saved = googleId ? await appCalendarEvent(token, cal, "PATCH", googleId, body) : null;
+        // Sem vínculo, ou o evento/agenda foi apagado no Google: cria de novo (recriando a agenda se preciso).
+        if (!saved || saved.status >= 400) {
+          let created = await appCalendarEvent(token, cal, "POST", undefined, body);
+          if (created.status >= 400) {
+            cal = await calendarOf(conn, token, true);
+            created = await appCalendarEvent(token, cal, "POST", undefined, body);
+          }
+          saved = created;
         }
+        if (saved.data.id && saved.data.id !== googleId)
+          await db.from("calendar_event_links").upsert({ event_id: eventId, profile_id: profileId, connection_id: conn.id, google_event_id: saved.data.id, synced_at: new Date().toISOString() });
       } else if (googleId) {
-        await call(token, "DELETE", `${API}/${encodeURIComponent(googleId)}`);
+        if (conn.resource_id) await appCalendarEvent(token, conn.resource_id, "DELETE", googleId);
         await db.from("calendar_event_links").delete().eq("event_id", eventId).eq("profile_id", profileId);
       }
     } catch (e) {

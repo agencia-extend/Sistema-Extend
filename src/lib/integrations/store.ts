@@ -18,6 +18,7 @@ export type StoredConnection = {
   refresh_token_enc: string | null;
   expires_at: string | null;
   status: string;
+  resource_id: string | null;
 };
 
 type SaveInput = {
@@ -35,6 +36,8 @@ type SaveInput = {
   refreshToken?: string | null;
   expiresAt: string | null;
   connectedBy: string;
+  /** Google Agenda: id da agenda "Sistema Extend" criada na conta da pessoa. */
+  resourceId?: string | null;
 };
 
 /** Grava (ou troca) a conexão. Reconectar substitui o token e limpa o erro. */
@@ -62,6 +65,7 @@ export async function saveConnection(i: SaveInput): Promise<string> {
     last_error: null,
     last_checked_at: new Date().toISOString(),
     connected_by: i.connectedBy,
+    ...(i.resourceId !== undefined ? { resource_id: i.resourceId } : {}),
   };
   if (existing) {
     const { error } = await db.from("integration_connections").update(row).eq("id", existing.id);

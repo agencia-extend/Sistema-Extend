@@ -91,7 +91,7 @@ export function PolicyContent({ c }: { c: Controller }) {
           rows={[
             ["Meta da agência (BM da Extend) e Facebook de um gestor", "Lê o nome e o identificador da pessoa ou do usuário do sistema conectado, os portfólios empresariais (BMs) e as contas de anúncio a que ele tem acesso, com nome, moeda e situação. Os números de campanhas e anúncios das contas escolhidas entram quando a sincronização for ligada. Não publica nem altera anúncios."],
             ["Google Ads da agência", "Lê o e-mail da conta Google conectada, as contas de administrador (MCC) e as contas de anúncio dentro delas, com nome, moeda e situação. Não altera campanhas."],
-            ["Google Agenda de cada pessoa", "Lê o e-mail e o nome da agenda principal. Cria, altera e apaga na sua agenda apenas os eventos do sistema em que você participa ou que você criou. Não lê os outros eventos da sua agenda."],
+            ["Google Agenda de cada pessoa", "Lê o e-mail da conta. Cria na sua conta uma agenda separada chamada “Sistema Extend” e coloca nela apenas os eventos do sistema em que você participa ou que você criou. Não tem acesso às suas outras agendas nem aos outros eventos."],
           ]}
         />
         <p>

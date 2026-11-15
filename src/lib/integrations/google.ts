@@ -6,7 +6,8 @@ import { env, redirectUri } from "./config";
 // O acesso à Google Ads API vem do projeto do Google Cloud (o developer token foi aposentado em 09/2026).
 export const GOOGLE_SCOPES: Record<Purpose, string[]> = {
   ads: ["openid", "email", "https://www.googleapis.com/auth/adwords"],
-  calendar: ["openid", "email", "https://www.googleapis.com/auth/calendar.events"],
+  // Escopo mais restrito: só a agenda "Sistema Extend" que o próprio app cria na conta da pessoa.
+  calendar: ["openid", "email", "https://www.googleapis.com/auth/calendar.app.created"],
 };
 const adsApi = () => `https://googleads.googleapis.com/${env("GOOGLE_ADS_API_VERSION") || "v26"}`;
 
@@ -156,15 +157,39 @@ export async function googleDiscover(accessToken: string): Promise<{ managers: G
   return { managers, accounts: [...accounts.values()].sort((a, b) => a.name.localeCompare(b.name, "pt-BR")) };
 }
 
-/** Agenda principal da pessoa conectada (para mostrar qual agenda recebe os eventos). */
-export async function googlePrimaryCalendar(accessToken: string) {
-  const res = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary", {
-    headers: { Authorization: `Bearer ${accessToken}` },
+export const APP_CALENDAR_NAME = "Sistema Extend";
+const CAL = "https://www.googleapis.com/calendar/v3/calendars";
+
+async function calendarCall<T>(accessToken: string, method: string, url: string, body?: unknown): Promise<{ status: number; data: T }> {
+  const res = await fetch(url, {
+    method,
+    headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" },
+    body: body ? JSON.stringify(body) : undefined,
     cache: "no-store",
     signal: AbortSignal.timeout(20_000),
   }).catch(() => null);
   if (!res) throw Object.assign(new GoogleError(), { message: "Sem resposta do Google Agenda (rede). Tente de novo em instantes." });
-  const data = (await res.json().catch(() => ({}))) as { id?: string; summary?: string; error?: { status?: string } };
-  if (!res.ok) throw new GoogleError(data.error?.status, res.status);
-  return { id: data.id ?? "primary", name: data.summary ?? data.id ?? "Agenda principal" };
+  const data = (await res.json().catch(() => ({}))) as T & { error?: { status?: string } };
+  // 404/410: a agenda ou o evento foram apagados pela pessoa; quem chamou decide o que fazer.
+  if (!res.ok && res.status !== 404 && res.status !== 410) throw new GoogleError(data.error?.status, res.status);
+  return { status: res.status, data };
 }
+
+/** Usa a agenda "Sistema Extend" que já existe na conta da pessoa ou cria uma nova. Devolve o id. */
+export async function ensureAppCalendar(accessToken: string, knownId: string | null): Promise<string> {
+  if (knownId) {
+    const r = await calendarCall<{ id?: string }>(accessToken, "GET", `${CAL}/${encodeURIComponent(knownId)}`);
+    if (r.status < 300 && r.data.id) return r.data.id;
+  }
+  const r = await calendarCall<{ id?: string }>(accessToken, "POST", CAL, {
+    summary: APP_CALENDAR_NAME,
+    description: "Gravações, reuniões e eventos do Sistema Extend em que você participa. Mantida pelo sistema.",
+    timeZone: "America/Sao_Paulo",
+  });
+  if (!r.data.id) throw new GoogleError(undefined, r.status);
+  return r.data.id;
+}
+
+/** Evento dentro da agenda do app: criar (POST), alterar (PATCH) ou apagar (DELETE). */
+export const appCalendarEvent = (accessToken: string, calendarId: string, method: "POST" | "PATCH" | "DELETE", eventId?: string, body?: unknown) =>
+  calendarCall<{ id?: string }>(accessToken, method, `${CAL}/${encodeURIComponent(calendarId)}/events${eventId ? `/${encodeURIComponent(eventId)}` : ""}`, body);

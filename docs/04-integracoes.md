@@ -42,7 +42,7 @@ Projeto no time da Extend, região gru1, domínio **[CONFIRMAR: ex. sistema.agen
 - Upload grande (vídeo) direto do navegador para o Drive via sessão de upload retomável, sem passar pela Vercel.
 
 ## Google Agenda
-OAuth por pessoa (Meu perfil › Conexões, escopo `calendar.events`). **Feito em 15/11/2026:** criar, alterar e excluir um evento no sistema cria, altera e apaga o evento na agenda principal de cada participante conectado e de quem criou (`calendar_event_links`). A volta (eventos criados no Google aparecendo no sistema) fica para depois, com `syncToken` e canal de push.
+OAuth por pessoa (Meu perfil › Conexões), com o escopo mais restrito, `calendar.app.created`: o sistema cria na conta da pessoa uma agenda separada "Sistema Extend" (id em `integration_connections.resource_id`) e não enxerga as outras agendas. **Feito em 15/11/2026:** criar, alterar e excluir um evento no sistema cria, altera e apaga o evento nessa agenda, para cada participante conectado e para quem criou (`calendar_event_links`). Se a pessoa apagar a agenda no Google, o sistema cria outra no próximo evento. A volta (eventos criados no Google aparecendo no sistema) fica para depois, com `syncToken` e canal de push.
 
 ## Google Places (prospectador, etapa 08)
 Chave restrita por API e por referer/servidor; limite de gasto mensal configurado no Google Cloud e exibido no sistema.

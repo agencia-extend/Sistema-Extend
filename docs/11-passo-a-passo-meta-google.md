@@ -1,179 +1,291 @@
-# 11 — Passo a passo: conectar a Meta e o Google
+# 11 — Passo a passo: Meta e Google, da criação à publicação
 
-Para o Henrique (ou quem administra as contas da Extend). Tudo é feito **nas contas da Extend**, nunca em conta pessoal. Conferido nas páginas oficiais em 15/11/2026. A Meta e o Google mudam nomes de menu com frequência: se um nome estiver diferente, procure pelo item mais parecido e me avise.
+Para o Henrique, ou quem administra as contas da Extend.
+- **Contas:** tudo é feito nas contas da Extend, nunca em conta pessoal.
+- **Fontes:** conferido nas páginas oficiais em 15/11/2026.
+- **Menus:** a Meta e o Google mudam nomes de menu com frequência. Se algo estiver diferente, procure o item mais parecido e avise.
 
-**O que já está pronto no sistema:**
-- **Configurações › Integrações:** conecta a Meta e o Google Ads da agência. Mostra o que falta configurar e o endereço de retorno, com botão de copiar.
-- **Contas de anúncio:** depois de conectar, aparecem os BMs, a MCC e as contas encontradas. Você escolhe o cliente de cada conta e quais entram no sistema.
-- **Meu perfil › Conexões:** cada pessoa conecta a própria Google Agenda. Os eventos do sistema em que ela participa vão para a agenda dela. Gestores podem conectar o próprio Facebook para trazer contas de clientes que não estão no BM.
-- **Proteção:** os tokens ficam cifrados e o sistema avisa quando uma conexão vai vencer ou parou.
+Versão para seguir no celular, com caixas de marcar e botões de copiar: https://claude.ai/artifact/9SfsRU4vFKSM2KzUx12EJK
 
-**Endereços que você vai precisar:**
+## Visão geral: por que em fases
 
-| Para quê | Endereço |
+| Fase | O que acontece | Quem |
+|---|---|---|
+| 1. Preparar | Criar o projeto do Google e o app da Meta; verificar domínio, marca e empresa | Henrique |
+| 2. Conectar e usar | Chaves no sistema; a agência conecta; o sistema já funciona para a equipe | Henrique + desenvolvedor |
+| 3. Completar o sistema | Sincronização dos números, painel do tráfego e páginas, que os vídeos das análises precisam mostrar | Desenvolvedor |
+| 4. Verificações e análises | Verificação do Google (escopos) e análise da Meta (acesso avançado) com vídeos e textos | Henrique, com os textos deste guia |
+| 5. Publicar | Google já publicado; Meta em modo Live; acesso completo da API de Marketing | Henrique |
+
+**Por que a Meta só vem na fase 4:**
+- Para a equipe e as contas dos clientes usarem o app, cada permissão precisa de "acesso avançado".
+- O acesso avançado exige a verificação da empresa e a análise do app.
+- A análise pede, para cada permissão, um vídeo mostrando o dado em uso dentro do sistema. Para `ads_read`, o vídeo precisa mostrar gasto, impressões, cliques, alcance e conversões na tela.
+- Por isso a análise só é enviada depois que a sincronização e o painel existirem (fase 3).
+- O botão de pedir acesso também só libera depois que o app fez pelo menos uma chamada à API com cada permissão.
+
+**O que o sistema já tem para as verificações:**
+
+| Exigência | Onde está |
 |---|---|
-| Retorno do Google (OAuth) | `https://hub.agenciaextend.com.br/api/integracoes/google/retorno` |
-| Retorno da Meta (OAuth) | `https://hub.agenciaextend.com.br/api/integracoes/meta/retorno` |
-| Página inicial | `https://hub.agenciaextend.com.br` |
-| Política de privacidade | `https://hub.agenciaextend.com.br/privacidade` |
-| Termos de uso | `https://hub.agenciaextend.com.br/termos` |
+| Página inicial pública que explica o app (não pode ser só o login) | `https://hub.agenciaextend.com.br` |
+| Política de privacidade com o uso dos dados do Google e da Meta e a declaração de Uso Limitado | `https://hub.agenciaextend.com.br/privacidade` (seção 5) |
 | Instruções de exclusão de dados (Meta) | `https://hub.agenciaextend.com.br/privacidade#exclusao` |
-
-Para testes no computador do desenvolvedor, cadastre também os retornos com `http://localhost:3000` no lugar de `https://hub.agenciaextend.com.br`.
+| Termos de uso | `https://hub.agenciaextend.com.br/termos` |
+| Botões do Google no padrão de marca do Google | "Continuar com o Google" em Integrações e em Meu perfil |
+| Ícone do app 1024×1024 (Meta) | `https://hub.agenciaextend.com.br/brand/app-icon-1024.png` |
+| Escopo mínimo da agenda | `calendar.app.created`: o sistema cria uma agenda separada "Sistema Extend" e não vê as outras agendas da pessoa |
+| Endereço de retorno do Google | `https://hub.agenciaextend.com.br/api/integracoes/google/retorno` |
+| Endereço de retorno da Meta | `https://hub.agenciaextend.com.br/api/integracoes/meta/retorno` |
 
 ---
 
-## Parte A — Google (Google Ads, Google Agenda)
+## Fase 1 — Preparar
 
-Use a **conta Google que administra a MCC da Extend**. Se a MCC ainda não existe, crie em <https://ads.google.com/home/tools/manager-accounts/> e vincule as contas dos clientes a ela.
+### Google
 
-### A1. Criar o projeto
+Use a **conta Google que administra a MCC da Extend**. Se a MCC não existe, crie em <https://ads.google.com/home/tools/manager-accounts/> e vincule as contas dos clientes.
+
+**G1. Projeto.**
 1. Abra <https://console.cloud.google.com/projectcreate>.
-2. Nome do projeto: **Sistema Extend**. Clique em **Create**.
+2. Nome: **Sistema Extend**. Clique em **Create**.
 
-### A2. Ligar o faturamento (obrigatório para o acesso Explorer da Google Ads API; a API não cobra pelo uso)
-1. No projeto, vá em **Billing** (Faturamento) e vincule uma conta de faturamento da Extend.
-2. Projetos em período de teste gratuito, ou com o faturamento suspenso, têm o pedido de acesso recusado.
+**G2. Faturamento.**
+1. Em **Billing**, vincule uma conta de faturamento da Extend.
+2. A API não cobra pelo uso, mas sem faturamento ativo o pedido de acesso da Google Ads API é recusado.
 
-### A3. Ativar as APIs
+**G3. APIs.**
 1. Google Ads API: <https://console.cloud.google.com/flows/enableapi?apiid=googleads.googleapis.com>, depois **Enable**.
 2. Google Calendar API: em **APIs & Services › Library**, procure "Google Calendar API" e clique em **Enable**.
 
-### A4. Verificar o domínio
-1. Em <https://search.google.com/search-console>, adicione a propriedade de domínio **agenciaextend.com.br**.
-2. O Google mostra um registro TXT. Crie esse registro no DNS da HostGator e espere a verificação.
+**G4. Domínio verificado.**
+1. No <https://search.google.com/search-console>, adicione a propriedade de domínio `agenciaextend.com.br`.
+2. Crie no DNS da HostGator o registro TXT que o Google mostrar e clique em **Verificar**.
+3. Faça isso com a mesma conta Google que é dona do projeto.
 
-### A5. Google Auth Platform › Branding
-<https://console.cloud.google.com/auth/branding>
-1. **App name:** Sistema Extend. **User support email:** o e-mail da Extend.
-2. **App domain:** página inicial, política de privacidade e termos, com os endereços da tabela acima.
-3. **Authorized domains:** `agenciaextend.com.br`.
-4. **Developer contact information:** o e-mail da Extend.
-5. Não envie logo por enquanto. A logo obriga uma verificação extra da marca.
+**G5. Google Auth Platform › Branding** (<https://console.cloud.google.com/auth/branding>)
+- **App name:** `Sistema Extend` (o mesmo nome da página inicial).
+- **User support email** e **Developer contact information:** e-mail da Extend.
+- **App logo:** o ícone em `https://hub.agenciaextend.com.br/brand/app-icon-1024.png`. Baixe e reduza para 120×120 se o Google pedir. A logo faz parte da verificação da marca (G9).
+- **Application home page:** `https://hub.agenciaextend.com.br`.
+- **Application privacy policy link:** `https://hub.agenciaextend.com.br/privacidade`.
+- **Application terms of service link:** `https://hub.agenciaextend.com.br/termos`.
+- **Authorized domains:** `agenciaextend.com.br`.
 
-### A6. Google Auth Platform › Audience
-<https://console.cloud.google.com/auth/audience>
+**G6. Google Auth Platform › Audience** (<https://console.cloud.google.com/auth/audience>)
 1. **User type:** External.
-2. **Publishing status:** clique em **Publish app** para passar para **In production**.
-   - **Importante:** em "Testing", as conexões caem a cada 7 dias.
-   - Enquanto o app não for verificado, quem conectar vê uma tela de "app não verificado": clique em **Avançado** e depois em **Acessar Sistema Extend**.
-   - Sem verificação, o limite é de 100 pessoas, o que é suficiente para a equipe.
-   - A verificação pode ser pedida depois, em **Verification Center**, e pede um vídeo mostrando a conexão.
+2. Clique em **Publish app** para passar para **In production**.
+   - Em "Testing", as conexões caem a cada 7 dias.
+   - Enquanto os escopos não forem verificados (fase 4), aparece a tela "app não verificado". Clique em **Avançado** e depois em **Acessar Sistema Extend**. O limite é de 100 pessoas, suficiente para a equipe.
 
-### A7. Google Auth Platform › Data Access
-Clique em **Add or remove scopes** e marque:
+**G7. Google Auth Platform › Data Access.** Em **Add or remove scopes**, marque:
 - `openid`
 - `.../auth/userinfo.email`
-- `https://www.googleapis.com/auth/adwords` (Google Ads)
-- `https://www.googleapis.com/auth/calendar.events` (Google Agenda)
+- `https://www.googleapis.com/auth/adwords`
+- `https://www.googleapis.com/auth/calendar.app.created`
 
-### A8. Google Auth Platform › Clients (o "ID do cliente OAuth")
-<https://console.cloud.google.com/auth/clients>
-1. Clique em **Create client** e escolha o tipo **Web application**. Nome: Sistema Extend.
-2. **Authorized redirect URIs:** cole o retorno do Google da tabela acima. Para testes, cole também a versão com `localhost`.
+O Console mostra se cada escopo é "sensível". **Anote quais aparecem como sensíveis**: são esses que vão para a verificação da fase 4. Se nenhum aparecer como sensível, a fase 4 do Google se resume à verificação da marca.
+
+**G8. Google Auth Platform › Clients** (<https://console.cloud.google.com/auth/clients>)
+1. Clique em **Create client** e escolha **Web application**. Nome: Sistema Extend.
+2. **Authorized redirect URIs:**
+   - `https://hub.agenciaextend.com.br/api/integracoes/google/retorno`
+   - para testes do desenvolvedor, também `http://localhost:3000/api/integracoes/google/retorno`
 3. Clique em **Create** e **copie o Client ID e o Client secret na hora**. O segredo só aparece uma vez.
 
-### A9. Nível de acesso da Google Ads API
-<https://console.cloud.google.com/google/ads-apis/overview>
-1. O developer token **não existe mais**: o Google aposentou em 09/09/2026. Não use a "Central de API" dentro do Google Ads.
-2. Abra **Upgrade access level**. Confira se **Next access level** está em **Explorer** e clique em **Apply for access**. A aprovação costuma ser automática.
-3. O Explorer já lê as contas reais dos clientes, com até 2.880 operações por dia em contas de produção. Para mais, peça **Basic**, que exige a verificação da marca.
-4. **Problema conhecido do Google:** se aparecer `AUTHORIZATION_ERROR` mesmo com o Explorer aprovado, o Google orienta criar um projeto novo.
+**G9. Verificação da marca** (é rápida e libera o acesso Basic do Google Ads)
+1. Na página **Branding**, clique em **Verify Branding**.
+2. O Google confere o domínio verificado, a página inicial (nome do app, o que ele faz, link da política) e a política no mesmo domínio.
+3. Quando aparecer "Ready to publish", clique em **Publish branding**.
 
----
+**G10. Acesso à Google Ads API** (<https://console.cloud.google.com/google/ads-apis/overview>)
+1. Abra **Upgrade access level**. Em **Next access level**, escolha **Explorer** e clique em **Apply for access**.
+   - A aprovação costuma ser automática.
+   - O Explorer permite até 2.880 operações por dia em contas reais.
+2. Depois da G9, peça **Basic** do mesmo jeito: 15.000 operações por dia.
+3. Não existe mais developer token (aposentado em 09/09/2026). Não use a "Central de API" dentro do Google Ads.
+4. Se aparecer `AUTHORIZATION_ERROR` com o acesso aprovado, o Google orienta criar um projeto novo.
 
-## Parte B — Meta (Facebook e Instagram)
+### Meta
 
 Use um perfil do Facebook que seja **administrador do portfólio empresarial (BM) da Extend**.
 
-### B1. Verificar a empresa (BM)
-1. A verificação demora alguns dias: comece por ela.
-2. No app da Meta (passo B2), vá em **Configurações › Básico › Verificação**, clique em **Iniciar verificação** e termine no gerenciador de negócios.
-3. Pedem CNPJ, comprovante de endereço e um telefone ou e-mail do domínio.
-4. A verificação é exigida para ler contas de anúncio que **pertencem aos clientes** (passo B6).
+**M1. Verificar o domínio no BM.**
+1. No Meta Business Suite, abra **Configurações › Segurança da marca › Domínios**.
+2. Adicione `agenciaextend.com.br` e confirme pelo registro TXT no DNS da HostGator.
 
-### B2. Criar o app
+**M2. Criar o app.**
 1. Abra <https://developers.facebook.com/apps/creation/>.
-2. **Nome:** Sistema Extend. Coloque o e-mail de contato e clique em **Avançar**.
-3. **Casos de uso:** escolha o de **anúncios / API de Marketing** (algo como "Criar e gerenciar anúncios com a API de Marketing").
-   - O "Login do Facebook para Empresas" entra junto.
-   - Caso de uso não pode ser removido depois. Na dúvida, me mande um print da lista antes de confirmar.
-4. **Empresa:** escolha o **portfólio empresarial da Extend**. Avance até o painel.
+2. **Nome:** `Sistema Extend`. O nome não pode ter "Facebook", "Meta", "Face", "Book" nem "FB".
+3. **Casos de uso:** o de **anúncios / API de Marketing** (algo como "Criar e gerenciar anúncios com a API de Marketing"). O Login do Facebook para Empresas entra junto.
+   - Caso de uso não pode ser removido depois. Na dúvida, mande um print antes de confirmar.
+4. **Empresa:** o portfólio da Extend.
 
-### B3. Configurações › Básico
-1. Copie o **ID do app** e a **Chave secreta do app** (clique em **Mostrar**).
-2. **Domínios do app:** `hub.agenciaextend.com.br`.
-3. **Política de privacidade**, **Termos de serviço** e **Exclusão de dados do usuário:** os endereços da tabela acima.
-4. **Ícone do app** e **Categoria:** preencha para poder colocar o app no ar.
+**M3. Verificação da empresa** (leva alguns dias: comece cedo)
+1. No app, abra **Configurações › Básico › Verificação** e clique em **Iniciar verificação**. Termine no gerenciador de negócios. Só um administrador do BM consegue concluir.
+2. Tenha em mãos:
+   - cartão CNPJ;
+   - um documento com razão social e endereço, como conta de luz ou telefone, extrato bancário ou contrato social;
+   - e-mail `@agenciaextend.com.br` ou telefone da empresa para o código de confirmação.
+3. O nome e o endereço precisam ser **iguais** aos do CNPJ.
 
-### B4. Login do Facebook para Empresas
-1. No menu do app, abra **Login do Facebook para Empresas › Configurações**.
-   - Em **URIs de redirecionamento do OAuth válidos**, cole o retorno da Meta da tabela acima.
-2. Em **Login do Facebook para Empresas › Configurações (Configurations)**, clique em **+ Criar configuração**.
-   - Nome: Sistema Extend.
-   - Tipo de token: **Token de acesso do usuário**.
-   - Permissões: `ads_read`, `business_management`, `pages_show_list`, `pages_read_engagement`.
+**M4. Configurações › Básico.**
+- Copie o **ID do app** e a **Chave secreta do app** (clique em **Mostrar**).
+- **Domínios do app:** `hub.agenciaextend.com.br`.
+- **E-mail de contato:** e-mail da Extend.
+- **URL da Política de privacidade:** `https://hub.agenciaextend.com.br/privacidade`.
+- **URL dos Termos de serviço:** `https://hub.agenciaextend.com.br/termos`.
+- **Exclusão de dados do usuário:** escolha a opção de URL de instruções e cole `https://hub.agenciaextend.com.br/privacidade#exclusao`.
+- **Ícone do app (1024×1024):** baixe `https://hub.agenciaextend.com.br/brand/app-icon-1024.png` e envie.
+- **Categoria:** Negócios e páginas (Business and Pages).
+- **Finalidade do app:** **Clientes** (Clients), porque o app atende os clientes da agência.
+- Em **+ Adicionar plataforma › Site**, coloque `https://hub.agenciaextend.com.br`.
+
+**M5. Login do Facebook para Empresas.**
+1. No menu do app, abra **Login do Facebook para Empresas › Configurações**. Em **URIs de redirecionamento do OAuth válidos**, cole `https://hub.agenciaextend.com.br/api/integracoes/meta/retorno`.
+2. Em **Configurations**, clique em **+ Criar configuração**:
+   - **Nome:** Sistema Extend.
+   - **Tipo de token:** Token de acesso do usuário.
+   - **Permissões:** `ads_read`, `business_management`, `pages_show_list`, `pages_read_engagement`.
 3. Clique em **Criar** e copie o **ID da configuração**.
 
-### B5. Usuário do sistema (forma recomendada para a agência)
-O token do usuário do sistema não depende do Facebook de ninguém e é o jeito mais estável.
-1. No **Meta Business Suite**, abra **Configurações › Usuários › Usuários do sistema**.
-2. Clique em **Adicionar**. Nome: Sistema Extend. Função: **Admin**.
-3. Clique em **Atribuir ativos**. Marque as **contas de anúncio**, inclusive as dos clientes compartilhadas com o BM, e as **páginas**, com permissão de ver o desempenho.
-4. Clique em **Gerar token**:
+**M6. Funções do app.** Em **Funções do app › Funções**, adicione como **Administrador** ou **Desenvolvedor** as pessoas que vão testar antes da aprovação (você, o Luiz). Só quem tem função no app consegue conectar enquanto ele está em desenvolvimento.
+
+**M7. Usuário do sistema (conexão da agência).**
+1. No Meta Business Suite, abra **Configurações › Usuários › Usuários do sistema** › **Adicionar**. Nome: Sistema Extend. Função: **Admin**.
+2. **Atribuir ativos:**
+   - o app Sistema Extend;
+   - as **contas de anúncio**, inclusive as dos clientes compartilhadas com o BM;
+   - as **páginas**, com permissão de ver o desempenho.
+3. **Gerar token:**
    - **App:** Sistema Extend.
-   - **Validade:** "Nunca", se aparecer. Se só houver 60 dias, tudo bem: o sistema avisa uma semana antes de vencer.
-   - **Permissões:** `ads_read`, `business_management`, `pages_show_list` e `pages_read_engagement`.
-5. Copie o token. **Ele não vai para o `.env.local`**: você cola direto no sistema, no passo C3.
-
-### B6. Nível de acesso da Meta
-- O app começa com o acesso **limitado** (antes "Standard Access"). Esse acesso já lê as contas de anúncio que **pertencem ao BM da Extend**.
-- Contas que **pertencem aos clientes** podem exigir o acesso **completo** (antes "Advanced Access") de `ads_read` e `business_management`.
-  - Ele é pedido em **Análise do app › Permissões e recursos › Solicitar acesso avançado**.
-  - Exige a verificação da empresa (B1).
-  - A Meta também libera esse acesso pelo uso: 500 chamadas em 15 dias com menos de 15% de erro.
-- Se, ao conectar, alguma conta de cliente não aparecer, o sistema mostra o motivo e seguimos por esse caminho.
+   - **Validade:** "Nunca", se aparecer. A Meta recomenda 60 dias; se escolher 60, o sistema avisa uma semana antes de vencer.
+   - **Permissões:** `ads_read`, `business_management`, `pages_show_list`, `pages_read_engagement`.
+4. Copie o token. **Ele não vai para o `.env.local`**: você cola no sistema (fase 2).
 
 ---
 
-## Parte C — Colocar no sistema
+## Fase 2 — Conectar e usar
 
-### C1. Preencher o `.env.local`
-Preencha no `.env.local` do computador do desenvolvedor (fora do git). **Não mande essas chaves pelo chat.**
-```
-META_APP_ID=          (B3)
-META_APP_SECRET=      (B3)
-META_LOGIN_CONFIG_ID= (B4, opcional, mas recomendado)
-GOOGLE_CLIENT_ID=     (A8)
-GOOGLE_CLIENT_SECRET= (A8)
-```
-A `TOKEN_ENCRYPTION_KEY` já está criada. Não precisa de developer token nem de ID da MCC: o sistema encontra a MCC sozinho.
+1. **Preencher o `.env.local`** (fora do git; não mande pelo chat):
+   ```
+   META_APP_ID=          (M4)
+   META_APP_SECRET=      (M4)
+   META_LOGIN_CONFIG_ID= (M5)
+   GOOGLE_CLIENT_ID=     (G8)
+   GOOGLE_CLIENT_SECRET= (G8)
+   ```
+2. **Avisar "pronto".** O desenvolvedor copia para a Vercel sem exibir e publica de novo.
+3. **Configurações › Integrações:**
+   - **Meta:** cole o token do usuário do sistema (M7) e clique em **Salvar token e buscar contas**.
+   - **Google Ads:** clique em **Continuar com o Google** com a conta da MCC e marque todas as caixas.
+   - **Contas de anúncio:** escolha o cliente de cada conta e ligue **Entra no sistema**.
+4. **Cada pessoa:** em **Meu perfil › Conexões**, clique em **Continuar com o Google**. Aparece no Google Agenda dela uma agenda "Sistema Extend" com os eventos do sistema.
 
-### C2. Avisar o desenvolvedor
-Avise com "pronto". O desenvolvedor copia as chaves para a Vercel sem exibi-las e publica de novo.
-
-### C3. Conectar a agência
-Em **Configurações › Integrações**:
-1. **Meta:** cole o token do usuário do sistema (B5) e clique em **Salvar token e buscar contas**. A outra opção é **Entrar com o Facebook**.
-2. **Google Ads:** clique em **Entrar com o Google** com a conta que administra a MCC e marque todas as caixas de permissão.
-3. **Contas de anúncio:** escolha o cliente de cada conta.
-   - Quando o cliente já tem a conta cadastrada em "Contas e acessos", o sistema sugere o vínculo.
-   - Ligue **Entra no sistema** nas contas que devem ser acompanhadas.
-
-### C4. Conexões de cada pessoa
-Em **Meu perfil › Conexões**:
-- **Conectar Google Agenda**, para os eventos do sistema irem para a agenda do Google.
-- Gestores que administram contas de clientes fora do BM: **Conectar meu Facebook**.
+Nesta fase, o app da Meta ainda está em desenvolvimento. O token do usuário do sistema lê os ativos do BM da Extend. Contas que pertencem aos clientes podem só aparecer depois do acesso avançado (fase 4); a tela de Integrações mostra o motivo, se acontecer.
 
 ---
 
-## Depois de conectar (próximas entregas)
-Com as contas ligadas e testadas com dados reais, entram (prompt 05):
-- sincronização dos números a cada 3 horas;
-- painel do tráfego em tabela;
-- saldo e alertas;
-- números por criativo para a equipe de mídias;
-- vínculo do plano de campanha;
-- verificador de nomes fora do padrão.
+## Fase 3 — Completar o sistema (desenvolvedor)
 
-Depois disso, os relatórios automáticos (prompt 06). Cada uma só é dada como pronta depois de conferida com o Gerenciador de Anúncios e o Google Ads.
+Com as contas conectadas e dados reais:
+- **Sincronização:** os números das contas escolhidas chegam a cada 3 horas.
+- **Painel do tráfego:** gasto, impressões, alcance, cliques, leads, conversões e custo por resultado, por cliente e por campanha.
+- **Números por criativo:** aparecem na biblioteca e no criativo, para a equipe de mídias.
+- **Páginas e Instagram:** a lista das páginas que a agência administra, com o vínculo a cada cliente (`pages_show_list`) e os últimos posts da página ao lado do cronograma (`pages_read_engagement`).
+- **Conta de revisor:** uma pessoa só para os revisores da Meta e do Google, com acesso à tela de Integrações e ao painel, sem dados que não precisem ver.
+
+Cada tela só é dada como pronta depois de conferida com o Gerenciador de Anúncios e o Google Ads. Essas telas, com dados reais, são o que os vídeos da fase 4 mostram.
+
+---
+
+## Fase 4 — Verificações e análises
+
+### Google: verificação dos escopos sensíveis
+Só para os escopos marcados como sensíveis em G7.
+1. **Google Auth Platform › Verification Center** (ou **Prepare for verification**).
+2. Para cada escopo sensível, cole a justificativa (textos prontos abaixo).
+3. **Vídeo de demonstração:** grave seguindo o roteiro abaixo, publique no YouTube como **não listado** e cole o link.
+4. Clique em **Submit for verification**.
+   - O Google responde por e-mail aos donos do projeto e pode pedir ajustes.
+   - O prazo varia de dias a algumas semanas.
+   - Enquanto isso, o app continua funcionando para a equipe, com a tela de "não verificado".
+
+**Justificativa: `https://www.googleapis.com/auth/adwords`**
+> Sistema Extend is the internal management system of Agência Extend, a marketing agency in Brazil that manages Google Ads for its client businesses. An agency administrator connects the Google account that manages the agency's Google Ads manager account (MCC). The app uses this scope only to read: it lists the client accounts under the MCC and reads campaign performance metrics (cost, impressions, clicks, conversions) to show them in the app's paid-traffic dashboard to the agency team and, for each client, in that client's private portal. The app never creates, edits or deletes campaigns, budgets or users. The Google Ads API has no narrower read-only scope.
+
+**Justificativa: `https://www.googleapis.com/auth/calendar.app.created`**
+> Optional for each team member. When a person connects their Google account, Sistema Extend creates one secondary calendar named "Sistema Extend" in that account and adds, updates and deletes in it only the events created in Sistema Extend (video recording sessions and client meetings) in which that person takes part. This keeps the agency schedule in the person's Google Calendar. We use calendar.app.created because it is the narrowest Calendar scope: the app cannot see or change any of the user's other calendars or events.
+
+**Roteiro do vídeo do Google** (tela inteira, em inglês ou com legendas em inglês, 3 a 5 minutos)
+1. Mostre `https://hub.agenciaextend.com.br`: nome do app, o que ele faz e o link da política de privacidade.
+2. Entre no sistema. Abra **Configurações › Integrações** e clique em **Continuar com o Google**.
+3. Na tela de consentimento, troque o idioma para **English**, no canto inferior esquerdo.
+   - Mostre o nome do app e cada permissão pedida.
+   - Mostre a barra de endereço com o `client_id`.
+4. Permita. De volta ao sistema, mostre a MCC e a lista de contas encontradas. Depois mostre o painel do tráfego com os números (uso do `adwords`).
+5. Abra **Meu perfil › Conexões**, clique em **Continuar com o Google**, mostre o consentimento em inglês com a permissão da agenda e permita.
+6. Crie um evento na **Agenda** do sistema com você como participante.
+   - Abra o Google Agenda e mostre a agenda "Sistema Extend" com o evento.
+   - Altere e depois exclua o evento no sistema e mostre que mudou no Google.
+7. Mostre **Desconectar** e a seção 5 da política de privacidade.
+
+### Meta: análise do app (acesso avançado)
+1. **Pré-requisitos:**
+   - empresa verificada (M3);
+   - app com pelo menos uma chamada bem-sucedida de cada permissão nos últimos 30 dias (acontece sozinho com o sistema conectado na fase 2 e as telas da fase 3).
+2. **Análise do app › Permissões e recursos.** Para `ads_read`, `business_management`, `pages_show_list`, `pages_read_engagement` e `public_profile`, clique em **Solicitar acesso avançado** e depois em **Continuar a solicitação**.
+3. **Perguntas sobre o tratamento de dados:**
+   - **Operadores de dados que acessam dados da plataforma:** sim. Supabase (banco de dados) e Vercel (hospedagem), nos Estados Unidos.
+   - **Responsável:** Agência Extend.
+   - **Dados entregues a autoridades:** não.
+   - **Política de proteção:** as regras da seção 8 da política de privacidade.
+4. **Verificação do app (Platform settings):** descreva como entrar, com o texto pronto abaixo e a conta de revisor criada na fase 3.
+5. **Permissões solicitadas:** para cada uma, cole a descrição pronta (cada descrição é diferente; a Meta recusa texto copiado entre permissões) e envie o vídeo dela.
+6. Clique em **Enviar para análise** e aceite os termos. A Meta costuma responder em até uma semana.
+7. Depois de aprovado:
+   - **Análise do app › Permissões e recursos › Nível de acesso da API de Marketing:** clique em **+Upgrade** para o acesso completo. Ele exige 500 chamadas à API de Marketing em 15 dias e menos de 15% de erro; o sistema chega lá sozinho com a sincronização a cada 3 horas.
+   - Faça a **Verificação de uso de dados** (Data Use Checkup), que é anual.
+
+**Instruções para os revisores (Platform settings)**
+> Sistema Extend is an invitation-only internal system of a marketing agency. To review: 1) Open https://hub.agenciaextend.com.br/login and sign in with the test account provided below. 2) Go to "Configurações" (Settings) > "Integrações" (Integrations). The "Meta (Facebook e Instagram)" section shows the connected Business Portfolio, the ad accounts found and the client each one belongs to. "Entrar com o Facebook" starts Facebook Login for Business. 3) Open the paid-traffic dashboard to see ads performance (spend, impressions, reach, clicks, results) read with ads_read. 4) Open a client page to see the client's Facebook Page and latest posts (pages_show_list, pages_read_engagement). The interface is in Portuguese; the screen recordings have English captions.
+
+**Descrição: `ads_read`**
+> Agência Extend manages paid ads for its client businesses. Through a system user of our Business Portfolio (or Facebook Login for Business), the agency admin connects the ad accounts we manage. We use ads_read to read performance insights (spend, impressions, reach, clicks, leads, conversions and cost per result) for campaigns, ad sets and ads of those accounts, on behalf of our clients. We show this data in our paid-traffic dashboard for the agency team, in the performance view of each ad creative for our design team, and in each client's private portal. We never create, edit or pause ads.
+
+**Descrição: `business_management`**
+> We use business_management to read which Business Portfolios the connected user or system user can access, and the ad accounts owned by those portfolios or shared with them by our clients (owned_ad_accounts and client_ad_accounts). In Settings > Integrations, the agency admin sees this list and chooses which client each ad account belongs to, so data from each account is shown only to that client's team and portal. We do not change any business settings, users or assets.
+
+**Descrição: `pages_show_list`**
+> We list the Facebook Pages that our agency manages for its clients so the agency admin can link each Page, and its connected Instagram account, to the right client in Sistema Extend. The list appears in the client's page and in Settings > Integrations.
+
+**Descrição: `pages_read_engagement`**
+> For the client Pages linked in the system, we read Page metadata and the latest posts so the agency's social media team sees, next to each client's content schedule, what was actually published and when. We do not publish, edit or delete posts.
+
+**Descrição: `public_profile`**
+> We read the name and ID of the person who connects through Facebook Login for Business only to show who made the connection ("Conectado por") in Settings > Integrations, for accountability within the agency.
+
+**Roteiros dos vídeos da Meta** (1080p, mouse visível, sem áudio, legendas em inglês em cada clique)
+- **Para todas:** comece em `https://hub.agenciaextend.com.br`, entre no sistema, abra **Configurações › Integrações**, clique em **Entrar com o Facebook** e mostre o login e a tela de permissões completa.
+- **`ads_read`:** depois de conectar, abra o painel do tráfego. Mostre impressões, alcance, cliques, gasto e conversões de uma conta, e o mesmo número por criativo.
+- **`business_management`:** mostre a lista de BMs e contas encontradas em Integrações e o vínculo de uma conta a um cliente.
+- **`pages_show_list`:** mostre a lista de páginas e o vínculo de uma página a um cliente.
+- **`pages_read_engagement`:** mostre os últimos posts de uma página na tela do cliente.
+- **`public_profile`:** mostre "Conectado por" com o nome de quem conectou.
+
+---
+
+## Fase 5 — Publicar
+
+**Google**
+- O app já está "In production" desde a G6.
+- Com os escopos verificados, a tela de "não verificado" some e o limite de 100 pessoas acaba.
+
+**Meta**
+1. Com o acesso avançado aprovado e a Verificação de uso de dados feita, use o **seletor de modo** no topo do painel do app para passar de **Desenvolvimento** para **Live**.
+2. Depois disso, qualquer pessoa da equipe pode usar **Conectar meu Facebook** (Meu perfil › Conexões), sem precisar de função no app.
+3. **Atenção:** mudar os campos de **Configurações › Básico** depois de aprovado pode gerar nova análise.
+
+**Manutenção anual**
+- Verificação de uso de dados da Meta: todo ano.
+- Manter a política de privacidade atualizada sempre que o sistema passar a ler um dado novo da Meta ou do Google. O desenvolvedor atualiza a página e a versão.

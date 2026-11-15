@@ -263,8 +263,8 @@ Pedido do Henrique: deixar o sistema pronto para conectar a agência (BM e MCC) 
   - **Meta da agência:** token do usuário do sistema do BM (recomendado; validado na Meta pelo `debug_token`, recusado se for de outro app) ou login do Facebook (Login do Facebook para Empresas, com `config_id` quando houver);
   - **Google Ads da agência:** login com a conta que administra a MCC; a MCC é encontrada sozinha (sem developer token, aposentado pelo Google, e sem variável de MCC) e cada conta guarda o `login_customer_id`;
   - **Contas de anúncio:** BMs/MCCs e contas encontradas (próprias do BM, de clientes compartilhadas com o BM e dentro da MCC). A tela sugere o cliente quando ele já tem a conta em "Contas e acessos". Incluir exige cliente, e ligar a conta a um cliente a acrescenta em "Contas e acessos" sem duplicar (`save_ad_account`).
-- **Meu perfil › Conexões:** Google Agenda de cada pessoa (`calendar.events`) e Facebook pessoal de quem tem `ads.manage` (contas de clientes fora do BM; a conta que já vem pela agência continua com a agência). Só aparece o que está configurado no servidor.
-- **Google Agenda:** salvar ou excluir um evento leva a mudança para a agenda principal dos participantes conectados e de quem criou. Roda depois da resposta (`after`), sem atrasar a tela. Falha fica registrada na conexão da pessoa.
+- **Meu perfil › Conexões:** Google Agenda de cada pessoa (`calendar.app.created`: agenda separada "Sistema Extend" criada pelo app, sem acesso às outras agendas) e Facebook pessoal de quem tem `ads.manage` (contas de clientes fora do BM; a conta que já vem pela agência continua com a agência). Só aparece o que está configurado no servidor.
+- **Google Agenda:** salvar ou excluir um evento leva a mudança para a agenda "Sistema Extend" dos participantes conectados e de quem criou. Roda depois da resposta (`after`), sem atrasar a tela. Falha fica registrada na conexão da pessoa.
 - **Segurança:**
   - tokens cifrados (AES-256-GCM) em `integration_connections`, tabela sem grant para usuários;
   - a tela lê `integration_status()`, sem tokens: a agência para quem lê ou conecta anúncios, e cada um vê só as próprias conexões;
@@ -288,3 +288,11 @@ Pedido do Henrique: deixar o sistema pronto para conectar a agência (BM e MCC) 
   - itens 1 a 4 prontos;
   - item 5: calendário pronto; plano e nomenclatura esperam as campanhas sincronizadas;
   - itens 6 a 8 (checklists com números da API, registro de alterações automático, KPIs, relatórios e números por criativo) dependem da sincronização, que é a próxima entrega depois das chaves.
+
+- **Preparação para as verificações (15/11/2026, a pedido do Henrique):**
+  - página inicial pública em `/` (sem login): o que o sistema faz, o uso dos dados do Google e da Meta, resumo em inglês para os revisores, links de privacidade e termos. Quem está logado vai para `/inicio`;
+  - botões "Continuar com o Google" no padrão de marca do Google;
+  - ícone do app 1024×1024 em `/brand/app-icon-1024.png`;
+  - agenda com o escopo mínimo (`calendar.app.created`).
+  - **Ordem combinada (docs/11):** a análise da Meta (acesso avançado) só pode ser enviada depois da sincronização, do painel e das páginas (fase 3), porque cada permissão precisa de um vídeo com o dado em uso. Os textos em inglês para as análises estão prontos no docs/11.
+  - **Para a fase 3:** a Meta pede uso real de `pages_show_list` e `pages_read_engagement`, que são dependências de `business_management`. Entram com a lista de páginas e o vínculo ao cliente, e os últimos posts ao lado do cronograma. Também uma conta de revisor.

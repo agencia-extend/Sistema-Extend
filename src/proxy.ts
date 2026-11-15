@@ -72,9 +72,10 @@ export async function proxy(request: NextRequest) {
     return copyCookies(response, NextResponse.redirect(url));
   }
 
-  if (pathname === "/") {
+  // Sem login, "/" mostra a página pública do sistema (exigida pelo Google e pela Meta).
+  if (pathname === "/" && signedIn) {
     const url = request.nextUrl.clone();
-    url.pathname = signedIn ? "/inicio" : "/login";
+    url.pathname = "/inicio";
     url.search = "";
     return copyCookies(response, NextResponse.redirect(url));
   }

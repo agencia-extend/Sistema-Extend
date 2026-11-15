@@ -10,6 +10,7 @@ import { ConnectionPanel } from "@/features/integrations/components/connection-p
 import { SystemTokenForm } from "@/features/integrations/components/system-token-form";
 import { SetupNotice } from "@/features/integrations/components/setup-notice";
 import { AdAccountsTable } from "@/features/integrations/components/ad-accounts-table";
+import { GoogleButton } from "@/features/integrations/components/google-button";
 
 export const metadata: Metadata = { title: "Integrações" };
 
@@ -100,7 +101,7 @@ export default async function IntegracoesPage({ searchParams }: { searchParams: 
             {google ? (
               <ConnectionPanel conn={google} title="o Google Ads" reconnectHref={googleReady ? "/api/integracoes/google/conectar?para=agencia" : undefined} />
             ) : googleReady ? (
-              <a href="/api/integracoes/google/conectar?para=agencia" className={buttonVariants({ variant: "outline" }) + " justify-self-start"}>Entrar com o Google</a>
+              <GoogleButton href="/api/integracoes/google/conectar?para=agencia" />
             ) : null}
           </div>
         </section>
