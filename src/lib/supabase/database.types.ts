@@ -5,7 +5,71 @@ export type Database = {
   
   "public": {
           Tables: {
-            "approval_links": {
+            "ad_accounts": {
+                  Row: {
+                    "client_id": string | null,"connection_id": string | null,"created_at": string,"currency": string | null,"external_id": string,"id": string,"is_enabled": boolean,"last_seen_at": string,"login_customer_id": string | null,"manager_id": string | null,"name": string,"organization_id": string,"provider": string,"status_label": string | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id"?: string | null,"connection_id"?: string | null,"created_at"?: string,"currency"?: string | null,"external_id": string,"id"?: string,"is_enabled"?: boolean,"last_seen_at"?: string,"login_customer_id"?: string | null,"manager_id"?: string | null,"name": string,"organization_id": string,"provider": string,"status_label"?: string | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "client_id"?: string | null,"connection_id"?: string | null,"created_at"?: string,"currency"?: string | null,"external_id"?: string,"id"?: string,"is_enabled"?: boolean,"last_seen_at"?: string,"login_customer_id"?: string | null,"manager_id"?: string | null,"name"?: string,"organization_id"?: string,"provider"?: string,"status_label"?: string | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ad_accounts_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_accounts_connection_id_fkey"
+      columns: ["connection_id"]
+isOneToOne: false
+      referencedRelation: "integration_connections"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_accounts_manager_id_fkey"
+      columns: ["manager_id"]
+isOneToOne: false
+      referencedRelation: "ad_managers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_accounts_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"ad_managers": {
+                  Row: {
+                    "connection_id": string | null,"created_at": string,"external_id": string,"id": string,"last_seen_at": string,"name": string,"organization_id": string,"provider": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "connection_id"?: string | null,"created_at"?: string,"external_id": string,"id"?: string,"last_seen_at"?: string,"name": string,"organization_id": string,"provider": string
+                  }
+                  Update: {
+                    "connection_id"?: string | null,"created_at"?: string,"external_id"?: string,"id"?: string,"last_seen_at"?: string,"name"?: string,"organization_id"?: string,"provider"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ad_managers_connection_id_fkey"
+      columns: ["connection_id"]
+isOneToOne: false
+      referencedRelation: "integration_connections"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_managers_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"approval_links": {
                   Row: {
                     "comment": string | null,"created_at": string,"created_by": string | null,"decided_at": string | null,"decision": string | null,"delivery_id": string | null,"expires_at": string,"id": string,"reviewer_ip": string | null,"reviewer_name": string | null,"revoked_at": string | null,"task_id": string,"token_hash": string
                   }
@@ -135,6 +199,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     },{
       foreignKeyName: "calendar_attendees_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"calendar_event_links": {
+                  Row: {
+                    "connection_id": string | null,"event_id": string,"google_event_id": string,"profile_id": string,"synced_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "connection_id"?: string | null,"event_id": string,"google_event_id": string,"profile_id": string,"synced_at"?: string
+                  }
+                  Update: {
+                    "connection_id"?: string | null,"event_id"?: string,"google_event_id"?: string,"profile_id"?: string,"synced_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "calendar_event_links_connection_id_fkey"
+      columns: ["connection_id"]
+isOneToOne: false
+      referencedRelation: "integration_connections"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "calendar_event_links_profile_id_fkey"
       columns: ["profile_id"]
 isOneToOne: false
       referencedRelation: "profiles"
@@ -834,6 +924,38 @@ isOneToOne: false
       columns: ["handoff_id"]
 isOneToOne: false
       referencedRelation: "commercial_handoffs"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"integration_connections": {
+                  Row: {
+                    "account_email": string | null,"account_name": string | null,"accounts_synced_at": string | null,"connected_by": string | null,"created_at": string,"expires_at": string | null,"external_user_id": string | null,"id": string,"last_checked_at": string | null,"last_error": string | null,"method": string,"organization_id": string,"owner_kind": string,"profile_id": string | null,"provider": string,"purpose": string,"refresh_token_enc": string | null,"scopes": (string)[],"status": string,"token_enc": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "account_email"?: string | null,"account_name"?: string | null,"accounts_synced_at"?: string | null,"connected_by"?: string | null,"created_at"?: string,"expires_at"?: string | null,"external_user_id"?: string | null,"id"?: string,"last_checked_at"?: string | null,"last_error"?: string | null,"method"?: string,"organization_id": string,"owner_kind": string,"profile_id"?: string | null,"provider": string,"purpose": string,"refresh_token_enc"?: string | null,"scopes"?: (string)[],"status"?: string,"token_enc": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "account_email"?: string | null,"account_name"?: string | null,"accounts_synced_at"?: string | null,"connected_by"?: string | null,"created_at"?: string,"expires_at"?: string | null,"external_user_id"?: string | null,"id"?: string,"last_checked_at"?: string | null,"last_error"?: string | null,"method"?: string,"organization_id"?: string,"owner_kind"?: string,"profile_id"?: string | null,"provider"?: string,"purpose"?: string,"refresh_token_enc"?: string | null,"scopes"?: (string)[],"status"?: string,"token_enc"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "integration_connections_connected_by_fkey"
+      columns: ["connected_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "integration_connections_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "integration_connections_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
                   ]
@@ -2594,6 +2716,11 @@ isOneToOne: false
 "import_leads":
 { Args: { "p_file": string,"p_pipeline": string,"p_rows": Json }; Returns: Json
                            },
+"integration_status":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "account_email": string,"account_name": string,"accounts_synced_at": string,"connected_by_name": string,"created_at": string,"expires_at": string,"id": string,"last_error": string,"method": string,"owner_kind": string,"provider": string,"purpose": string,"status": string
+            }[]
+                           },
 "mark_all_notifications_read":
 { Args: Record<PropertyKey, never>; Returns: number
                            },
@@ -2620,6 +2747,9 @@ isOneToOne: false
 { Args: { "p_end": string,"p_start": string }; Returns: {
               "on_date": string,"title": string
             }[]
+                           },
+"notify_perm_holders":
+{ Args: { "p_actor": string,"p_body": string,"p_dedupe": string,"p_href": string,"p_kind": string,"p_org": string,"p_perm": string,"p_title": string }; Returns: number
                            },
 "notify_users":
 { Args: { "p_actor": string,"p_body": string,"p_dedupe_key": string,"p_href": string,"p_kind": string,"p_title": string,"p_users": (string)[] }; Returns: number
@@ -2673,6 +2803,9 @@ isOneToOne: false
                            },
 "review_creative":
 { Args: { "p_comment": string,"p_decision": string,"p_task": string }; Returns: undefined
+                           },
+"save_ad_account":
+{ Args: { "p_client": string,"p_enabled": boolean,"p_id": string }; Returns: undefined
                            },
 "save_client_strategy":
 { Args: { "p_body": string,"p_client": string,"p_publish": boolean }; Returns: string

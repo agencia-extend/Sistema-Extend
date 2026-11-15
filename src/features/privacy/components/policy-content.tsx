@@ -6,6 +6,7 @@ export const POLICY_SECTIONS = [
   ["quais", "Quais dados tratamos"],
   ["para-que", "Para que usamos e com qual base legal"],
   ["compartilhamento", "Com quem compartilhamos"],
+  ["conexoes", "Conexões com Meta e Google"],
   ["exterior", "Dados guardados fora do Brasil"],
   ["prazos", "Por quanto tempo guardamos"],
   ["seguranca", "Como protegemos"],
@@ -76,18 +77,39 @@ export function PolicyContent({ c }: { c: Controller }) {
           <li><strong>Vercel</strong>: hospedagem do sistema (servidores nos Estados Unidos, ao lado do banco de dados).</li>
           <li><strong>Titan (contratado pela HostGator)</strong>: envio dos e-mails do sistema.</li>
           <li><strong>Serviços de aviso dos navegadores</strong> (Google, Apple, Mozilla, Microsoft): entregam o aviso no seu aparelho, com o título e o texto do aviso.</li>
+          <li><strong>Meta (Facebook e Instagram) e Google (Google Ads e Google Agenda)</strong>: só quando a agência ou você conecta essas contas ao sistema; o que é lido e enviado está no item 5.</li>
           <li><strong>YouTube, Loom, Google Drive e Vimeo</strong>: só quando uma aula de treinamento tem vídeo dessas plataformas e você abre a aula. Vídeos do YouTube usam o modo de privacidade reforçada.</li>
         </List>
         <p>Também podemos informar dados a autoridades quando a lei ou uma ordem judicial exigir.</p>
       </Section>
 
-      <Section id="exterior" n={5} title="Dados guardados fora do Brasil">
+      <Section id="conexoes" n={5} title="Conexões com Meta e Google">
+        <p>O sistema só fala com a Meta e o Google quando alguém conecta uma conta, e só para o que está descrito aqui.</p>
+        <Table
+          caption="O que cada conexão faz"
+          head={["Conexão", "O que o sistema lê ou faz"]}
+          rows={[
+            ["Meta da agência (BM da Extend) e Facebook de um gestor", "Lê o nome e o identificador da pessoa ou do usuário do sistema conectado, os portfólios empresariais (BMs) e as contas de anúncio a que ele tem acesso, com nome, moeda e situação. Os números de campanhas e anúncios das contas escolhidas entram quando a sincronização for ligada. Não publica nem altera anúncios."],
+            ["Google Ads da agência", "Lê o e-mail da conta Google conectada, as contas de administrador (MCC) e as contas de anúncio dentro delas, com nome, moeda e situação. Não altera campanhas."],
+            ["Google Agenda de cada pessoa", "Lê o e-mail e o nome da agenda principal. Cria, altera e apaga na sua agenda apenas os eventos do sistema em que você participa ou que você criou. Não lê os outros eventos da sua agenda."],
+          ]}
+        />
         <p>
-          O banco de dados (Supabase) e o servidor do sistema (Vercel) ficam nos <strong>Estados Unidos</strong>. Essa transferência internacional segue o art. 33 da LGPD, com as garantias contratuais de proteção de dados oferecidas pelo fornecedor (cláusulas-padrão contratuais) e as medidas de segurança descritas no item 7.
+          Os tokens de acesso ficam cifrados (AES-256-GCM) e só o servidor do sistema os usa. O uso e a transferência de informações recebidas das APIs do Google seguem a{" "}
+          <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" className="font-medium text-brand underline underline-offset-2">Política de Dados do Usuário dos Serviços de API do Google</a>, incluindo os requisitos de Uso Limitado: esses dados não são usados para publicidade, não são vendidos e não são lidos por pessoas, exceto com a sua permissão, por segurança ou por obrigação legal.
+        </p>
+        <p id="exclusao">
+          <strong>Como desconectar e apagar:</strong> em <strong>Configurações → Meu perfil → Conexões</strong> (suas contas) ou <strong>Configurações → Integrações</strong> (contas da agência), use <strong>Desconectar</strong>: o acesso é revogado na Meta ou no Google e o token é apagado na hora. Você também pode remover o acesso nas configurações da sua conta do Facebook ou do Google. Para apagar também os dados que vieram dessas contas, peça em <strong>Meu perfil → Privacidade</strong> ou escreva para {mail}.
         </p>
       </Section>
 
-      <Section id="prazos" n={6} title="Por quanto tempo guardamos">
+      <Section id="exterior" n={6} title="Dados guardados fora do Brasil">
+        <p>
+          O banco de dados (Supabase) e o servidor do sistema (Vercel) ficam nos <strong>Estados Unidos</strong>. Essa transferência internacional segue o art. 33 da LGPD, com as garantias contratuais de proteção de dados oferecidas pelo fornecedor (cláusulas-padrão contratuais) e as medidas de segurança descritas no item 8.
+        </p>
+      </Section>
+
+      <Section id="prazos" n={7} title="Por quanto tempo guardamos">
         <Table
           caption="Prazos de guarda"
           head={["Dado", "Prazo"]}
@@ -105,7 +127,7 @@ export function PolicyContent({ c }: { c: Controller }) {
         <p>A limpeza dos avisos, convites, aparelhos e registros antigos é feita automaticamente todos os dias.</p>
       </Section>
 
-      <Section id="seguranca" n={7} title="Como protegemos">
+      <Section id="seguranca" n={8} title="Como protegemos">
         <List>
           <li>Conexão sempre criptografada (HTTPS) e senhas guardadas de forma irreversível (hash).</li>
           <li>Cada pessoa vê só o que o papel e as permissões dela permitem, com a regra aplicada no próprio banco de dados, não só na tela.</li>
@@ -116,13 +138,13 @@ export function PolicyContent({ c }: { c: Controller }) {
         <p>Se houver um incidente de segurança que possa trazer risco ou dano relevante, a agência avisa as pessoas afetadas e a Autoridade Nacional de Proteção de Dados (ANPD), como pede o art. 48 da LGPD.</p>
       </Section>
 
-      <Section id="cookies" n={8} title="Cookies e armazenamento no aparelho">
+      <Section id="cookies" n={9} title="Cookies e armazenamento no aparelho">
         <p>
           O sistema usa apenas cookies e armazenamento <strong>necessários para funcionar</strong>: manter você conectado com segurança e lembrar preferências de tela. Não há cookies de publicidade nem de rastreamento. Como são essenciais, não dependem de consentimento; ao sair do sistema, a sessão é encerrada.
         </p>
       </Section>
 
-      <Section id="direitos" n={9} title="Seus direitos e como pedir">
+      <Section id="direitos" n={10} title="Seus direitos e como pedir">
         <p>Pelo art. 18 da LGPD, você pode, a qualquer momento:</p>
         <List>
           <li>confirmar se tratamos seus dados e ter acesso a eles;</li>
@@ -142,7 +164,7 @@ export function PolicyContent({ c }: { c: Controller }) {
         </p>
       </Section>
 
-      <Section id="mudancas" n={10} title="Mudanças nesta política">
+      <Section id="mudancas" n={11} title="Mudanças nesta política">
         <p>Quando esta política mudar, a versão nova é publicada nesta página com a data de atualização no topo.</p>
       </Section>
     </div>

@@ -1,7 +1,7 @@
 /** Privacidade (LGPD): versão da política, tipos de pedido e prazos. */
 
 /** Mude a data quando o texto da política ou dos termos mudar: todos verão o aviso de novo. */
-export const PRIVACY_VERSION = "2026-11-13";
+export const PRIVACY_VERSION = "2026-11-15";
 export const PRIVACY_UPDATED_LABEL = "13/11/2026";
 
 export const REQUEST_KINDS = ["acesso", "correcao", "exclusao", "portabilidade", "revogacao", "oposicao", "informacao"] as const;

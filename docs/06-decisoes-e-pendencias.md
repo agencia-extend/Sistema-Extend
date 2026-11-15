@@ -255,3 +255,36 @@ As contas da Meta e do Google ainda não existem (passo a passo entregue ao Henr
 - **Manual do cliente:** página Ajuda do portal.
 - **Fora agora (não aparece na tela):** relatórios automáticos (etapa 06, depende da Meta/Google Ads) e avaliação de leads (etapa 11). Por enquanto os relatórios são os PDFs que a equipe envia para a pasta Relatórios.
 - **Correção encontrada no teste:** a checagem de acesso do portal devolvia “nulo” para acesso pausado e deixava passar; agora é `coalesce(..., false)`.
+
+## Etapa 05, parte 1: conexões com a Meta e o Google (15/11/2026)
+Pedido do Henrique: deixar o sistema pronto para conectar a agência (BM e MCC) e cada pessoa (Google Agenda, Facebook), e entregar o passo a passo das contas (`docs/11-passo-a-passo-meta-google.md`).
+- **Configurações › Integrações** (permissão `ads.connect`: admin e gerente de tráfego):
+  - mostra o que falta configurar no servidor e o endereço de retorno para cadastrar no app da Meta e no Google Cloud;
+  - **Meta da agência:** token do usuário do sistema do BM (recomendado; validado na Meta pelo `debug_token`, recusado se for de outro app) ou login do Facebook (Login do Facebook para Empresas, com `config_id` quando houver);
+  - **Google Ads da agência:** login com a conta que administra a MCC; a MCC é encontrada sozinha (sem developer token, aposentado pelo Google, e sem variável de MCC) e cada conta guarda o `login_customer_id`;
+  - **Contas de anúncio:** BMs/MCCs e contas encontradas (próprias do BM, de clientes compartilhadas com o BM e dentro da MCC). A tela sugere o cliente quando ele já tem a conta em "Contas e acessos". Incluir exige cliente, e ligar a conta a um cliente a acrescenta em "Contas e acessos" sem duplicar (`save_ad_account`).
+- **Meu perfil › Conexões:** Google Agenda de cada pessoa (`calendar.events`) e Facebook pessoal de quem tem `ads.manage` (contas de clientes fora do BM; a conta que já vem pela agência continua com a agência). Só aparece o que está configurado no servidor.
+- **Google Agenda:** salvar ou excluir um evento leva a mudança para a agenda principal dos participantes conectados e de quem criou. Roda depois da resposta (`after`), sem atrasar a tela. Falha fica registrada na conexão da pessoa.
+- **Segurança:**
+  - tokens cifrados (AES-256-GCM) em `integration_connections`, tabela sem grant para usuários;
+  - a tela lê `integration_status()`, sem tokens: a agência para quem lê ou conecta anúncios, e cada um vê só as próprias conexões;
+  - o OAuth usa `state` aleatório em cookie httpOnly de 10 minutos, comparado em tempo constante, com a permissão conferida na ida e na volta;
+  - desconectar revoga na plataforma e apaga o token.
+- **Avisos:**
+  - conexão da agência vencendo em 7 dias avisa quem tem `ads.connect` uma vez;
+  - conexão parada avisa uma vez por dia (cron `extend-integracoes`, 9h);
+  - desconectar a agência avisa os demais.
+- **Política de privacidade (versão 2026-11-15):** nova seção "Conexões com Meta e Google" com o que é lido, a declaração de Uso Limitado do Google e como desconectar e apagar (`/privacidade#exclusao`, endereço de exclusão de dados exigido pela Meta).
+- **Testado sem as chaves:**
+  - banco: `23_integracoes.test.sql`;
+  - regras: `src/domain/integrations`;
+  - tela: `e2e/19` (situação da configuração, endereço de retorno, conectar sem configuração volta com aviso, contas ligadas a clientes e sugestão, gestor sem acesso).
+- **Falta testar com as chaves:** a troca do código pelo token na Meta e no Google, a busca real de BMs, MCC e contas, e o envio para a Google Agenda. Será feito assim que as chaves estiverem no `.env.local`.
+- **Riscos levantados nas páginas oficiais:**
+  - Google em "Testing" derruba as conexões a cada 7 dias (publicar o app);
+  - o acesso Explorer da Google Ads API exige faturamento ativo no projeto;
+  - contas de anúncio que pertencem aos clientes podem exigir o acesso completo da Meta (verificação da empresa e análise do app).
+- **Briefing do Luiz revisto:**
+  - itens 1 a 4 prontos;
+  - item 5: calendário pronto; plano e nomenclatura esperam as campanhas sincronizadas;
+  - itens 6 a 8 (checklists com números da API, registro de alterações automático, KPIs, relatórios e números por criativo) dependem da sincronização, que é a próxima entrega depois das chaves.

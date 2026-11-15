@@ -1,6 +1,8 @@
 "use server";
 
 import { randomUUID } from "node:crypto";
+import { after } from "next/server";
+import { syncEventToGoogle } from "@/lib/integrations/calendar-sync";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { defineAction, must } from "@/lib/actions";
@@ -346,6 +348,8 @@ export const saveEvent = defineAction({ schema: eventSchema, permission: "calend
   if (remove.length) must(await supabase.from("calendar_attendees").delete().eq("event_id", id).in("profile_id", remove));
   if (add.length) must(await supabase.from("calendar_attendees").insert(add.map((profile_id) => ({ event_id: id!, profile_id }))));
   revalidatePath("/agenda");
+  // Leva o evento para a Google Agenda de quem conectou (depois da resposta, sem atrasar a tela).
+  after(() => syncEventToGoogle(id!));
   if (e.taskId) touch(e.taskId, e.clientId);
   return ok({ id }, e.id ? "Evento atualizado." : "Evento criado. Os participantes foram avisados.");
 });
@@ -353,6 +357,7 @@ export const saveEvent = defineAction({ schema: eventSchema, permission: "calend
 export const deleteEvent = defineAction({ schema: z.object({ id: uuid }) }, async ({ id }) => {
   const supabase = await createClient();
   must(await supabase.from("calendar_events").delete().eq("id", id).select("id").single());
+  after(() => syncEventToGoogle(id));
   revalidatePath("/agenda");
   return ok(null, "Evento excluído.");
 });
