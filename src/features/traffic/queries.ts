@@ -1,5 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
+import type { CheckItem, CheckKind } from "@/domain/traffic";
 
 export type ChangeRow = {
   id: string;
@@ -81,4 +82,67 @@ export async function listBudgets(clientId: string): Promise<BudgetRow[]> {
       authorName: one(r.profiles as { full_name: string } | { full_name: string }[] | null)?.full_name ?? null,
     };
   });
+}
+
+export type Decision = { level: "campanha" | "conjunto" | "anuncio"; target: string; decision: "pausar" | "manter" | "escalar"; why: string };
+export type CheckRow = {
+  id: string;
+  kind: CheckKind;
+  periodOn: string;
+  items: CheckItem[];
+  decisions: Decision[];
+  notes: string | null;
+  problems: number;
+  doneAt: string;
+  doneByName: string | null;
+};
+
+/** Últimos checklists do cliente (a RLS filtra quem vê o tráfego). */
+export async function listChecks(clientId: string): Promise<CheckRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("traffic_checks")
+    .select("id, kind, period_on, items, decisions, notes, problems, done_at, profiles!traffic_checks_done_by_fkey(full_name)")
+    .eq("client_id", clientId)
+    .order("period_on", { ascending: false })
+    .order("kind")
+    .limit(40);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    kind: r.kind as CheckKind,
+    periodOn: r.period_on,
+    items: (r.items ?? []) as CheckItem[],
+    decisions: (r.decisions ?? []) as Decision[],
+    notes: r.notes,
+    problems: r.problems,
+    doneAt: r.done_at,
+    doneByName: one(r.profiles as { full_name: string } | { full_name: string }[] | null)?.full_name ?? null,
+  }));
+}
+
+export type RoutineRow = {
+  clientId: string;
+  clientName: string;
+  clientCode: number | null;
+  team: string[];
+  daily: { doneAt: string; problems: number; by: string | null } | null;
+  weekly: { doneAt: string; problems: number; decisions: number; by: string | null } | null;
+  lastDailyOn: string | null;
+};
+
+/** Painel de pendências (RF-OTI-04): clientes com tráfego que a pessoa otimiza, com o checklist de hoje e o da semana. */
+export async function getRoutine(): Promise<RoutineRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("traffic_routine");
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    clientId: r.client_id,
+    clientName: r.client_name,
+    clientCode: r.client_code,
+    team: r.team ?? [],
+    daily: r.daily_id ? { doneAt: r.daily_done_at!, problems: r.daily_problems ?? 0, by: r.daily_by } : null,
+    weekly: r.weekly_id ? { doneAt: r.weekly_done_at!, problems: r.weekly_problems ?? 0, decisions: r.weekly_decisions ?? 0, by: r.weekly_by } : null,
+    lastDailyOn: r.last_daily_on,
+  }));
 }

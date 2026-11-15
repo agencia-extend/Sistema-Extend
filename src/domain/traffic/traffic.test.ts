@@ -23,3 +23,27 @@ describe("tráfego", () => {
     expect(g.map((x) => [x.month, x.items.length])).toEqual([["2026-11", 2], ["2026-10", 1]]);
   });
 });
+
+describe("checklists do tráfego", () => {
+  it("acha a segunda-feira da semana", async () => {
+    const { weekStart } = await import(".");
+    expect(weekStart("2026-11-15")).toBe("2026-11-09"); // domingo
+    expect(weekStart("2026-11-16")).toBe("2026-11-16"); // segunda
+    expect(weekStart("2026-11-20")).toBe("2026-11-16");
+    expect(weekStart("2027-01-01")).toBe("2026-12-28");
+  });
+
+  it("lista os problemas na ordem do checklist", async () => {
+    const { checkProblems } = await import(".");
+    expect(
+      checkProblems("diario", [
+        { key: "entrega", status: "problema", note: "Campanha X sem impressões" },
+        { key: "saldo", status: "problema", note: "Saldo para 1 dia" },
+        { key: "gasto", status: "ok" },
+      ]),
+    ).toEqual([
+      { label: "Saldo e cobrança", note: "Saldo para 1 dia" },
+      { label: "Entrega", note: "Campanha X sem impressões" },
+    ]);
+  });
+});

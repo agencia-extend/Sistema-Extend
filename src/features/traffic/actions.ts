@@ -6,7 +6,7 @@ import { z } from "zod";
 import { defineAction, must } from "@/lib/actions";
 import { fail, ok } from "@/domain/shared/result";
 import { createClient } from "@/lib/supabase/server";
-import { budgetSchema, changeSchema } from "./schemas";
+import { budgetSchema, changeSchema, checkSchema } from "./schemas";
 
 const MAX_FILE = 10 * 1024 * 1024;
 const page = (clientId: string) => `/clientes/${clientId}/trafego`;
@@ -109,4 +109,20 @@ export const deleteBudget = defineAction({ schema: z.object({ id: z.uuid(), clie
   if (!data?.length) return fail("forbidden", "Você não pode apagar esta verba.");
   revalidatePath(page(clientId));
   return ok(null, "Verba apagada. O comprovante continua em Documentos › Tráfego.");
+});
+
+/** Checklist diário ou semanal do cliente (RF-OTI-01/02). Um por cliente e período; salvar de novo atualiza. */
+export const saveCheck = defineAction({ schema: checkSchema, permission: "optimization.manage" }, async ({ clientId, kind, periodOn, items, decisions, notes }) => {
+  const supabase = await createClient();
+  const row = { items, decisions, notes: notes || null };
+  const { data: existing } = await supabase.from("traffic_checks").select("id").eq("client_id", clientId).eq("kind", kind).eq("period_on", periodOn).maybeSingle();
+  if (existing) {
+    const data = must(await supabase.from("traffic_checks").update(row).eq("id", existing.id).select("id"));
+    if (!data?.length) return fail("forbidden", "Você não pode alterar este checklist.");
+  } else must(await supabase.from("traffic_checks").insert({ ...row, client_id: clientId, kind, period_on: periodOn }).select("id").single());
+  revalidatePath(page(clientId));
+  revalidatePath("/trafego");
+  const problems = items.filter((i) => i.status === "problema").length;
+  const what = kind === "diario" ? "Checklist do dia" : "Checklist da semana";
+  return ok(null, existing ? `${what} atualizado.` : problems ? `${what} salvo com ${problems} ${problems === 1 ? "problema" : "problemas"} no histórico do cliente.` : `${what} salvo.`);
 });

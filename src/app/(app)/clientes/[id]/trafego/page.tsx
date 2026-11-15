@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import { History, Plus, Wallet } from "lucide-react";
+import { notFound } from "next/navigation";
 import { requirePermission } from "@/lib/auth/dal";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/app/states";
 import { Section } from "@/features/clients/components/section";
 import { todayKey } from "@/domain/media";
-import { listBudgets, listChanges } from "@/features/traffic/queries";
+import { listBudgets, listChanges, listChecks } from "@/features/traffic/queries";
+import { getClient } from "@/features/clients/queries";
+import { weekStart } from "@/domain/traffic";
+import { CheckHistory } from "@/features/traffic/components/check-history";
 import { BudgetDialog } from "@/features/traffic/components/budget-dialog";
 import { BudgetList } from "@/features/traffic/components/budget-list";
 import { ChangeDialog } from "@/features/traffic/components/change-dialog";
@@ -13,16 +17,21 @@ import { ChangeLog } from "@/features/traffic/components/change-log";
 
 export const metadata: Metadata = { title: "Tráfego do cliente" };
 
-/** Aba Tráfego: verbas aprovadas pelo cliente (RF-T2-03) e registro de alterações das contas (RF-OTI-03). */
+/** Aba Tráfego: checklists diário e semanal (RF-OTI-01/02), verbas aprovadas pelo cliente (RF-T2-03) e registro de alterações das contas (RF-OTI-03). */
 export default async function TrafegoPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePermission(["ads.read", "optimization.manage"]);
   const { id } = await params;
-  const [changes, budgets] = await Promise.all([listChanges(id), listBudgets(id)]);
+  const [client, changes, budgets, checks] = await Promise.all([getClient(id), listChanges(id), listBudgets(id), listChecks(id)]);
+  if (!client) notFound();
   const canManage = Boolean(user.permissions["optimization.manage"]);
   const today = todayKey(new Date());
 
   return (
     <div className="grid max-w-5xl gap-10">
+      <Section title="Checklists">
+        <CheckHistory clientId={id} clientName={client.name} today={today} monday={weekStart(today)} rows={checks} canManage={canManage} />
+      </Section>
+
       <Section
         title="Verba aprovada pelo cliente"
         action={canManage && <BudgetDialog clientId={id} today={today} trigger={<Button size="sm"><Plus aria-hidden="true" /> Registrar verba</Button>} />}

@@ -2493,6 +2493,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"traffic_checks": {
+                  Row: {
+                    "client_id": string,"created_at": string,"decisions": NonNullable<Json>,"done_at": string,"done_by": string | null,"id": string,"items": NonNullable<Json>,"kind": string,"notes": string | null,"organization_id": string,"period_on": string,"problems": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"decisions"?: NonNullable<Json>,"done_at"?: string,"done_by"?: string | null,"id"?: string,"items": NonNullable<Json>,"kind": string,"notes"?: string | null,"organization_id"?: string,"period_on": string,"problems"?: number
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"decisions"?: NonNullable<Json>,"done_at"?: string,"done_by"?: string | null,"id"?: string,"items"?: NonNullable<Json>,"kind"?: string,"notes"?: string | null,"organization_id"?: string,"period_on"?: string,"problems"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "traffic_checks_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "traffic_checks_done_by_fkey"
+      columns: ["done_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "traffic_checks_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"training_assignments": {
                   Row: {
                     "assigned_by": string | null,"completed_at": string | null,"created_at": string,"due_on": string | null,"id": string,"profile_id": string,"training_id": string
@@ -2924,6 +2956,11 @@ isOneToOne: false
                            },
 "stop_timer":
 { Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"traffic_routine":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "client_code": number,"client_id": string,"client_name": string,"daily_by": string,"daily_done_at": string,"daily_id": string,"daily_problems": number,"last_daily_on": string,"team": (string)[],"weekly_by": string,"weekly_decisions": number,"weekly_done_at": string,"weekly_id": string,"weekly_problems": number
+            }[]
                            },
 "undo_import":
 { Args: { "p_import": string }; Returns: number

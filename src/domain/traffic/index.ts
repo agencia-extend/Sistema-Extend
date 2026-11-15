@@ -44,3 +44,47 @@ export function byMonth<T extends { happenedOn: string }>(list: T[]): { month: s
   }
   return out;
 }
+
+// Checklists do tráfego (RF-OTI-01 diário, RF-OTI-02 semanal).
+export const CHECK_KINDS = ["diario", "semanal"] as const;
+export type CheckKind = (typeof CHECK_KINDS)[number];
+export const CHECK_STATUSES = ["ok", "problema", "na"] as const;
+export type CheckStatus = (typeof CHECK_STATUSES)[number];
+export const CHECK_STATUS_LABEL: Record<CheckStatus, string> = { ok: "Ok", problema: "Problema", na: "Não se aplica" };
+
+export const CHECK_ITEMS: Record<CheckKind, { key: string; label: string; hint: string }[]> = {
+  diario: [
+    { key: "saldo", label: "Saldo e cobrança", hint: "Saldo para os próximos dias, cartão ou boleto em dia." },
+    { key: "reprovados", label: "Anúncios reprovados", hint: "Nenhum anúncio reprovado ou com veiculação limitada." },
+    { key: "gasto", label: "Gasto x orçamento", hint: "O gasto de ontem bate com o orçamento e com a verba aprovada." },
+    { key: "entrega", label: "Entrega", hint: "Nenhuma campanha ativa sem impressões ou com entrega parada." },
+  ],
+  semanal: [
+    { key: "criativos", label: "Criativos", hint: "Quais seguram resultado e quais cansaram (frequência, CTR)." },
+    { key: "publicos", label: "Públicos", hint: "Públicos que funcionam, saturados ou para testar." },
+    { key: "custos", label: "Custos", hint: "CPL, custo por conversa e CPM em relação à meta." },
+  ],
+};
+
+export const DECISION_LEVELS = ["campanha", "conjunto", "anuncio"] as const;
+export const DECISION_LEVEL_LABEL: Record<(typeof DECISION_LEVELS)[number], string> = { campanha: "Campanha", conjunto: "Conjunto", anuncio: "Anúncio" };
+export const DECISIONS = ["pausar", "manter", "escalar"] as const;
+export const DECISION_LABEL: Record<(typeof DECISIONS)[number], string> = { pausar: "Pausar", manter: "Manter", escalar: "Escalar" };
+
+/** Segunda-feira da semana do dia (AAAA-MM-DD), que identifica o checklist semanal. */
+export function weekStart(day: string): string {
+  const d = new Date(`${day}T12:00:00Z`);
+  const dow = (d.getUTCDay() + 6) % 7;
+  d.setUTCDate(d.getUTCDate() - dow);
+  return d.toISOString().slice(0, 10);
+}
+
+export type CheckItem = { key: string; status: CheckStatus; note?: string };
+
+/** Itens com problema (rótulo e comentário), na ordem do checklist. */
+export function checkProblems(kind: CheckKind, items: CheckItem[]): { label: string; note: string }[] {
+  return CHECK_ITEMS[kind].flatMap((d) => {
+    const it = items.find((i) => i.key === d.key);
+    return it?.status === "problema" ? [{ label: d.label, note: it.note ?? "" }] : [];
+  });
+}

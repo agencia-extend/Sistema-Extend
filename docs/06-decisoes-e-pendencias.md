@@ -316,3 +316,14 @@ Feito sem depender das chaves da Meta e do Google.
   - só quem registrou corrige ou apaga; a origem (`source`) não vem do formulário;
   - registros automáticos (`source = 'sync'`, mudança de orçamento/status detectada) entram com a sincronização e não podem ser alterados.
 - **Permissões no banco:** RLS por cliente (`can_client`), colunas liberadas uma a uma, organização e autor preenchidos por gatilho. Coberto por `24_registro_trafego.test.sql` e `e2e/21`.
+
+## Briefing do Luiz: checklists e rotina do tráfego (15/11/2026)
+Feito sem depender das chaves (item 6 do briefing; RF-OTI-01, 02 e 04).
+- **Checklist diário** por cliente: saldo e cobrança, anúncios reprovados, gasto x orçamento, entrega. Cada item: Ok, Problema (com o que aconteceu, obrigatório) ou Não se aplica.
+- **Checklist semanal** (identificado pela segunda-feira): criativos, públicos, custos e as decisões da semana (campanha, conjunto ou anúncio → pausar, manter ou escalar, com o motivo).
+- Um checklist por cliente e período (`traffic_checks`); salvar de novo atualiza. Organização, autor, hora e contagem de problemas vêm do banco; itens e decisões são validados no banco (`private.traffic_check_error`) e no Zod. Não dá para fazer o de um dia futuro.
+- **Problema** vai para o histórico do cliente; **saldo/cobrança com problema** avisa o responsável pela comunicação do cliente (para cobrar o pagamento).
+- **Rotina do tráfego** (`/trafego`, menu Produção, `optimization.manage`): tabela dos clientes ativos com anúncios que a pessoa otimiza, com o checklist de hoje e o da semana, em aberto primeiro (`public.traffic_routine`). Na aba Tráfego do cliente, os dois do período no topo e os anteriores com problemas e decisões.
+- **Lembretes** (job `extend-checklists-trafego`, dias úteis às 11h): um aviso por pessoa da equipe de tráfego com os clientes sem o checklist do dia; no último dia útil da semana, também o semanal. Tipo de aviso `traffic_check` (pode ser desligado em Notificações).
+- **Com a sincronização:** os itens do diário chegam pré-preenchidos com os números da API (saldo em dias, reprovados, gasto de ontem x verba, campanhas sem entrega), e as decisões passam a escolher a campanha da lista sincronizada.
+- Coberto por `25_checklists_trafego.test.sql` e `e2e/22`.

@@ -47,6 +47,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/setores", label: "Visão do setor", icon: "dashboard", anyOf: ["sector.dashboard.read"] },
       { href: "/quadros", label: "Quadros", icon: "boards", anyOf: ["tasks.read"] },
+      { href: "/trafego", label: "Rotina do tráfego", icon: "ads", anyOf: ["optimization.manage"] },
       { href: "/criativos", label: "Criativos", icon: "creatives", anyOf: ["creatives.request.create", "creatives.produce", "creatives.review", "creatives.library.manage"] },
       { href: "/calendario-marketing", label: "Calendário de marketing", icon: "calendar", anyOf: ["marketing_calendar.read"] },
       { href: "/producao", label: "Controle geral", icon: "production", anyOf: ["dashboards.read"] },
