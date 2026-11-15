@@ -1,13 +1,21 @@
 "use client";
 
 import { useTransition } from "react";
-import { BellRing, Power, PowerOff } from "lucide-react";
+import { BellRing, Power } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ConfirmDialog } from "@/components/app/confirm-dialog";
 import { sendTestNotification, setUserActive } from "@/features/admin/actions";
+import type { OpenWork } from "@/features/admin/queries";
 import { handleResult } from "@/lib/action-feedback";
+import { DeactivateDialog } from "./deactivate-dialog";
 
-export function UserActions({ userId, name, active, canToggle }: { userId: string; name: string; active: boolean; canToggle: boolean }) {
+export function UserActions({ userId, name, active, canToggle, work, successors }: {
+  userId: string;
+  name: string;
+  active: boolean;
+  canToggle: boolean;
+  work: OpenWork | null;
+  successors: { id: string; name: string; crm: boolean }[];
+}) {
   const [pending, startTransition] = useTransition();
   return (
     <>
@@ -18,17 +26,7 @@ export function UserActions({ userId, name, active, canToggle }: { userId: strin
       )}
       {canToggle &&
         (active ? (
-          <ConfirmDialog
-            trigger={
-              <Button variant="destructive" disabled={pending}>
-                <PowerOff aria-hidden="true" /> Desativar acesso
-              </Button>
-            }
-            title={`Desativar o acesso de ${name}?`}
-            description="A pessoa é desconectada de todos os aparelhos e não consegue mais entrar. O histórico dela continua no sistema. Você pode reativar depois."
-            confirmLabel="Desativar acesso"
-            onConfirm={async () => handleResult(await setUserActive({ userId, active: false }))}
-          />
+          work && <DeactivateDialog userId={userId} name={name} work={work} people={successors} />
         ) : (
           <Button disabled={pending} onClick={() => startTransition(async () => void handleResult(await setUserActive({ userId, active: true })))}>
             <Power aria-hidden="true" /> Reativar acesso

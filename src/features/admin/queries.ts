@@ -113,3 +113,31 @@ export async function getRolePermissions(roleIds: string[]) {
   if (error) throw error;
   return (data ?? []) as { role_id: string; permission_key: string; scope: PermissionScope }[];
 }
+
+export type OpenWork = {
+  tasks: number;
+  repeats: number;
+  teams: number;
+  owned_clients: number;
+  step_defaults: number;
+  checklist: number;
+  leads: number;
+  proposals: number;
+  marketing: number;
+};
+
+/** O que a pessoa tem em aberto e passa para outra ao ser desativada (RF-PER-10). */
+export async function getOpenWork(userId: string): Promise<OpenWork> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("admin_open_work", { p_user: userId });
+  if (error) throw error;
+  return data as OpenWork;
+}
+
+/** Quem pode assumir o trabalho de uma pessoa desativada. */
+export async function listSuccessors(userId: string): Promise<{ id: string; name: string; crm: boolean }[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("admin_successors", { p_user: userId });
+  if (error) throw error;
+  return (data ?? []).map((p) => ({ id: p.id, name: p.full_name, crm: p.crm }));
+}

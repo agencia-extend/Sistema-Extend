@@ -14,7 +14,7 @@ export const invitationIdSchema = z.object({ id: uuid });
 
 export const userIdSchema = z.object({ userId: uuid });
 
-export const setUserActiveSchema = z.object({ userId: uuid, active: z.boolean() });
+export const setUserActiveSchema = z.object({ userId: uuid, active: z.boolean(), successorId: uuid.optional() });
 
 export const updateUserAccessSchema = z.object({
   userId: uuid,

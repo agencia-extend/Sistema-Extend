@@ -21,7 +21,14 @@
 ## Pendências da etapa 01
 - **Supabase da Extend:** autenticar o MCP `supabase` (projeto `iuqcpcrpnwwquxxbleyw`, em `.mcp.json`) com a conta Google da Extend via `claude /mcp` num terminal comum. Sem isso as migrations não foram aplicadas e o roteiro de teste E2E não rodou.
 - **Vercel da Extend:** criar o projeto (região gru1) e as variáveis de ambiente; depois rodar `scripts/configure-jobs.mjs`.
-- **RF-PER-10 (reatribuir demandas ao desativar):** o acesso já é removido na hora; a reatribuição entra na etapa 03, quando as tarefas existirem.
+- ~~**RF-PER-10 (reatribuir demandas ao desativar)**~~: feito em 14/11/2026. "Desativar acesso" mostra o que a pessoa tem em aberto e, se houver algo, exige escolher quem assume (`admin_open_work`, `admin_deactivate_user`, `admin_successors`). Passa, na mesma transação da desativação:
+  - demandas abertas (responsável, quem edita e quem grava) e a dona das demandas que se repetem;
+  - equipes de cliente, responsável pela comunicação e pessoa padrão por etapa;
+  - passos de onboarding não feitos;
+  - leads abertos e propostas não decididas (aí quem assume precisa ter acesso ao Comercial);
+  - pedidos de criativo agendados no calendário de marketing.
+
+  O que já foi concluído continua no nome de quem fez. Quem assume recebe **um** aviso com o resumo (os avisos item a item dos gatilhos são trocados por ele), com link para Minhas tarefas, Comercial ou Clientes conforme o acesso. Reativar não devolve o trabalho. Coberto por `21_desativar_com_repasse.test.sql` e `e2e/17`.
 - **Convite com clientes iniciais (RF-PER-02):** a coluna `invitations.client_ids` existe; a escolha na tela entra na etapa 02.
 
 ## Decisões em aberto (resolver antes da etapa indicada)

@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Eye } from "lucide-react";
 import { requirePermission } from "@/lib/auth/dal";
-import { getRolePermissions, getUserAccess, listPermissions, listRoles, listSectors, listUsers } from "@/features/admin/queries";
+import { getOpenWork, getRolePermissions, getUserAccess, listPermissions, listRoles, listSectors, listSuccessors, listUsers } from "@/features/admin/queries";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -28,6 +28,7 @@ export default async function UsuarioPage({ params }: { params: Promise<{ id: st
   const isSelf = user.id === me.id;
   const targetIsAdmin = user.roles.some((r) => r.key === "admin");
   const locked = isSelf || (targetIsAdmin && !me.isAdmin);
+  const [work, successors] = user.is_active && !locked ? await Promise.all([getOpenWork(id), listSuccessors(id)]) : [null, []];
 
   return (
     <>
@@ -45,7 +46,7 @@ export default async function UsuarioPage({ params }: { params: Promise<{ id: st
             <Link href={`/configuracoes/usuarios/${id}/ver-como`} className={buttonVariants({ variant: "outline" })}>
               <Eye aria-hidden="true" /> Ver como
             </Link>
-            <UserActions userId={id} name={user.full_name || user.email} active={user.is_active} canToggle={!locked} />
+            <UserActions userId={id} name={user.full_name || user.email} active={user.is_active} canToggle={!locked} work={work} successors={successors} />
           </>
         }
       />

@@ -28,7 +28,7 @@ Legenda: **Pronto** = funciona hoje · **Parcial** = existe, mas falta parte · 
 | 3.4 Controle Geral e relatórios | Falta | Visão do setor com contadores do mês | Produção por pessoa e período; entregue × contratado por cliente; gargalos por status; retrabalho |
 | 3.5 Quadro do setor (Kanban) | Parcial | Kanban por cliente; visão do setor em lista com filtros; Minhas tarefas | Kanban do setor com todos os clientes, nas colunas e cores do Trello; etiqueta "Em alteração" que devolve o card e conta retrabalho |
 | 3.6 Fluxo de produção | Parcial | Fluxos por tipo de demanda, editáveis em Configurações | Ajustar as etapas ao fluxo real (item 2 abaixo) |
-| 3.7 Prazos recorrentes do social media | Falta | — | Sexta: cronograma; segunda: legendas e posts programados |
+| 3.7 Prazos recorrentes do social media | Pronto (13/11) | `service_routines`: cronograma na sexta, legendas e posts na segunda, por cliente com Gerenciamento (`docs/10`) | — |
 | 3.8 Fila de criativos do tráfego | Falta | — | Previsto na etapa 04 |
 | 3.9 Relatório semanal com retorno do cliente | Falta | — | Previsto na etapa 06, acrescentando o retorno (negativo, positivo, sem retorno) |
 | 3.9 Alertas de contrato e de cliente sem retorno | Parcial | Contrato perto do fim (30 e 7 dias, vencido); cliente sem retorno em aprovação há 2 e 5 dias úteis (14/11) | Relatório atrasado (depende da etapa 06) |

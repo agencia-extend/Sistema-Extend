@@ -26,10 +26,12 @@ const ROLES = "/configuracoes/papeis";
 
 // --- Usuários -------------------------------------------------------------------
 
-export const setUserActive = defineAction({ schema: setUserActiveSchema, permission: "users.manage" }, async ({ userId, active }, { user }) => {
+export const setUserActive = defineAction({ schema: setUserActiveSchema, permission: "users.manage" }, async ({ userId, active, successorId }, { user }) => {
   const supabase = await createClient();
-  // A RPC aplica as travas (não desativar a si mesmo, nem um admin sem ser admin, último admin).
-  must(await supabase.rpc("admin_set_user_active", { p_user: userId, p_active: active }));
+  // As RPCs aplicam as travas (não desativar a si mesmo, nem um admin sem ser admin, último admin).
+  // Ao desativar, o trabalho em aberto passa para quem assume (RF-PER-10), na mesma transação.
+  if (active) must(await supabase.rpc("admin_set_user_active", { p_user: userId, p_active: true }));
+  else must(await supabase.rpc("admin_deactivate_user", { p_user: userId, p_successor: successorId }));
   // Derruba os tokens de atualização: a sessão cai também nos outros aparelhos.
   if (process.env.SUPABASE_SECRET_KEY) {
     await createAdminClient().auth.admin.updateUserById(userId, { ban_duration: active ? "none" : "876000h" });
@@ -47,7 +49,7 @@ export const setUserActive = defineAction({ schema: setUserActiveSchema, permiss
     mail = await sendEmail(person.email, m.subject, m.parts);
   }
   const warn = mail === "failed" ? " O e-mail de aviso não pôde ser enviado; avise a pessoa por outro canal." : mail === "sent" ? " Ela foi avisada por e-mail." : "";
-  return ok(null, (active ? "Acesso reativado." : "Acesso desativado. A pessoa foi desconectada.") + warn);
+  return ok(null, (active ? "Acesso reativado." : successorId ? "Acesso desativado e trabalho repassado. A pessoa foi desconectada." : "Acesso desativado. A pessoa foi desconectada.") + warn);
 });
 
 export const updateUserAccess = defineAction(

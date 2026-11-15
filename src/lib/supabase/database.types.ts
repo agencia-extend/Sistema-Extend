@@ -2515,11 +2515,22 @@ isOneToOne: false
 "add_delivery":
 { Args: { "p_assets": Json,"p_note": string,"p_task": string }; Returns: number
                            },
+"admin_deactivate_user":
+{ Args: { "p_successor"?: string,"p_user": string }; Returns: Json
+                           },
+"admin_open_work":
+{ Args: { "p_user": string }; Returns: Json
+                           },
 "admin_set_user_active":
 { Args: { "p_active": boolean,"p_user": string }; Returns: undefined
                            },
 "admin_set_user_role":
 { Args: { "p_role": string,"p_user": string }; Returns: undefined
+                           },
+"admin_successors":
+{ Args: { "p_user": string }; Returns: {
+              "crm": boolean,"full_name": string,"id": string
+            }[]
                            },
 "apply_playbook":
 { Args: { "p_client": string,"p_playbook": string,"p_start": string }; Returns: string
