@@ -675,6 +675,50 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"client_reports": {
+                  Row: {
+                    "area": string,"call_task_id": string | null,"client_id": string,"created_at": string,"feedback": string | null,"feedback_at": string | null,"feedback_by": string | null,"feedback_note": string | null,"id": string,"link": string | null,"notes": string | null,"organization_id": string,"sent_by": string | null,"sent_on": string,"week_on": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "area": string,"call_task_id"?: string | null,"client_id": string,"created_at"?: string,"feedback"?: string | null,"feedback_at"?: string | null,"feedback_by"?: string | null,"feedback_note"?: string | null,"id"?: string,"link"?: string | null,"notes"?: string | null,"organization_id"?: string,"sent_by"?: string | null,"sent_on"?: string,"week_on"?: string
+                  }
+                  Update: {
+                    "area"?: string,"call_task_id"?: string | null,"client_id"?: string,"created_at"?: string,"feedback"?: string | null,"feedback_at"?: string | null,"feedback_by"?: string | null,"feedback_note"?: string | null,"id"?: string,"link"?: string | null,"notes"?: string | null,"organization_id"?: string,"sent_by"?: string | null,"sent_on"?: string,"week_on"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_reports_call_task_id_fkey"
+      columns: ["call_task_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_reports_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_reports_feedback_by_fkey"
+      columns: ["feedback_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_reports_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_reports_sent_by_fkey"
+      columns: ["sent_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"client_services": {
                   Row: {
                     "client_id": string,"created_at": string,"ends_on": string | null,"id": string,"monthly_qty": number,"price_cents": number | null,"service_id": string,"starts_on": string
@@ -2908,6 +2952,11 @@ isOneToOne: false
                            },
 "refuse_proposal":
 { Args: { "p_id": string,"p_reason": string }; Returns: undefined
+                           },
+"report_routine":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "area": string,"can_send": boolean,"client_code": number,"client_id": string,"client_name": string,"feedback": string,"feedback_note": string,"last_sent_on": string,"link": string,"report_id": string,"sent_by": string,"sent_on": string
+            }[]
                            },
 "review_creative":
 { Args: { "p_comment": string,"p_decision": string,"p_task": string }; Returns: undefined

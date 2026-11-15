@@ -327,3 +327,14 @@ Feito sem depender das chaves (item 6 do briefing; RF-OTI-01, 02 e 04).
 - **Lembretes** (job `extend-checklists-trafego`, dias úteis às 11h): um aviso por pessoa da equipe de tráfego com os clientes sem o checklist do dia; no último dia útil da semana, também o semanal. Tipo de aviso `traffic_check` (pode ser desligado em Notificações).
 - **Com a sincronização:** os itens do diário chegam pré-preenchidos com os números da API (saldo em dias, reprovados, gasto de ontem x verba, campanhas sem entrega), e as decisões passam a escolher a campanha da lista sincronizada.
 - Coberto por `25_checklists_trafego.test.sql` e `e2e/22`.
+
+## Relatório semanal e retorno do cliente (15/11/2026)
+Briefing de mídias 3.9 ("Entrega de métricas e acompanhamento"), feito sem depender das chaves nem do WhatsApp.
+- **Registro do envio** (`client_reports`): um relatório por cliente, área e semana (identificada pela segunda-feira). Áreas: **tráfego** (cliente com anúncios; envia quem tem `reports.manage`) e **conteúdo** (cliente com gerenciamento; envia quem tem `content.publish`). Data do envio (não pode ser futura), link do relatório (Reportei, PDF no Drive, print) e observações. Quem enviou vem do login.
+- **Retorno do cliente:** Positivo, Negativo (com o que o cliente achou ruim, obrigatório) ou Sem retorno. Registra quem envia a área ou o responsável pela comunicação do cliente. Vai para o histórico do cliente.
+  - **Negativo** avisa a equipe da área no cliente e o responsável pela comunicação (estudar e ajustar as campanhas / rever o conteúdo).
+  - **Sem retorno** cria a demanda "Ligar para {cliente}: sem retorno do relatório de …", prioridade alta, para o responsável pela comunicação (ou quem enviou), com prazo no próximo dia útil ao meio-dia.
+- **Telas:** aba **Relatórios** no cliente (com anúncios ou gerenciamento): a semana atual no topo e as anteriores com o retorno; página **Relatórios da semana** (`/relatorios`, menu Produção) com a tabela por cliente e área e a lista dos que esperam retorno de semanas anteriores.
+- **Avisos** (job `extend-relatorios-retorno`, dias úteis às 10h, tipo `client_report`): a partir de quarta, relatório da semana sem envio (equipe da área, uma vez por semana); retorno não registrado 2 dias úteis depois do envio (quem enviou, uma vez por relatório).
+- **Com a etapa 06:** o envio automático pelo WhatsApp e o PDF gravam a mesma linha; o retorno continua manual.
+- Coberto por `26_relatorios_retorno.test.sql` e `e2e/23`.

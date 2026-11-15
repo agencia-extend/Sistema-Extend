@@ -3,6 +3,7 @@ import {
   Briefcase,
   CalendarDays,
   ClipboardCheck,
+  FileBarChart,
   GraduationCap,
   House,
   Kanban,
@@ -19,6 +20,7 @@ import type { NavIcon as NavIconKey } from "@/config/navigation";
 
 const ICONS: Record<NavIconKey, LucideIcon> = {
   home: House,
+  weekly: FileBarChart,
   tasks: LayoutList,
   clients: Users,
   creatives: Palette,

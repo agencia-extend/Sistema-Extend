@@ -30,8 +30,8 @@ Legenda: **Pronto** = funciona hoje · **Parcial** = existe, mas falta parte · 
 | 3.6 Fluxo de produção | Parcial | Fluxos por tipo de demanda, editáveis em Configurações | Ajustar as etapas ao fluxo real (item 2 abaixo) |
 | 3.7 Prazos recorrentes do social media | Pronto (13/11) | `service_routines`: cronograma na sexta, legendas e posts na segunda, por cliente com Gerenciamento (`docs/10`) | — |
 | 3.8 Fila de criativos do tráfego | Falta | — | Previsto na etapa 04 |
-| 3.9 Relatório semanal com retorno do cliente | Falta | — | Previsto na etapa 06, acrescentando o retorno (negativo, positivo, sem retorno) |
-| 3.9 Alertas de contrato e de cliente sem retorno | Parcial | Contrato perto do fim (30 e 7 dias, vencido); cliente sem retorno em aprovação há 2 e 5 dias úteis (14/11) | Relatório atrasado (depende da etapa 06) |
+| 3.9 Relatório semanal com retorno do cliente | Parcial (15/11) | Registro do envio e do retorno (positivo, negativo, sem retorno → ligação), aba Relatórios e página "Relatórios da semana" (`docs/06`) | Envio automático e PDF (etapa 06) |
+| 3.9 Alertas de contrato e de cliente sem retorno | Pronto (15/11) | Contrato perto do fim (30 e 7 dias, vencido); cliente sem retorno em aprovação há 2 e 5 dias úteis (14/11) | — (relatório atrasado e retorno não registrado: 15/11) |
 | 3.10 Portal do cliente | Falta | — | Etapa 12 |
 | 5. Google Drive | Falta | Links manuais | Decisão D1 em aberto; briefing pede pastas automáticas e cita o Drive de 5 TB para brutos |
 | 5. Importar planilhas | Parcial | "Controle de clientes" (CSV) com prévia e desfazer | "Controle de Mídias" |

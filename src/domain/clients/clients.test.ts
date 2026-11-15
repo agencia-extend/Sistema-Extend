@@ -40,6 +40,12 @@ describe("abas do cliente", () => {
   it("só tráfego não mostra demanda do mês", () => {
     expect(clientTabs("ativo", ["anuncios"], { "tasks.read": "all" }).map((t) => t.key)).not.toContain("midias");
   });
+  it("aba Relatórios só para quem tem anúncios ou gerenciamento", () => {
+    expect(clientTabs("ativo", ["anuncios"], {}).map((t) => t.key)).toContain("relatorios");
+    expect(clientTabs("ativo", ["gerenciamento"], {}).map((t) => t.key)).toContain("relatorios");
+    expect(clientTabs("ativo", ["videos"], {}).map((t) => t.key)).not.toContain("relatorios");
+    expect(clientTabs("onboarding", ["anuncios"], {}).map((t) => t.key)).not.toContain("relatorios");
+  });
 });
 
 describe("seções da ficha por serviço", () => {
