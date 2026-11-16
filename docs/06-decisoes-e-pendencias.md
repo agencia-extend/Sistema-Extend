@@ -338,3 +338,15 @@ Briefing de mídias 3.9 ("Entrega de métricas e acompanhamento"), feito sem dep
 - **Avisos** (job `extend-relatorios-retorno`, dias úteis às 10h, tipo `client_report`): a partir de quarta, relatório da semana sem envio (equipe da área, uma vez por semana); retorno não registrado 2 dias úteis depois do envio (quem enviou, uma vez por relatório).
 - **Com a etapa 06:** o envio automático pelo WhatsApp e o PDF gravam a mesma linha; o retorno continua manual.
 - Coberto por `26_relatorios_retorno.test.sql` e `e2e/23`.
+
+## Briefing do Luiz: histórico de reprovações da Meta (15/11/2026)
+RF-T2-02, feito sem depender das chaves (registro manual; a sincronização passa a trazer as reprovações sozinha).
+- **Registro** (`ad_rejections`) na aba **Tráfego** do cliente, seção "Reprovações da Meta": data (não pode ser futura), plataforma, formato, ângulo, motivo, o que a Meta disse, nome do anúncio, desfecho (em aberto, corrigido e reenviado, contestado e aprovado, contestado e mantida, descartado) e "o que evitar da próxima vez".
+  - **Motivos** (lista fixa, para consolidar): atributos pessoais, antes e depois / imagem corporal, promessa de resultado, saúde e procedimentos, serviços financeiros, conteúdo sensacionalista, conteúdo adulto ou sugestivo, marca ou direitos autorais, página de destino, funcionalidade falsa, tema social ou político, outro.
+  - Pode ser ligada a um **criativo da biblioteca**: o formato e o ângulo vêm dele, e a peça passa a "Reprovado pela Meta".
+  - Registra, corrige e apaga quem otimiza o cliente (`optimization.manage`). Lê também quem pede ou produz criativos para o cliente. Registros automáticos (`source = 'sync'`) não mudam pela tela.
+- **Avisos** (tipo `ad_alert`): a equipe de tráfego do cliente (abre a aba Tráfego) e quem pediu e quem produziu a peça (abre o criativo), menos quem registrou. Entra no histórico do cliente.
+- **Consolidado:** "Motivos que mais se repetem" na aba Tráfego; na página do criativo, o quadro "Reprovado pela Meta"; no **pedido de criativo**, o quadro "O que evitar" com os motivos dos últimos 12 meses do cliente, formatos, ângulos e as lições anotadas (`avoidSummary` em `src/domain/creatives/rejections.ts`).
+- **Com a sincronização:** reprovações detectadas na API entram sozinhas (`source = 'sync'`) e o alerta de anúncio reprovado (RF-ALE-01) usa a mesma tabela.
+- Coberto por `27_reprovacoes_meta.test.sql` e `e2e/24`.
+- Correção junto: no pedido de criativo, ângulos longos na lista "Últimos criativos com resultado" alargavam a página no computador.

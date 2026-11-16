@@ -6,7 +6,7 @@ import { z } from "zod";
 import { defineAction, must } from "@/lib/actions";
 import { fail, ok } from "@/domain/shared/result";
 import { createClient } from "@/lib/supabase/server";
-import { budgetSchema, changeSchema, checkSchema } from "./schemas";
+import { budgetSchema, changeSchema, checkSchema, rejectionSchema } from "./schemas";
 
 const MAX_FILE = 10 * 1024 * 1024;
 const page = (clientId: string) => `/clientes/${clientId}/trafego`;
@@ -125,4 +125,38 @@ export const saveCheck = defineAction({ schema: checkSchema, permission: "optimi
   const problems = items.filter((i) => i.status === "problema").length;
   const what = kind === "diario" ? "Checklist do dia" : "Checklist da semana";
   return ok(null, existing ? `${what} atualizado.` : problems ? `${what} salvo com ${problems} ${problems === 1 ? "problema" : "problemas"} no histórico do cliente.` : `${what} salvo.`);
+});
+
+/** Reprovação da Meta (RF-T2-02): registrar, corrigir ou anotar o desfecho. A RLS só deixa quem otimiza o cliente. */
+export const saveRejection = defineAction({ schema: rejectionSchema, permission: "optimization.manage" }, async ({ id, clientId, ...v }) => {
+  const supabase = await createClient();
+  const row = {
+    library_id: v.libraryId,
+    platform: v.platform,
+    rejected_on: v.rejectedOn,
+    format: v.format,
+    angle: v.angle,
+    reason: v.reason,
+    policy_text: v.policyText,
+    ad_name: v.adName || null,
+    outcome: v.outcome,
+    lesson: v.lesson || null,
+  };
+  if (id) {
+    const { data, error } = await supabase.from("ad_rejections").update(row).eq("id", id).select("id");
+    if (error) throw error;
+    if (!data?.length) return fail("forbidden", "Esta reprovação não pode ser alterada por você.");
+  } else must(await supabase.from("ad_rejections").insert({ ...row, client_id: clientId }).select("id").single());
+  revalidatePath(page(clientId));
+  revalidatePath(`/clientes/${clientId}/historico`);
+  revalidatePath("/criativos/biblioteca");
+  return ok(null, id ? "Reprovação atualizada." : "Reprovação registrada. A equipe foi avisada.");
+});
+
+export const deleteRejection = defineAction({ schema: z.object({ id: z.uuid(), clientId: z.uuid() }), permission: "optimization.manage" }, async ({ id, clientId }) => {
+  const supabase = await createClient();
+  const { data } = await supabase.from("ad_rejections").delete().eq("id", id).select("id");
+  if (!data?.length) return fail("forbidden", "Esta reprovação não pode ser apagada por você.");
+  revalidatePath(page(clientId));
+  return ok(null, "Reprovação apagada.");
 });

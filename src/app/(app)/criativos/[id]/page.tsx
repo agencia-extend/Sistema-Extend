@@ -3,7 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/dal";
-import { getCreative } from "@/features/creatives/queries";
+import { getCreative, listCreativeRejections } from "@/features/creatives/queries";
+import { REJECTION_OUTCOME_LABEL, REJECTION_REASON, type RejectionOutcome, type RejectionReason } from "@/domain/creatives/rejections";
 import { DeliveryUpload } from "@/features/creatives/components/delivery-upload";
 import { AssetPreview } from "@/features/creatives/components/asset-preview";
 import { ReviewActions } from "@/features/creatives/components/review-actions";
@@ -20,7 +21,7 @@ const LINK_STATE = { aberto: "Aguardando o cliente", usado: "Decidido", substitu
 export default async function CriativoPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
-  const [user, c] = await Promise.all([getCurrentUser(), getCreative(id)]);
+  const [user, c, rejections] = await Promise.all([getCurrentUser(), getCreative(id), listCreativeRejections(id)]);
   if (!c || !user) notFound();
   const r = c.request;
   const isRequester = r.requestedBy === user.id;
@@ -94,6 +95,21 @@ export default async function CriativoPage({ params }: { params: Promise<{ id: s
       </div>
 
       <aside className="grid content-start gap-4">
+        {rejections.length > 0 && (
+          <section aria-labelledby="reprovado" className="grid gap-2 rounded-xl border border-danger/40 bg-danger-soft/40 p-4">
+            <h3 id="reprovado" className="text-sm font-semibold text-danger">Reprovado pela {rejections[0].platform === "google" ? "Google" : "Meta"}</h3>
+            <ul className="grid gap-3">
+              {rejections.map((x) => (
+                <li key={x.id} className="grid gap-0.5 text-sm">
+                  <span className="font-medium">{REJECTION_REASON[x.reason as RejectionReason]?.label ?? x.reason} · {x.rejectedOn.split("-").reverse().join("/")}</span>
+                  <span className="break-words text-muted-foreground">{x.policyText}</span>
+                  {x.lesson && <span className="break-words"><span className="font-medium">Evitar:</span> {x.lesson}</span>}
+                  <span className="text-xs text-muted-foreground">{x.outcome ? REJECTION_OUTCOME_LABEL[x.outcome as RejectionOutcome] : "Em aberto"}</span>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
         <section aria-labelledby="pedido" className="grid gap-2 rounded-xl border bg-card p-4">
           <h3 id="pedido" className="text-sm font-semibold">Pedido</h3>
           <dl className="grid gap-1.5 text-sm">

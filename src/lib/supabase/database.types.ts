@@ -69,6 +69,44 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"ad_rejections": {
+                  Row: {
+                    "ad_name": string | null,"angle": string,"client_id": string,"created_at": string,"created_by": string | null,"format": string,"id": string,"lesson": string | null,"library_id": string | null,"organization_id": string,"outcome": string | null,"platform": string,"policy_text": string,"reason": string,"rejected_on": string,"source": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad_name"?: string | null,"angle": string,"client_id": string,"created_at"?: string,"created_by"?: string | null,"format": string,"id"?: string,"lesson"?: string | null,"library_id"?: string | null,"organization_id"?: string,"outcome"?: string | null,"platform"?: string,"policy_text": string,"reason": string,"rejected_on"?: string,"source"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "ad_name"?: string | null,"angle"?: string,"client_id"?: string,"created_at"?: string,"created_by"?: string | null,"format"?: string,"id"?: string,"lesson"?: string | null,"library_id"?: string | null,"organization_id"?: string,"outcome"?: string | null,"platform"?: string,"policy_text"?: string,"reason"?: string,"rejected_on"?: string,"source"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ad_rejections_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_rejections_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_rejections_library_id_fkey"
+      columns: ["library_id"]
+isOneToOne: false
+      referencedRelation: "creative_library"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_rejections_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"approval_links": {
                   Row: {
                     "comment": string | null,"created_at": string,"created_by": string | null,"decided_at": string | null,"decision": string | null,"delivery_id": string | null,"expires_at": string,"id": string,"reviewer_ip": string | null,"reviewer_name": string | null,"revoked_at": string | null,"task_id": string,"token_hash": string

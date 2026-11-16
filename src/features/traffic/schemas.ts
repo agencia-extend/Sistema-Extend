@@ -1,5 +1,7 @@
 import { z } from "zod";
 import { BUDGET_CHANNELS, BUDGET_PLATFORMS, CHANGE_CATEGORIES, CHECK_ITEMS, CHECK_KINDS, CHECK_STATUSES, DECISIONS, DECISION_LEVELS, PLATFORMS } from "@/domain/traffic";
+import { CREATIVE_FORMATS } from "@/domain/creatives";
+import { REJECTION_OUTCOMES, REJECTION_REASONS } from "@/domain/creatives/rejections";
 
 const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data.");
 
@@ -57,3 +59,19 @@ export const checkSchema = z
     if (v.kind === "diario" && v.decisions.length) ctx.addIssue({ code: "custom", path: ["decisions"], message: "Decisões são do checklist semanal." });
   });
 export type CheckInput = z.infer<typeof checkSchema>;
+
+export const rejectionSchema = z.object({
+  id: z.uuid().optional(),
+  clientId: z.uuid(),
+  libraryId: z.uuid().nullable().default(null),
+  platform: z.enum(["meta", "google"], { message: "Escolha a plataforma." }),
+  rejectedOn: day,
+  format: z.enum(CREATIVE_FORMATS, { message: "Escolha o formato." }),
+  angle: z.string().trim().min(2, "Qual era o ângulo ou a mensagem do anúncio?").max(300, "Use até 300 caracteres."),
+  reason: z.enum(REJECTION_REASONS, { message: "Escolha o motivo." }),
+  policyText: z.string().trim().min(3, "Cole ou resuma o que a Meta disse.").max(1000, "Use até 1000 caracteres."),
+  adName: z.string().trim().max(200, "Use até 200 caracteres.").default(""),
+  outcome: z.enum(REJECTION_OUTCOMES).nullable().default(null),
+  lesson: z.string().trim().max(500, "Use até 500 caracteres.").default(""),
+});
+export type RejectionInput = z.infer<typeof rejectionSchema>;

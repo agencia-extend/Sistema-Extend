@@ -146,3 +146,67 @@ export async function getRoutine(): Promise<RoutineRow[]> {
     lastDailyOn: r.last_daily_on,
   }));
 }
+
+export type RejectionRow = {
+  id: string;
+  libraryId: string | null;
+  libraryCampaign: string | null;
+  platform: "meta" | "google";
+  rejectedOn: string;
+  format: string;
+  angle: string;
+  reason: string;
+  policyText: string;
+  adName: string | null;
+  outcome: string | null;
+  lesson: string | null;
+  source: "manual" | "sync";
+  authorName: string | null;
+};
+
+/** Reprovações do cliente, mais recentes primeiro (a RLS deixa o tráfego e quem pede ou produz criativos). */
+export async function listRejections(clientId: string, since?: string): Promise<RejectionRow[]> {
+  const supabase = await createClient();
+  let q = supabase
+    .from("ad_rejections")
+    .select("id, library_id, platform, rejected_on, format, angle, reason, policy_text, ad_name, outcome, lesson, source, creative_library(campaign), profiles!ad_rejections_created_by_fkey(full_name)")
+    .eq("client_id", clientId)
+    .order("rejected_on", { ascending: false })
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (since) q = q.gte("rejected_on", since);
+  const { data, error } = await q;
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    libraryId: r.library_id,
+    libraryCampaign: one(r.creative_library as { campaign: string } | { campaign: string }[] | null)?.campaign ?? null,
+    platform: r.platform as "meta" | "google",
+    rejectedOn: r.rejected_on,
+    format: r.format,
+    angle: r.angle,
+    reason: r.reason,
+    policyText: r.policy_text,
+    adName: r.ad_name,
+    outcome: r.outcome,
+    lesson: r.lesson,
+    source: r.source as "manual" | "sync",
+    authorName: one(r.profiles as { full_name: string } | { full_name: string }[] | null)?.full_name ?? null,
+  }));
+}
+
+export type LibraryOption = { id: string; campaign: string; angle: string; format: string };
+
+/** Criativos aprovados do cliente, para ligar a reprovação à peça (o formato e o ângulo vêm junto). */
+export async function listLibraryOptions(clientId: string): Promise<LibraryOption[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("creative_library")
+    .select("id, campaign, angle, format")
+    .eq("client_id", clientId)
+    .neq("status", "arquivado")
+    .order("approved_at", { ascending: false })
+    .limit(100);
+  if (error) return []; // quem não vê a biblioteca registra sem ligar à peça
+  return data ?? [];
+}

@@ -229,3 +229,15 @@ export async function listRequestableClients(): Promise<{ id: string; name: stri
   if (error) throw error;
   return data;
 }
+
+/** Reprovações ligadas a este criativo (pela peça na biblioteca). A RLS deixa quem pede, produz ou otimiza o cliente. */
+export async function listCreativeRejections(taskId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("ad_rejections")
+    .select("id, platform, rejected_on, reason, policy_text, lesson, outcome, creative_library!inner(task_id)")
+    .eq("creative_library.task_id", taskId)
+    .order("rejected_on", { ascending: false });
+  if (error) return [];
+  return (data ?? []).map((r) => ({ id: r.id, platform: r.platform, rejectedOn: r.rejected_on, reason: r.reason, policyText: r.policy_text, lesson: r.lesson, outcome: r.outcome }));
+}

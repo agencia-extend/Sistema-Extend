@@ -1,12 +1,12 @@
 import type { Metadata } from "next";
-import { History, Plus, Wallet } from "lucide-react";
+import { Ban, History, Plus, Wallet } from "lucide-react";
 import { notFound } from "next/navigation";
 import { requirePermission } from "@/lib/auth/dal";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/app/states";
 import { Section } from "@/features/clients/components/section";
 import { todayKey } from "@/domain/media";
-import { listBudgets, listChanges, listChecks } from "@/features/traffic/queries";
+import { listBudgets, listChanges, listChecks, listLibraryOptions, listRejections } from "@/features/traffic/queries";
 import { getClient } from "@/features/clients/queries";
 import { weekStart } from "@/domain/traffic";
 import { CheckHistory } from "@/features/traffic/components/check-history";
@@ -14,16 +14,25 @@ import { BudgetDialog } from "@/features/traffic/components/budget-dialog";
 import { BudgetList } from "@/features/traffic/components/budget-list";
 import { ChangeDialog } from "@/features/traffic/components/change-dialog";
 import { ChangeLog } from "@/features/traffic/components/change-log";
+import { RejectionDialog } from "@/features/traffic/components/rejection-dialog";
+import { RejectionList } from "@/features/traffic/components/rejection-list";
 
 export const metadata: Metadata = { title: "Tráfego do cliente" };
 
-/** Aba Tráfego: checklists diário e semanal (RF-OTI-01/02), verbas aprovadas pelo cliente (RF-T2-03) e registro de alterações das contas (RF-OTI-03). */
+/** Aba Tráfego: checklists (RF-OTI-01/02), verbas aprovadas pelo cliente (RF-T2-03), registro de alterações (RF-OTI-03) e reprovações da Meta (RF-T2-02). */
 export default async function TrafegoPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePermission(["ads.read", "optimization.manage"]);
   const { id } = await params;
-  const [client, changes, budgets, checks] = await Promise.all([getClient(id), listChanges(id), listBudgets(id), listChecks(id)]);
-  if (!client) notFound();
   const canManage = Boolean(user.permissions["optimization.manage"]);
+  const [client, changes, budgets, checks, rejections, library] = await Promise.all([
+    getClient(id),
+    listChanges(id),
+    listBudgets(id),
+    listChecks(id),
+    listRejections(id),
+    canManage ? listLibraryOptions(id) : Promise.resolve([]),
+  ]);
+  if (!client) notFound();
   const today = todayKey(new Date());
 
   return (
@@ -43,6 +52,22 @@ export default async function TrafegoPage({ params }: { params: Promise<{ id: st
             icon={Wallet}
             title="Nenhuma verba registrada"
             description={canManage ? "Quando o cliente aprovar um valor para anúncios, registre aqui com o período, quem aprovou e o print ou áudio da aprovação." : "A equipe de tráfego registra aqui as verbas aprovadas pelo cliente."}
+          />
+        )}
+      </Section>
+
+      <Section
+        id="reprovacoes"
+        title="Reprovações da Meta"
+        action={canManage && <RejectionDialog clientId={id} today={today} library={library} trigger={<Button size="sm" variant="outline"><Plus aria-hidden="true" /> Registrar reprovação</Button>} />}
+      >
+        {rejections.length ? (
+          <RejectionList clientId={id} today={today} rows={rejections} library={library} canManage={canManage} />
+        ) : (
+          <EmptyState
+            icon={Ban}
+            title="Nenhuma reprovação registrada"
+            description={canManage ? "Quando a Meta reprovar um anúncio, registre o motivo e o que evitar. Aparece para quem pede e produz os próximos criativos deste cliente." : "As reprovações de anúncios deste cliente aparecem aqui, com o motivo."}
           />
         )}
       </Section>
