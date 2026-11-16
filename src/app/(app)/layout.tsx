@@ -27,6 +27,7 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
         name: user.fullName,
         email: user.email,
         roleName: user.roles.map((r) => r.name).join(", ") || "Sem papel",
+        orgId: user.organizationId,
         canManageUsers: Boolean(user.permissions["users.manage"]),
       }}
       groups={groups}

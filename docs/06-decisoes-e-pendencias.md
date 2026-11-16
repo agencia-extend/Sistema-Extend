@@ -372,3 +372,8 @@ RF-CON-01, visão do setor de gerenciamento (o cronograma por cliente já existi
 - O mês é o do calendário, como na aba Cronograma (não o mês do contrato do Controle de Mídias).
 - Coberto por `29_cronogramas_do_mes.test.sql` e `e2e/26`.
 - Correção junto: o mês aparecia como "Novembro De 2026" na aba Cronograma; agora "Novembro de 2026".
+
+## Quem está online (16/11/2026)
+- **Topo de todas as telas:** botão "N online" (no celular, só o ícone e o número). Abre a lista de quem está com o sistema aberto agora: você primeiro, depois por nome, com o papel e desde que horas. Várias abas da mesma pessoa contam como uma; quem fecha o sistema some da lista em alguns segundos.
+- **Acesso no banco:** canal privado do Realtime `equipe:{organização}`. As políticas em `realtime.messages` (`20261116000300`) só deixam ler e anunciar presença quem é da equipe ativa da organização (`private.org_id()`, que já exclui a área do cliente e quem foi desativado), e só presença (nada de mensagens no canal). Testes em `30_presenca_online.test.sql`.
+- Nada fica gravado: a presença vive só enquanto a pessoa está conectada. Se o canal não conectar, o botão não aparece e o resto da tela segue normal.

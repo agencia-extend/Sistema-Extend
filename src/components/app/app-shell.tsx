@@ -12,10 +12,11 @@ import { NavIcon } from "@/components/app/nav-icon";
 import { SidebarNav } from "@/components/app/sidebar-nav";
 import { GlobalSearch, type SearchPage } from "@/components/app/global-search";
 import { UserMenu } from "@/components/app/user-menu";
+import { OnlinePresence } from "@/components/app/online-presence";
 import { NotificationBell } from "@/features/notifications/components/notification-bell";
 import { cn } from "@/lib/utils";
 
-type ShellUser = { id: string; name: string; email: string; roleName: string; canManageUsers: boolean };
+type ShellUser = { id: string; name: string; email: string; roleName: string; orgId: string; canManageUsers: boolean };
 
 function Brand() {
   return (
@@ -78,6 +79,7 @@ export function AppShell({
               <span className="truncate max-sm:sr-only">{timer.title}</span>
             </Link>
           )}
+          <OnlinePresence me={{ id: user.id, name: user.name, role: user.roleName, orgId: user.orgId }} />
           <NotificationBell userId={user.id} initialUnread={unread} />
           <UserMenu name={user.name} email={user.email} roleName={user.roleName} />
         </header>

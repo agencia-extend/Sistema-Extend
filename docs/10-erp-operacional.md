@@ -22,7 +22,7 @@ Recebido em 12/11/2026 (`PROMPT-ERP-OPERACIONAL.md`, enviado pelo Henrique). É 
 | Gamificação (ons, faixas, ranking, missões, carreira) | — | **Não entra** (decisão da Extend em 13/11) |
 | Treinamentos | `/treinamentos`: trilhas com aulas (texto, vídeo do YouTube/Loom/Drive/Vimeo, PDF ou slides), progresso por pessoa, atribuição com prazo, aba Equipe | **Feito em 13/11** (conteúdo da Extend; o do prompt é de outra agência) |
 | Assistente de IA | Futuro (D10) | Fora do MVP |
-| Presença "N online" | — | Baixa prioridade |
+| Presença "N online" | Botão "N online" no topo com a lista de quem está com o sistema aberto (papel e desde quando) | **Feito em 16/11** (canal privado do Realtime; só a equipe ativa entra) |
 
 ## Decisões de 13/11/2026
 - **Repetição:** a próxima da série nasce ao concluir ou quando o prazo passa (a atrasada continua aberta, para não sumir trabalho). Vai para quem estava responsável quando a repetição foi ligada. Copia descrição, checklist (desmarcado), etiquetas e participantes. Se ficou parada semanas, pula para a próxima data futura. Cliente encerrado ou excluído para a série.
