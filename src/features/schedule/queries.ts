@@ -104,3 +104,33 @@ export async function listRecordableContents(clientId: string): Promise<{ id: st
   if (error) throw error;
   return data;
 }
+
+export type ScheduleOverviewRow = {
+  clientId: string;
+  clientName: string;
+  clientCode: number | null;
+  contracted: number;
+  scheduled: number;
+  posted: number;
+  undated: number;
+  social: string[];
+  mine: boolean;
+};
+
+/** Cronogramas do mês por cliente com Gerenciamento (a função do banco filtra o que a pessoa pode ver). */
+export async function listScheduleOverview(start: string, end: string): Promise<ScheduleOverviewRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("schedule_overview", { p_start: start, p_end: end });
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    clientId: r.client_id,
+    clientName: r.client_name,
+    clientCode: r.client_code,
+    contracted: r.contracted,
+    scheduled: r.scheduled,
+    posted: r.posted,
+    undated: r.undated,
+    social: r.social ?? [],
+    mine: r.mine,
+  }));
+}

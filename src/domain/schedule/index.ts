@@ -47,3 +47,17 @@ export const POST_STATE_LABEL: Record<PostState, string> = { postado: "Postado",
 export function gridOrder<T extends { postOn: string | null }>(posts: T[]): T[] {
   return posts.filter((p) => p.postOn).sort((a, b) => (b.postOn! < a.postOn! ? -1 : b.postOn! > a.postOn! ? 1 : 0));
 }
+
+/** Situação do cronograma do cliente no mês: completo quando os posts com data cobrem o contratado. */
+export type MonthStatus = { complete: boolean; missing: number };
+export function monthStatus(contracted: number, scheduled: number): MonthStatus {
+  const missing = Math.max(0, contracted - scheduled);
+  return { complete: missing === 0, missing };
+}
+
+/** Os que faltam mais primeiro; completos por último; empate pelo nome. */
+export function byMissing<T extends { contracted: number; scheduled: number; clientName: string }>(rows: T[]): T[] {
+  return [...rows].sort(
+    (a, b) => monthStatus(b.contracted, b.scheduled).missing - monthStatus(a.contracted, a.scheduled).missing || a.clientName.localeCompare(b.clientName, "pt-BR"),
+  );
+}

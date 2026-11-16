@@ -24,3 +24,22 @@ describe("cronograma", () => {
     expect(g.map((p) => p.id)).toEqual([3, 1]);
   });
 });
+
+describe("cronogramas do mês", () => {
+  it("diz quantos posts faltam e se o mês está completo", async () => {
+    const { monthStatus } = await import(".");
+    expect(monthStatus(12, 8)).toEqual({ complete: false, missing: 4 });
+    expect(monthStatus(12, 14)).toEqual({ complete: true, missing: 0 });
+    expect(monthStatus(0, 0)).toEqual({ complete: true, missing: 0 });
+  });
+
+  it("ordena os que faltam mais primeiro", async () => {
+    const { byMissing } = await import(".");
+    const rows = [
+      { clientName: "Beta", contracted: 8, scheduled: 8 },
+      { clientName: "Alfa", contracted: 8, scheduled: 6 },
+      { clientName: "Gama", contracted: 12, scheduled: 2 },
+    ];
+    expect(byMissing(rows).map((r) => r.clientName)).toEqual(["Gama", "Alfa", "Beta"]);
+  });
+});

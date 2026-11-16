@@ -29,7 +29,7 @@ export default async function CronogramaPage({ params, searchParams }: { params:
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-1">
           <Button asChild variant="ghost" size="icon"><Link href={q(shiftMonth(month, -1), view)} aria-label="Mês anterior"><ChevronLeft /></Link></Button>
-          <h2 className="min-w-44 text-center text-base font-semibold capitalize">{monthLabel(month)}</h2>
+          <h2 className="min-w-44 text-center text-base font-semibold first-letter:uppercase">{monthLabel(month)}</h2>
           <Button asChild variant="ghost" size="icon"><Link href={q(shiftMonth(month, 1), view)} aria-label="Próximo mês"><ChevronRight /></Link></Button>
         </div>
         <nav aria-label="Visualização" className="inline-flex rounded-lg border p-0.5 text-sm">

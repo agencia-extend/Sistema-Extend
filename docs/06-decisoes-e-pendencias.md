@@ -362,3 +362,13 @@ RF-ADS-11, feito sem depender das chaves.
 - **Com a sincronização:** a campanha poderá ser escolhida da lista sincronizada.
 - Coberto por `28_links_utm.test.sql`, `utm.test.ts` e `e2e/25`.
 - Correção junto: o botão de fechar dos diálogos e painéis era lido como "Close" pelo leitor de tela; agora é "Fechar".
+
+## Cronogramas do mês (16/11/2026)
+RF-CON-01, visão do setor de gerenciamento (o cronograma por cliente já existia desde 14/11).
+- **Página** `/cronogramas` (menu Produção, "Cronogramas do mês"): para quem publica conteúdo (`content.publish`: social media, coordenação de conteúdo, admin) ou tem o Controle geral (`dashboards.read`).
+- **Tabela por cliente** ativo com **Gerenciamento de redes** vigente no mês: Nº e nome (abre o cronograma do cliente no mesmo mês), social media (quem está no setor Gerenciamento do cliente), posts **contratados** (quantidade do serviço), **programados** (com data no mês), **postados** (com o link do post) e **sem data** (marcados para o cronograma). Situação: **Completo** quando os programados cobrem o contratado; senão "Faltam N posts". Os que faltam mais aparecem primeiro.
+- **Filtro:** "Meus clientes" (padrão para quem está no gerenciamento de algum cliente) ou "Todos"; navegação por mês.
+- **No banco:** `public.schedule_overview(início, fim)` faz as contagens e só devolve clientes que a pessoa pode ver (`can_client` de `content.publish` ou `dashboards.read`); período de até 62 dias. Regras puras em `monthStatus` e `byMissing` (`src/domain/schedule`).
+- O mês é o do calendário, como na aba Cronograma (não o mês do contrato do Controle de Mídias).
+- Coberto por `29_cronogramas_do_mes.test.sql` e `e2e/26`.
+- Correção junto: o mês aparecia como "Novembro De 2026" na aba Cronograma; agora "Novembro de 2026".

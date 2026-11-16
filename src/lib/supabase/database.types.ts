@@ -3049,6 +3049,11 @@ isOneToOne: false
 "save_recording":
 { Args: { "p": Json }; Returns: string
                            },
+"schedule_overview":
+{ Args: { "p_end": string,"p_start": string }; Returns: {
+              "client_code": number,"client_id": string,"client_name": string,"contracted": number,"mine": boolean,"posted": number,"scheduled": number,"social": (string)[],"undated": number
+            }[]
+                           },
 "send_proposal":
 { Args: { "p_id": string }; Returns: string
                            },

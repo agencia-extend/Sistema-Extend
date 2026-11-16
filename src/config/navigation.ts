@@ -3,6 +3,7 @@ import { canAny, type PermissionKey, type PermissionMap } from "@/domain/permiss
 export type NavIcon =
   | "home"
   | "weekly"
+  | "schedule"
   | "tasks"
   | "clients"
   | "creatives"
@@ -50,6 +51,7 @@ export const NAV_GROUPS: NavGroup[] = [
       { href: "/quadros", label: "Quadros", icon: "boards", anyOf: ["tasks.read"] },
       { href: "/trafego", label: "Rotina do tráfego", icon: "ads", anyOf: ["optimization.manage"] },
       { href: "/relatorios", label: "Relatórios da semana", icon: "weekly", anyOf: ["reports.manage", "content.publish"] },
+      { href: "/cronogramas", label: "Cronogramas do mês", icon: "schedule", anyOf: ["content.publish", "dashboards.read"] },
       { href: "/criativos", label: "Criativos", icon: "creatives", anyOf: ["creatives.request.create", "creatives.produce", "creatives.review", "creatives.library.manage"] },
       { href: "/calendario-marketing", label: "Calendário de marketing", icon: "calendar", anyOf: ["marketing_calendar.read"] },
       { href: "/producao", label: "Controle geral", icon: "production", anyOf: ["dashboards.read"] },

@@ -1,6 +1,7 @@
 import {
   BarChart3,
   Briefcase,
+  CalendarCheck,
   CalendarDays,
   ClipboardCheck,
   FileBarChart,
@@ -21,6 +22,7 @@ import type { NavIcon as NavIconKey } from "@/config/navigation";
 const ICONS: Record<NavIconKey, LucideIcon> = {
   home: House,
   weekly: FileBarChart,
+  schedule: CalendarCheck,
   tasks: LayoutList,
   clients: Users,
   creatives: Palette,
