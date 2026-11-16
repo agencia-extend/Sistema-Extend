@@ -210,3 +210,44 @@ export async function listLibraryOptions(clientId: string): Promise<LibraryOptio
   if (error) return []; // quem não vê a biblioteca registra sem ligar à peça
   return data ?? [];
 }
+
+export type UtmLinkRow = {
+  id: string;
+  label: string;
+  platform: "meta" | "google" | "outro";
+  baseUrl: string;
+  source: string;
+  medium: string;
+  campaign: string;
+  term: string | null;
+  content: string | null;
+  url: string;
+  authorName: string | null;
+  createdAt: string;
+};
+
+/** Links com UTM gerados para o cliente, mais recentes primeiro (a RLS deixa quem vê o tráfego dele). */
+export async function listUtmLinks(clientId: string): Promise<UtmLinkRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("utm_links")
+    .select("id, label, platform, base_url, source, medium, campaign, term, content, url, created_at, profiles!utm_links_created_by_fkey(full_name)")
+    .eq("client_id", clientId)
+    .order("created_at", { ascending: false })
+    .limit(200);
+  if (error) throw error;
+  return (data ?? []).map((r) => ({
+    id: r.id,
+    label: r.label,
+    platform: r.platform as UtmLinkRow["platform"],
+    baseUrl: r.base_url,
+    source: r.source,
+    medium: r.medium,
+    campaign: r.campaign,
+    term: r.term,
+    content: r.content,
+    url: r.url,
+    authorName: one(r.profiles as { full_name: string } | { full_name: string }[] | null)?.full_name ?? null,
+    createdAt: r.created_at,
+  }));
+}

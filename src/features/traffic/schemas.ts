@@ -2,6 +2,7 @@ import { z } from "zod";
 import { BUDGET_CHANNELS, BUDGET_PLATFORMS, CHANGE_CATEGORIES, CHECK_ITEMS, CHECK_KINDS, CHECK_STATUSES, DECISIONS, DECISION_LEVELS, PLATFORMS } from "@/domain/traffic";
 import { CREATIVE_FORMATS } from "@/domain/creatives";
 import { REJECTION_OUTCOMES, REJECTION_REASONS } from "@/domain/creatives/rejections";
+import { normalizeBaseUrl, UTM_PLATFORMS, utmValue } from "@/domain/traffic/utm";
 
 const day = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe a data.");
 
@@ -75,3 +76,20 @@ export const rejectionSchema = z.object({
   lesson: z.string().trim().max(500, "Use até 500 caracteres.").default(""),
 });
 export type RejectionInput = z.infer<typeof rejectionSchema>;
+
+const utmPart = (min: number, max: number, msg: string) => z.string().trim().min(min, msg).max(max, `Use até ${max} caracteres.`);
+export const utmSchema = z
+  .object({
+    clientId: z.uuid(),
+    label: utmPart(2, 120, "Dê um nome ao link (ex.: Bio do Instagram)."),
+    platform: z.enum(UTM_PLATFORMS, { message: "Escolha onde o link vai ser usado." }),
+    baseUrl: z.string().trim().max(2000, "Endereço longo demais."),
+    source: utmPart(1, 200, "Informe a origem (utm_source)."),
+    medium: utmPart(1, 200, "Informe a mídia (utm_medium)."),
+    campaign: utmPart(1, 300, "Informe a campanha (utm_campaign)."),
+    term: z.string().trim().max(300, "Use até 300 caracteres.").default(""),
+    content: z.string().trim().max(300, "Use até 300 caracteres.").default(""),
+  })
+  .refine((v) => normalizeBaseUrl(v.baseUrl) !== null, { path: ["baseUrl"], message: "Informe o endereço do site (ex.: https://clinica.com.br/agendar)." })
+  .refine((v) => utmValue(v.source) && utmValue(v.medium) && utmValue(v.campaign), { path: ["campaign"], message: "Origem, mídia e campanha precisam ter letras ou números." });
+export type UtmInput = z.infer<typeof utmSchema>;

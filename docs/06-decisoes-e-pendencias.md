@@ -350,3 +350,15 @@ RF-T2-02, feito sem depender das chaves (registro manual; a sincronização pass
 - **Com a sincronização:** reprovações detectadas na API entram sozinhas (`source = 'sync'`) e o alerta de anúncio reprovado (RF-ALE-01) usa a mesma tabela.
 - Coberto por `27_reprovacoes_meta.test.sql` e `e2e/24`.
 - Correção junto: no pedido de criativo, ângulos longos na lista "Últimos criativos com resultado" alargavam a página no computador.
+
+## Links com UTM (16/11/2026)
+RF-ADS-11, feito sem depender das chaves.
+- **Onde:** aba **Tráfego** do cliente, seção "Links com UTM" (`utm_links`). Lê quem vê o tráfego do cliente (`ads.read` ou `optimization.manage`); gera e apaga quem otimiza o cliente. Link não se edita: "Gerar parecido" abre o formulário preenchido.
+- **Modelos** (`src/domain/traffic/utm.ts`):
+  - **Meta Ads:** `utm_source={{site_source_name}}&utm_medium=cpc&utm_campaign={{campaign.name}}&utm_term={{adset.name}}&utm_content={{ad.name}}`. A Meta troca as chaves em cada clique. Botão "Copiar parâmetros" para o campo "Parâmetros de URL" do anúncio.
+  - **Google Ads:** `utm_source=google&utm_medium=cpc&utm_campaign={campaignid}&utm_term={keyword}&utm_content={creative}` (ValueTrack). Botão "Copiar modelo de acompanhamento" (`{lpurl}?…`).
+  - **Outro** (bio, e-mail, WhatsApp, QR Code): tudo à mão.
+- **Regras:** o que é digitado vira minúsculas, sem acento e com "_" no lugar de espaço; as chaves das plataformas ficam como estão. O destino precisa ser http(s) com domínio; UTMs antigas do destino são trocadas e os outros parâmetros e a âncora ficam. O banco confere que o link parte do destino e tem source, medium e campaign, e não deixa gerar o mesmo link duas vezes no cliente.
+- **Com a sincronização:** a campanha poderá ser escolhida da lista sincronizada.
+- Coberto por `28_links_utm.test.sql`, `utm.test.ts` e `e2e/25`.
+- Correção junto: o botão de fechar dos diálogos e painéis era lido como "Close" pelo leitor de tela; agora é "Fechar".

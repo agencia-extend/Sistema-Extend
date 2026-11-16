@@ -2763,6 +2763,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"utm_links": {
+                  Row: {
+                    "base_url": string,"campaign": string,"client_id": string,"content": string | null,"created_at": string,"created_by": string | null,"id": string,"label": string,"medium": string,"organization_id": string,"platform": string,"source": string,"term": string | null,"url": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "base_url": string,"campaign": string,"client_id": string,"content"?: string | null,"created_at"?: string,"created_by"?: string | null,"id"?: string,"label": string,"medium": string,"organization_id"?: string,"platform": string,"source": string,"term"?: string | null,"url": string
+                  }
+                  Update: {
+                    "base_url"?: string,"campaign"?: string,"client_id"?: string,"content"?: string | null,"created_at"?: string,"created_by"?: string | null,"id"?: string,"label"?: string,"medium"?: string,"organization_id"?: string,"platform"?: string,"source"?: string,"term"?: string | null,"url"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "utm_links_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "utm_links_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "utm_links_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"workflow_steps": {
                   Row: {
                     "archived_at": string | null,"color": string,"created_at": string,"id": string,"is_rework": boolean,"name": string,"position": number,"sector_id": string | null,"status": string,"waits_client": boolean,"workflow_id": string

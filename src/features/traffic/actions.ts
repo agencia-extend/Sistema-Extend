@@ -6,7 +6,8 @@ import { z } from "zod";
 import { defineAction, must } from "@/lib/actions";
 import { fail, ok } from "@/domain/shared/result";
 import { createClient } from "@/lib/supabase/server";
-import { budgetSchema, changeSchema, checkSchema, rejectionSchema } from "./schemas";
+import { budgetSchema, changeSchema, checkSchema, rejectionSchema, utmSchema } from "./schemas";
+import { buildUtmUrl, normalizeBaseUrl, utmValue } from "@/domain/traffic/utm";
 
 const MAX_FILE = 10 * 1024 * 1024;
 const page = (clientId: string) => `/clientes/${clientId}/trafego`;
@@ -159,4 +160,36 @@ export const deleteRejection = defineAction({ schema: z.object({ id: z.uuid(), c
   if (!data?.length) return fail("forbidden", "Esta reprovação não pode ser apagada por você.");
   revalidatePath(page(clientId));
   return ok(null, "Reprovação apagada.");
+});
+
+/** Gerar link com UTM: a URL final é montada aqui (o banco confere destino e UTMs e não deixa repetir). */
+export const saveUtmLink = defineAction({ schema: utmSchema, permission: "optimization.manage" }, async ({ clientId, ...v }) => {
+  const url = buildUtmUrl(v.baseUrl, v);
+  const base = normalizeBaseUrl(v.baseUrl);
+  if (!url || !base) return fail("validation", "Informe o endereço do site.");
+  const supabase = await createClient();
+  const { error } = await supabase.from("utm_links").insert({
+    client_id: clientId,
+    label: v.label,
+    platform: v.platform,
+    base_url: base,
+    source: utmValue(v.source),
+    medium: utmValue(v.medium),
+    campaign: utmValue(v.campaign),
+    term: utmValue(v.term) || null,
+    content: utmValue(v.content) || null,
+    url,
+  });
+  if (error?.code === "23505") return fail("conflict", "Este link já foi gerado para o cliente. Copie da lista.");
+  if (error) throw error;
+  revalidatePath(page(clientId));
+  return ok({ url }, "Link gerado.");
+});
+
+export const deleteUtmLink = defineAction({ schema: z.object({ id: z.uuid(), clientId: z.uuid() }), permission: "optimization.manage" }, async ({ id, clientId }) => {
+  const supabase = await createClient();
+  const { data } = await supabase.from("utm_links").delete().eq("id", id).select("id");
+  if (!data?.length) return fail("forbidden", "Este link não pode ser apagado por você.");
+  revalidatePath(page(clientId));
+  return ok(null, "Link apagado.");
 });

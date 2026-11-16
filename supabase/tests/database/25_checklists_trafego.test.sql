@@ -46,7 +46,7 @@ select lives_ok($$insert into public.traffic_checks (client_id, kind, period_on,
   '[{"key":"saldo","status":"problema","note":"Cartão recusado, saldo para 1 dia"},{"key":"reprovados","status":"ok"},{"key":"gasto","status":"na"},{"key":"entrega","status":"ok"}]')$$, 'gestora faz o diário');
 select is((select problems from public.traffic_checks where client_id = '00000000-0000-4000-b510-000000000001' and kind = 'diario'), 1, 'o banco conta os problemas');
 select is((select done_by from public.traffic_checks where client_id = '00000000-0000-4000-b510-000000000001' and kind = 'diario'), '00000000-0000-4000-b500-000000000001'::uuid, 'quem fez é quem está logado');
-select throws_ok($$insert into public.traffic_checks (client_id, kind, period_on, items) values ('00000000-0000-4000-b510-000000000001', 'semanal', date_trunc('week', private.today_sp())::date + 1,
+select throws_ok($$insert into public.traffic_checks (client_id, kind, period_on, items) values ('00000000-0000-4000-b510-000000000001', 'semanal', date_trunc('week', private.today_sp())::date - 6,
   '[{"key":"criativos","status":"ok"},{"key":"publicos","status":"ok"},{"key":"custos","status":"ok"}]')$$, 'P0001', 'O checklist semanal vale a partir da segunda-feira.', 'semana começa na segunda');
 select lives_ok($$insert into public.traffic_checks (client_id, kind, period_on, items, decisions) values ('00000000-0000-4000-b510-000000000001', 'semanal', date_trunc('week', private.today_sp())::date,
   '[{"key":"criativos","status":"ok"},{"key":"publicos","status":"ok"},{"key":"custos","status":"ok"}]',
