@@ -136,3 +136,39 @@ export async function getClientAds(clientId: string, range: { start: string; end
     .sort((x, y) => Number(y.status === "ACTIVE") - Number(x.status === "ACTIVE") || y.totals.spend_cents - x.totals.spend_cents);
   return { accounts, ads: rows };
 }
+
+export type ClientGoal = {
+  id: string;
+  month: string;
+  resultKind: "leads" | "messages" | "purchases" | "link_clicks";
+  resultsTarget: number | null;
+  spendCents: number | null;
+  maxCostCents: number | null;
+  minRoas: number | null;
+  notes: string | null;
+};
+
+/** Meta do mês do cliente e o realizado até ontem (contas ligadas, nível conta). */
+export async function getClientGoal(clientId: string, today: string): Promise<{ goal: ClientGoal | null; actual: { spendCents: number; results: number; purchaseValueCents: number } }> {
+  const supabase = await createClient();
+  const month = `${today.slice(0, 7)}-01`;
+  const [{ data: g }, { data: accs }] = await Promise.all([
+    supabase.from("ad_goals").select("id, month, result_kind, results_target, spend_cents, max_cost_cents, min_roas, notes").eq("client_id", clientId).eq("month", month).maybeSingle(),
+    supabase.from("ad_accounts").select("id").eq("client_id", clientId).eq("is_enabled", true),
+  ]);
+  const ids = (accs ?? []).map((a) => a.id);
+  const { data: rows } = ids.length
+    ? await supabase.from("ad_insights_daily").select("spend_cents, leads, messages, purchases, link_clicks, purchase_value_cents").in("ad_account_id", ids).eq("level", "account").gte("date", month).lt("date", today)
+    : { data: [] };
+  const kind = (g?.result_kind ?? "leads") as ClientGoal["resultKind"];
+  const actual = { spendCents: 0, results: 0, purchaseValueCents: 0 };
+  for (const r of rows ?? []) {
+    actual.spendCents += n(r.spend_cents);
+    actual.results += n(r[kind]);
+    actual.purchaseValueCents += n(r.purchase_value_cents);
+  }
+  return {
+    goal: g ? { id: g.id, month: g.month, resultKind: kind, resultsTarget: g.results_target, spendCents: g.spend_cents === null ? null : n(g.spend_cents), maxCostCents: g.max_cost_cents === null ? null : n(g.max_cost_cents), minRoas: g.min_roas === null ? null : Number(g.min_roas), notes: g.notes } : null,
+    actual,
+  };
+}

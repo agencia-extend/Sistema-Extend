@@ -63,6 +63,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"ad_goals": {
+                  Row: {
+                    "client_id": string,"created_at": string,"created_by": string | null,"id": string,"max_cost_cents": number | null,"min_roas": number | null,"month": string,"notes": string | null,"organization_id": string,"result_kind": string,"results_target": number | null,"spend_cents": number | null,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"max_cost_cents"?: number | null,"min_roas"?: number | null,"month": string,"notes"?: string | null,"organization_id"?: string,"result_kind": string,"results_target"?: number | null,"spend_cents"?: number | null,"updated_at"?: string
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"max_cost_cents"?: number | null,"min_roas"?: number | null,"month"?: string,"notes"?: string | null,"organization_id"?: string,"result_kind"?: string,"results_target"?: number | null,"spend_cents"?: number | null,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ad_goals_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_goals_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_goals_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"ad_insights_daily": {
                   Row: {
                     "ad_account_id": string,"clicks": number,"date": string,"impressions": number,"landing_page_views": number,"leads": number,"level": string,"link_clicks": number,"messages": number,"object_external_id": string,"purchase_value_cents": number,"purchases": number,"reach": number,"spend_cents": number,"video_views": number

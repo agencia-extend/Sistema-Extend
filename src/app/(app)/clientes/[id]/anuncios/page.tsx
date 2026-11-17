@@ -9,10 +9,14 @@ import { PERIOD_LABEL, RESULT_LABEL, parsePeriod, periodRange, type Period } fro
 import { todayKey } from "@/domain/media";
 import { formatBRL } from "@/domain/shared/money";
 import { getClient } from "@/features/clients/queries";
-import { getClientAds } from "@/features/ads/queries";
+import { getClientAds, getClientGoal } from "@/features/ads/queries";
 import { PanelTable, StatusDot } from "@/features/ads/components/panel-table";
 import { SyncButton } from "@/features/ads/components/sync-button";
 import { ReportButton } from "@/features/ads/components/report-button";
+import { GoalDialog } from "@/features/ads/components/goal-dialog";
+import { GoalProgress } from "@/features/ads/components/goal-progress";
+import { Button } from "@/components/ui/button";
+import { Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Anúncios do cliente" };
@@ -26,7 +30,10 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const period = parsePeriod(sp.periodo);
   const today = todayKey(new Date());
-  const [client, data] = await Promise.all([getClient(id), getClientAds(id, periodRange(period, today))]);
+  const [client, data, goal] = await Promise.all([getClient(id), getClientAds(id, periodRange(period, today)), getClientGoal(id, today)]);
+  const canGoal = Boolean(user.permissions["optimization.manage"]);
+  const month = `${today.slice(0, 7)}-01`;
+  const monthName = new Date(`${month}T12:00:00Z`).toLocaleDateString("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" });
   if (!client) notFound();
 
   if (!data.accounts.length)
@@ -57,6 +64,22 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
           </div>
         )}
       </div>
+
+      <section id="metas" aria-labelledby="metas-h" className="grid scroll-mt-20 gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 id="metas-h" className="text-base font-semibold first-letter:uppercase">Metas de {monthName}</h2>
+          {canGoal && (
+            <GoalDialog clientId={id} month={month} monthLabel={monthName} goal={goal.goal}
+              trigger={<Button size="sm" variant="outline"><Target aria-hidden="true" /> {goal.goal ? "Editar meta" : "Definir meta"}</Button>} />
+          )}
+        </div>
+        {goal.goal ? (
+          <GoalProgress goal={goal.goal} actual={goal.actual} today={today} />
+        ) : (
+          <p className="text-sm text-muted-foreground">{canGoal ? "Sem meta para este mês. Defina o que foi combinado com o cliente (resultados, investimento, custo máximo) para acompanhar o ritmo." : "Sem meta definida para este mês."}</p>
+        )}
+        {goal.goal?.notes && <p className="text-sm text-muted-foreground break-words">{goal.goal.notes}</p>}
+      </section>
 
       <PanelTable accounts={data.accounts} showClient={false} />
 

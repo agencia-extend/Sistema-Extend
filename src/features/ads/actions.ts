@@ -1,12 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { defineAction } from "@/lib/actions";
+import { defineAction, must } from "@/lib/actions";
 import { fail, ok } from "@/domain/shared/result";
 import { syncMetaAccounts } from "@/lib/ads/meta-sync";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { reportNowSchema, syncNowSchema } from "./schemas";
+import { goalIdSchema, goalSchema, reportNowSchema, syncNowSchema } from "./schemas";
 import { periodRange } from "@/domain/ads";
 import { lastWeek } from "@/domain/ads/report";
 import { todayKey } from "@/domain/media";
@@ -54,4 +54,22 @@ export const sendReportNow = defineAction({ schema: reportNowSchema, permission:
   if (r.error) return fail("business_rule", r.error);
   if (!r.sent) return fail("business_rule", "Sem gasto no período: não há o que relatar.");
   return ok(null, "Relatório enviado para o grupo de relatórios do WhatsApp.");
+});
+
+/** Meta do mês do cliente (uma por mês; salvar de novo substitui). A RLS confere quem otimiza o cliente. */
+export const saveGoal = defineAction({ schema: goalSchema, permission: "optimization.manage" }, async (g) => {
+  const supabase = await createClient();
+  const values = { result_kind: g.resultKind, results_target: g.resultsTarget, spend_cents: g.spend, max_cost_cents: g.maxCost, min_roas: g.minRoas, notes: g.notes };
+  const { data: existing } = await supabase.from("ad_goals").select("id").eq("client_id", g.clientId).eq("month", g.month).maybeSingle();
+  if (existing) must(await supabase.from("ad_goals").update(values).eq("id", existing.id));
+  else must(await supabase.from("ad_goals").insert({ client_id: g.clientId, month: g.month, ...values }));
+  revalidatePath(`/clientes/${g.clientId}/anuncios`);
+  return ok(null, "Meta do mês salva.");
+});
+
+export const deleteGoal = defineAction({ schema: goalIdSchema, permission: "optimization.manage" }, async ({ id, clientId }) => {
+  const supabase = await createClient();
+  must(await supabase.from("ad_goals").delete().eq("id", id));
+  revalidatePath(`/clientes/${clientId}/anuncios`);
+  return ok(null, "Meta apagada.");
 });

@@ -436,3 +436,17 @@ Decisão do Henrique: WAHA, para usar os grupos que a Extend já tem. Por enquan
   - **Texto** (`src/domain/ads/report.ts`): investimento, impressões, cada campanha com gasto, resultado principal, custo por resultado e CTR, e o saldo da conta pré-paga com a previsão de dias.
 - **Histórico:** ao ler o QR Code, o servidor carrega as conversas e os grupos do aparelho (`fullSync`).
 - **Próximas partes:** modelos de relatório editáveis com variáveis (RF-REL-02), PDF (RF-REL-05) e a caixa de entrada (RF-WPP-03).
+
+## Metas de anúncios por cliente (17/11/2026)
+RF-T2-04, com os números já sincronizados da Meta.
+- **Onde:** aba Anúncios do cliente, quadro "Metas de {mês}". Quem otimiza as contas do cliente (`optimization.manage`) define; quem vê os anúncios dele (`ads.read`) acompanha. Regras no banco (`ad_goals`, RLS, gatilho) e testes em `35_metas_anuncios.test.sql`.
+- **O que se define por mês** (só o que foi combinado):
+  - resultado (leads, conversas, compras ou cliques no link) e a quantidade;
+  - investimento;
+  - custo máximo por resultado;
+  - ROAS mínimo.
+- **Progresso** (`src/domain/ads/goals.ts`):
+  - o realizado vai até ontem, nas contas ligadas do cliente;
+  - a projeção é linear (realizado ÷ dias completos × dias do mês) e só aparece a partir do 3º dia completo;
+  - "No ritmo": a projeção chega a 80% da meta; investimento dentro de ±15% do planejado; custo dentro do limite; ROAS acima do mínimo.
+- **Avisos** (RF-ALE-01, "CPL acima da meta"): nos dias úteis às 10h (`extend-metas-anuncios`), a partir do 6º dia do mês, o tráfego do cliente recebe "Custo por … acima da meta" e "Ritmo abaixo da meta" (projeção abaixo de 80%). No máximo um de cada por semana. Chegam também ao grupo de alertas do WhatsApp.

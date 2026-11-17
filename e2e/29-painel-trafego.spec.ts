@@ -105,6 +105,27 @@ test("2. aba Anúncios do cliente e conta sem conexão ao sincronizar", async ({
   const card = page.getByRole("listitem").filter({ hasText: "Vídeo antes e depois" });
   await expect(card).toContainText("Ativo");
   await expect(card).toContainText("R$ 140,00 · 28 conversas · R$ 5,00 cada");
+  // Meta do mês: 100 conversas e até R$ 4,00 cada. Realizado: 28 conversas a R$ 5,00 → abaixo e acima do limite.
+  await page.getByRole("button", { name: "Definir meta" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Resultado").click();
+  await page.getByRole("option", { name: "Conversas" }).click();
+  await dialog.getByLabel("Quantidade no mês").fill("100");
+  await dialog.getByLabel("Custo máximo por conversa (R$)").fill("abc");
+  await dialog.getByRole("button", { name: "Salvar meta" }).click();
+  await expect(dialog.getByText("Valor inválido. Ex.: 1.500,00")).toBeVisible();
+  await dialog.getByLabel("Custo máximo por conversa (R$)").fill("4,00");
+  await dialog.getByRole("button", { name: "Salvar meta" }).click();
+  await expect(page.getByText("Meta do mês salva.")).toBeVisible();
+  const goals = page.getByRole("list", { name: "Metas do mês" });
+  // Só os dias de teste que caem neste mês entram (no começo do mês, parte fica no anterior).
+  const inMonth = [1, 2, 3, 4, 5, 6, 7].filter((i) => day(i) >= `${day(0).slice(0, 7)}-01`).length;
+  test.skip(inMonth < 3, "Começo do mês: poucos dias para a meta.");
+  await expect(goals.getByRole("listitem").filter({ hasText: "Conversas" })).toContainText(`${inMonth * 4} de 100`);
+  await expect(goals.getByRole("listitem").filter({ hasText: "Conversas" })).toContainText("Abaixo da meta");
+  await expect(goals.getByRole("listitem").filter({ hasText: "Custo por conversa" })).toContainText("Acima do limite");
+  await expect(page.getByRole("button", { name: "Editar meta" })).toBeVisible();
+
   // Sem WhatsApp configurado (ou sem grupo de relatórios), o envio diz o que falta.
   await page.getByRole("button", { name: "Enviar relatório" }).click();
   await expect(page.getByText(/Configurações › WhatsApp/).first()).toBeVisible();
