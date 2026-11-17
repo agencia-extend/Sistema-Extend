@@ -90,6 +90,7 @@ export function PolicyContent({ c }: { c: Controller }) {
           head={["Conexão", "O que o sistema lê ou faz"]}
           rows={[
             ["Meta da agência (BM da Extend) e Facebook de um gestor", "Lê o nome e o identificador da pessoa ou do usuário do sistema conectado, os portfólios empresariais (BMs) e as contas de anúncio a que ele tem acesso, com nome, moeda e situação. Os números de campanhas e anúncios das contas escolhidas entram quando a sincronização for ligada. Não publica nem altera anúncios."],
+            ["Facebook de um cliente da agência", "Quando o próprio cliente autoriza pelo link que a agência envia (ou um gestor conecta com o Facebook do cliente): lê o nome e o identificador do perfil, os portfólios empresariais e as contas de anúncio a que ele tem acesso, com nome, moeda e situação, para ligar essas contas ao cliente. Os números das contas escolhidas entram quando a sincronização for ligada. Não publica nem altera anúncios e não lê mensagens."],
             ["Google Ads da agência", "Lê o e-mail da conta Google conectada, as contas de administrador (MCC) e as contas de anúncio dentro delas, com nome, moeda e situação. Não altera campanhas."],
             ["Google Agenda de cada pessoa", "Lê o e-mail da conta. Cria na sua conta uma agenda separada chamada “Sistema Extend” e coloca nela apenas os eventos do sistema em que você participa ou que você criou. Não tem acesso às suas outras agendas nem aos outros eventos."],
           ]}
@@ -99,7 +100,7 @@ export function PolicyContent({ c }: { c: Controller }) {
           <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer" className="font-medium text-brand underline underline-offset-2">Política de Dados do Usuário dos Serviços de API do Google</a>, incluindo os requisitos de Uso Limitado: esses dados não são usados para publicidade, não são vendidos e não são lidos por pessoas, exceto com a sua permissão, por segurança ou por obrigação legal.
         </p>
         <p id="exclusao">
-          <strong>Como desconectar e apagar:</strong> em <strong>Configurações → Meu perfil → Conexões</strong> (suas contas) ou <strong>Configurações → Integrações</strong> (contas da agência), use <strong>Desconectar</strong>: o acesso é revogado na Meta ou no Google e o token é apagado na hora. Você também pode remover o acesso nas configurações da sua conta do Facebook ou do Google. Para apagar também os dados que vieram dessas contas, peça em <strong>Meu perfil → Privacidade</strong> ou escreva para {mail}.
+          <strong>Como desconectar e apagar:</strong> em <strong>Configurações → Meu perfil → Conexões</strong> (suas contas) ou <strong>Configurações → Integrações</strong> (contas da agência), use <strong>Desconectar</strong>: o acesso é revogado na Meta ou no Google e o token é apagado na hora. Você também pode remover o acesso nas configurações da sua conta do Facebook (Configurações › Integrações comerciais › “Sistema Extend”) ou do Google. Se você é cliente e autorizou o seu Facebook, peça à agência para desconectar ou remova o acesso direto no Facebook; o token é apagado quando a agência desconecta. Para apagar também os dados que vieram dessas contas, peça em <strong>Meu perfil → Privacidade</strong> ou escreva para {mail}.
         </p>
       </Section>
 

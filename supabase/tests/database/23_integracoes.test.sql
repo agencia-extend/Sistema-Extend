@@ -41,7 +41,7 @@ set local request.jwt.claims = '{"sub":"00000000-0000-4000-b300-000000000001","r
 select throws_ok($$select token_enc from public.integration_connections$$, '42501', null, 'nem quem conecta lê os tokens');
 select is((select count(*)::int from public.integration_status() where owner_kind = 'agency'), 1, 'gerente vê a situação da conexão da agência');
 select is((select count(*)::int from public.integration_status() where owner_kind = 'user'), 0, 'e não vê a agenda conectada de outra pessoa');
-select is((select count(*)::int from public.ad_accounts), 2, 'gerente vê todas as contas encontradas');
+select is((select count(*)::int from public.ad_accounts where external_id like 'act_90%'), 2, 'gerente vê todas as contas encontradas');
 
 -- Gestora: não liga conta; vê só as contas ligadas aos clientes dela.
 set local request.jwt.claims = '{"sub":"00000000-0000-4000-b300-000000000002","role":"authenticated"}';

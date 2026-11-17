@@ -377,3 +377,17 @@ RF-CON-01, visão do setor de gerenciamento (o cronograma por cliente já existi
 - **Topo de todas as telas:** botão "N online" (no celular, só o ícone e o número). Abre a lista de quem está com o sistema aberto agora: você primeiro, depois por nome, com o papel e desde que horas. Várias abas da mesma pessoa contam como uma; quem fecha o sistema some da lista em alguns segundos.
 - **Acesso no banco:** canal privado do Realtime `equipe:{organização}`. As políticas em `realtime.messages` (`20261116000300`) só deixam ler e anunciar presença quem é da equipe ativa da organização (`private.org_id()`, que já exclui a área do cliente e quem foi desativado), e só presença (nada de mensagens no canal). Testes em `30_presenca_online.test.sql`.
 - Nada fica gravado: a presença vive só enquanto a pessoa está conectada. Se o canal não conectar, o botão não aparece e o resto da tela segue normal.
+
+## Facebook do cliente (17/11/2026)
+A pedido do Henrique: muitas contas de anúncio ficam no perfil do Facebook do cliente, e não no BM da Extend. Além da conexão da agência (usuário do sistema do BM) e da pessoal de cada gestor, cada cliente pode ter **o próprio Facebook conectado**.
+- **Onde:** aba Tráfego do cliente, seção "Facebook do cliente". Lista também em Configurações › Integrações ("Facebook dos clientes").
+- **Dois jeitos de conectar:**
+  - **Gerar link para o cliente:** página pública `/conectar/{código}`, que mostra o que a agência vê e o que não faz. O cliente toca em "Continuar com o Facebook" e autoriza, sem login no sistema. O link vale 7 dias e serve para uma autorização. Gerar outro cancela o anterior. Só o hash do código fica no banco, então o link aparece uma vez só, com "Copiar" e "Enviar no WhatsApp".
+  - **Conectar agora:** o gestor entra com o Facebook do cliente no próprio navegador.
+- **Contas encontradas:** já ficam com o cliente. Quem cuida do tráfego do cliente liga "Entra no sistema" na própria aba. Contas que já vêm pelo BM da Extend continuam pela conexão da agência.
+- **Quem pode:** gerar link, conectar, reconectar, buscar contas e desconectar exige `ads.manage` no cliente (gestor do cliente, gerente de tráfego, admin). Quem só lê anúncios vê a situação. Regras no banco: `can_manage_client_ads`, `create_client_connect_link`, `revoke_client_connect_link`, `toggle_client_ad_account` e `integration_status` com as conexões de cliente. Testes em `31_facebook_do_cliente.test.sql` e `e2e/28-facebook-do-cliente.spec.ts`.
+- **Avisos:**
+  - Quando o cliente autoriza pelo link, quem gerou o link e o tráfego do cliente recebem "{cliente} conectou o Facebook", com o número de contas.
+  - Conexão parada ou vencendo (o token de login da Meta dura cerca de 60 dias) avisa o tráfego do cliente, ou quem conecta a agência se ninguém cuidar do cliente (cron `extend-integracoes`).
+- **Limite da Meta:** enquanto o app está em desenvolvimento, só conecta quem estiver cadastrado no app (Funções do app › Testadores). A seção mostra esse aviso até `META_APP_LIVE=1`, que deve ser ligado na Vercel quando a Meta aprovar o app e ele for para Live.
+- **Next.js 16.4.6:** o build de produção passou a recusar a 16.4.3 por uma falha de segurança conhecida.

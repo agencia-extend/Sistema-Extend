@@ -2,7 +2,7 @@
 
 export type Provider = "meta" | "google";
 export type Purpose = "ads" | "calendar";
-export type OwnerKind = "agency" | "user";
+export type OwnerKind = "agency" | "user" | "client";
 
 /** O que cada conexão precisa no servidor. Os nomes são os das variáveis de ambiente. */
 export const REQUIRED_ENV: Record<Provider, readonly string[]> = {

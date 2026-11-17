@@ -65,7 +65,7 @@ function Row({ a, clients }: { a: AdAccountView; clients: { id: string; name: st
         <p className="truncate text-xs text-muted-foreground tabular">
           {shownId(a)}
           {a.managerName ? ` · ${a.provider === "meta" ? "BM" : "MCC"} ${a.managerName}` : ""}
-          {a.viaPersonal ? " · pela conexão pessoal de um gestor" : ""}
+          {a.viaPersonal ? " · pela conexão pessoal de um gestor" : a.viaClient ? " · pelo Facebook do cliente" : ""}
         </p>
       </div>
       <span className="text-sm"><span className="text-muted-foreground md:hidden">Plataforma: </span>{PROVIDER[a.provider]}</span>

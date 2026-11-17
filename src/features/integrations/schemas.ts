@@ -18,3 +18,7 @@ export const adAccountSchema = z.object({
   enabled: z.boolean(),
   clientId: uuid.nullable(),
 });
+
+export const clientIdSchema = z.object({ clientId: uuid });
+export const linkIdSchema = z.object({ id: uuid, clientId: uuid });
+export const clientAccountSchema = z.object({ id: uuid, clientId: uuid, enabled: z.boolean() });

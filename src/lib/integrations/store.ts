@@ -14,6 +14,7 @@ export type StoredConnection = {
   purpose: Purpose;
   owner_kind: OwnerKind;
   profile_id: string | null;
+  client_id: string | null;
   token_enc: string;
   refresh_token_enc: string | null;
   expires_at: string | null;
@@ -27,6 +28,8 @@ type SaveInput = {
   purpose: Purpose;
   owner: OwnerKind;
   profileId: string | null;
+  /** Facebook do cliente: o cliente dono da conexão. */
+  clientId?: string | null;
   method: "oauth" | "system_user";
   accountName: string;
   accountEmail?: string | null;
@@ -35,7 +38,7 @@ type SaveInput = {
   token: string;
   refreshToken?: string | null;
   expiresAt: string | null;
-  connectedBy: string;
+  connectedBy: string | null;
   /** Google Agenda: id da agenda "Sistema Extend" criada na conta da pessoa. */
   resourceId?: string | null;
 };
@@ -44,7 +47,7 @@ type SaveInput = {
 export async function saveConnection(i: SaveInput): Promise<string> {
   const db = createAdminClient();
   let q = db.from("integration_connections").select("id, refresh_token_enc").eq("provider", i.provider).eq("purpose", i.purpose).eq("owner_kind", i.owner);
-  q = i.owner === "agency" ? q.eq("organization_id", i.organizationId) : q.eq("profile_id", i.profileId!);
+  q = i.owner === "agency" ? q.eq("organization_id", i.organizationId) : i.owner === "client" ? q.eq("client_id", i.clientId!) : q.eq("profile_id", i.profileId!);
   const { data: existing } = await q.maybeSingle();
   const row = {
     organization_id: i.organizationId,
@@ -52,6 +55,7 @@ export async function saveConnection(i: SaveInput): Promise<string> {
     purpose: i.purpose,
     owner_kind: i.owner,
     profile_id: i.profileId,
+    client_id: i.owner === "client" ? (i.clientId ?? null) : null,
     method: i.method,
     account_name: i.accountName,
     account_email: i.accountEmail ?? null,
@@ -138,9 +142,9 @@ export async function discoverAccounts(conn: StoredConnection): Promise<{ manage
     if (error) throw error;
     for (const m of data ?? []) managerIds.set(m.external_id, m.id);
   }
-  // Conta que já responde pela conexão da agência continua com ela (a conexão pessoal só traz as que faltam).
+  // Conta que já responde pela conexão da agência continua com ela (a conexão pessoal ou do cliente só traz as que faltam).
   let accounts = found.accounts;
-  if (conn.owner_kind === "user" && accounts.length) {
+  if (conn.owner_kind !== "agency" && accounts.length) {
     const { data: agency } = await db
       .from("ad_accounts")
       .select("external_id, integration_connections!inner(owner_kind)")
@@ -168,6 +172,11 @@ export async function discoverAccounts(conn: StoredConnection): Promise<{ manage
       { onConflict: "organization_id,provider,external_id", ignoreDuplicates: false },
     );
     if (error) throw error;
+    // Facebook do cliente: as contas encontradas já ficam com o cliente (as que ainda não têm cliente).
+    if (conn.owner_kind === "client" && conn.client_id) {
+      const { error: e2 } = await db.from("ad_accounts").update({ client_id: conn.client_id }).eq("connection_id", conn.id).is("client_id", null);
+      if (e2) throw e2;
+    }
   }
   await db.from("integration_connections").update({ accounts_synced_at: now, status: "active", last_error: null, last_checked_at: now }).eq("id", conn.id);
   return { managers: found.managers.length, accounts: found.accounts.length };

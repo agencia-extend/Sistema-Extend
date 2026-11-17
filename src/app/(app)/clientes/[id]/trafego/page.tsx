@@ -18,15 +18,18 @@ import { RejectionDialog } from "@/features/traffic/components/rejection-dialog"
 import { RejectionList } from "@/features/traffic/components/rejection-list";
 import { UtmDialog } from "@/features/traffic/components/utm-dialog";
 import { UtmList } from "@/features/traffic/components/utm-list";
+import { getClientFacebook } from "@/features/integrations/queries";
+import { ClientFacebook } from "@/features/integrations/components/client-facebook";
 
 export const metadata: Metadata = { title: "Tráfego do cliente" };
 
-/** Aba Tráfego: checklists (RF-OTI-01/02), verbas aprovadas pelo cliente (RF-T2-03), registro de alterações (RF-OTI-03) e reprovações da Meta (RF-T2-02) e links com UTM (RF-ADS-11). */
+/** Aba Tráfego: Facebook do cliente (contas fora do BM), checklists (RF-OTI-01/02), verbas aprovadas pelo cliente (RF-T2-03), registro de alterações (RF-OTI-03) e reprovações da Meta (RF-T2-02) e links com UTM (RF-ADS-11). */
 export default async function TrafegoPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePermission(["ads.read", "optimization.manage"]);
   const { id } = await params;
   const canManage = Boolean(user.permissions["optimization.manage"]);
-  const [client, changes, budgets, checks, rejections, library, utms] = await Promise.all([
+  const seesAds = Boolean(user.permissions["ads.read"] || user.permissions["ads.manage"]);
+  const [client, changes, budgets, checks, rejections, library, utms, facebook] = await Promise.all([
     getClient(id),
     listChanges(id),
     listBudgets(id),
@@ -34,12 +37,19 @@ export default async function TrafegoPage({ params }: { params: Promise<{ id: st
     listRejections(id),
     canManage ? listLibraryOptions(id) : Promise.resolve([]),
     listUtmLinks(id),
+    seesAds ? getClientFacebook(id) : Promise.resolve(null),
   ]);
   if (!client) notFound();
   const today = todayKey(new Date());
 
   return (
     <div className="grid max-w-5xl gap-10">
+      {facebook && (
+        <Section id="facebook" title="Facebook do cliente">
+          <ClientFacebook clientId={id} clientName={client.name} data={facebook} canManage={Boolean(user.permissions["ads.manage"])} />
+        </Section>
+      )}
+
       <Section title="Checklists">
         <CheckHistory clientId={id} clientName={client.name} today={today} monday={weekStart(today)} rows={checks} canManage={canManage} />
       </Section>

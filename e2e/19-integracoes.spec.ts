@@ -60,7 +60,10 @@ test("1. situação da configuração e endereço de retorno", async ({ page }) 
   await page.goto("/configuracoes/integracoes");
   await expect(page.getByRole("heading", { name: "Integrações", level: 1 })).toBeVisible();
   const meta = page.getByRole("region", { name: "Meta (Facebook e Instagram)" });
-  if (metaReady) await expect(meta.getByText("Configuração completa no servidor.")).toBeVisible();
+  // Com a Meta da agência já conectada, a tela mostra a conexão no lugar da configuração.
+  const { count: metaConnected } = await admin.from("integration_connections").select("id", { count: "exact", head: true }).eq("owner_kind", "agency").eq("provider", "meta");
+  if (metaReady && metaConnected) await expect(meta.getByText("Conta conectada")).toBeVisible();
+  else if (metaReady) await expect(meta.getByText("Configuração completa no servidor.")).toBeVisible();
   else {
     await expect(meta.getByText("Ainda não dá para conectar.")).toBeVisible();
     await expect(meta.getByText("META_APP_ID", { exact: true })).toBeVisible();
@@ -69,7 +72,7 @@ test("1. situação da configuração e endereço de retorno", async ({ page }) 
     await expect(page).toHaveURL(/\/configuracoes\/integracoes\?erro=configuracao/);
     await expect(page.getByText("A conexão ainda não está configurada no servidor.")).toBeVisible();
   }
-  await expect(page.getByRole("region", { name: "Meta (Facebook e Instagram)" }).getByText(/\/api\/integracoes\/meta\/retorno$/)).toBeVisible();
+  if (!metaConnected) await expect(page.getByRole("region", { name: "Meta (Facebook e Instagram)" }).getByText(/\/api\/integracoes\/meta\/retorno$/)).toBeVisible();
   await expect(page.getByRole("region", { name: "Google Ads (MCC)" }).getByText(/\/api\/integracoes\/google\/retorno$/)).toBeVisible();
 });
 

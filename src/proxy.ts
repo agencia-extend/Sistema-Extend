@@ -15,6 +15,9 @@ const PUBLIC_PATHS = [
   "/avaliar-leads",
   "/privacidade",
   "/termos",
+  "/conectar",
+  "/api/integracoes/meta/link",
+  "/api/integracoes/meta/retorno",
 ];
 
 function isPublic(pathname: string) {

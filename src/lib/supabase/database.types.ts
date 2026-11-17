@@ -409,6 +409,44 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"client_connect_links": {
+                  Row: {
+                    "client_id": string,"connection_id": string | null,"created_at": string,"created_by": string | null,"expires_at": string,"id": string,"organization_id": string,"provider": string,"revoked_at": string | null,"token_hash": string,"used_at": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"connection_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"expires_at": string,"id"?: string,"organization_id": string,"provider"?: string,"revoked_at"?: string | null,"token_hash": string,"used_at"?: string | null
+                  }
+                  Update: {
+                    "client_id"?: string,"connection_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"expires_at"?: string,"id"?: string,"organization_id"?: string,"provider"?: string,"revoked_at"?: string | null,"token_hash"?: string,"used_at"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_connect_links_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_connect_links_connection_id_fkey"
+      columns: ["connection_id"]
+isOneToOne: false
+      referencedRelation: "integration_connections"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_connect_links_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_connect_links_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"client_contacts": {
                   Row: {
                     "client_id": string,"created_at": string,"email": string | null,"id": string,"is_primary": boolean,"name": string,"phone": string | null,"role": string | null
@@ -1087,17 +1125,23 @@ isOneToOne: false
                   ]
                 },"integration_connections": {
                   Row: {
-                    "account_email": string | null,"account_name": string | null,"accounts_synced_at": string | null,"connected_by": string | null,"created_at": string,"expires_at": string | null,"external_user_id": string | null,"id": string,"last_checked_at": string | null,"last_error": string | null,"method": string,"organization_id": string,"owner_kind": string,"profile_id": string | null,"provider": string,"purpose": string,"refresh_token_enc": string | null,"resource_id": string | null,"scopes": (string)[],"status": string,"token_enc": string,"updated_at": string
+                    "account_email": string | null,"account_name": string | null,"accounts_synced_at": string | null,"client_id": string | null,"connected_by": string | null,"created_at": string,"expires_at": string | null,"external_user_id": string | null,"id": string,"last_checked_at": string | null,"last_error": string | null,"method": string,"organization_id": string,"owner_kind": string,"profile_id": string | null,"provider": string,"purpose": string,"refresh_token_enc": string | null,"resource_id": string | null,"scopes": (string)[],"status": string,"token_enc": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "account_email"?: string | null,"account_name"?: string | null,"accounts_synced_at"?: string | null,"connected_by"?: string | null,"created_at"?: string,"expires_at"?: string | null,"external_user_id"?: string | null,"id"?: string,"last_checked_at"?: string | null,"last_error"?: string | null,"method"?: string,"organization_id": string,"owner_kind": string,"profile_id"?: string | null,"provider": string,"purpose": string,"refresh_token_enc"?: string | null,"resource_id"?: string | null,"scopes"?: (string)[],"status"?: string,"token_enc": string,"updated_at"?: string
+                    "account_email"?: string | null,"account_name"?: string | null,"accounts_synced_at"?: string | null,"client_id"?: string | null,"connected_by"?: string | null,"created_at"?: string,"expires_at"?: string | null,"external_user_id"?: string | null,"id"?: string,"last_checked_at"?: string | null,"last_error"?: string | null,"method"?: string,"organization_id": string,"owner_kind": string,"profile_id"?: string | null,"provider": string,"purpose": string,"refresh_token_enc"?: string | null,"resource_id"?: string | null,"scopes"?: (string)[],"status"?: string,"token_enc": string,"updated_at"?: string
                   }
                   Update: {
-                    "account_email"?: string | null,"account_name"?: string | null,"accounts_synced_at"?: string | null,"connected_by"?: string | null,"created_at"?: string,"expires_at"?: string | null,"external_user_id"?: string | null,"id"?: string,"last_checked_at"?: string | null,"last_error"?: string | null,"method"?: string,"organization_id"?: string,"owner_kind"?: string,"profile_id"?: string | null,"provider"?: string,"purpose"?: string,"refresh_token_enc"?: string | null,"resource_id"?: string | null,"scopes"?: (string)[],"status"?: string,"token_enc"?: string,"updated_at"?: string
+                    "account_email"?: string | null,"account_name"?: string | null,"accounts_synced_at"?: string | null,"client_id"?: string | null,"connected_by"?: string | null,"created_at"?: string,"expires_at"?: string | null,"external_user_id"?: string | null,"id"?: string,"last_checked_at"?: string | null,"last_error"?: string | null,"method"?: string,"organization_id"?: string,"owner_kind"?: string,"profile_id"?: string | null,"provider"?: string,"purpose"?: string,"refresh_token_enc"?: string | null,"resource_id"?: string | null,"scopes"?: (string)[],"status"?: string,"token_enc"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
+      foreignKeyName: "integration_connections_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "integration_connections_connected_by_fkey"
       columns: ["connected_by"]
 isOneToOne: false
@@ -2882,6 +2926,9 @@ isOneToOne: false
 "archive_client":
 { Args: { "p_client": string }; Returns: undefined
                            },
+"can_manage_client_ads":
+{ Args: { "p_client": string }; Returns: boolean
+                           },
 "can_manage_portal":
 { Args: { "p_client": string }; Returns: boolean
                            },
@@ -2905,6 +2952,9 @@ isOneToOne: false
                            },
 "create_approval_link":
 { Args: { "p_days"?: number,"p_task": string,"p_token_hash": string }; Returns: string
+                           },
+"create_client_connect_link":
+{ Args: { "p_client": string,"p_days"?: number,"p_token_hash": string }; Returns: string
                            },
 "create_creative_request":
 { Args: { "p": Json }; Returns: string
@@ -2940,7 +2990,7 @@ isOneToOne: false
                            },
 "integration_status":
 { Args: Record<PropertyKey, never>; Returns: {
-              "account_email": string,"account_name": string,"accounts_synced_at": string,"connected_by_name": string,"created_at": string,"expires_at": string,"id": string,"last_error": string,"method": string,"owner_kind": string,"provider": string,"purpose": string,"status": string
+              "account_email": string,"account_name": string,"accounts_synced_at": string,"client_id": string,"client_name": string,"connected_by_name": string,"created_at": string,"expires_at": string,"id": string,"last_error": string,"method": string,"owner_kind": string,"provider": string,"purpose": string,"status": string
             }[]
                            },
 "mark_all_notifications_read":
@@ -2969,6 +3019,9 @@ isOneToOne: false
 { Args: { "p_end": string,"p_start": string }; Returns: {
               "on_date": string,"title": string
             }[]
+                           },
+"notify_client_ads_team":
+{ Args: { "p_body": string,"p_client": string,"p_dedupe": string,"p_extra": string,"p_href": string,"p_title": string }; Returns: number
                            },
 "notify_perm_holders":
 { Args: { "p_actor": string,"p_body": string,"p_dedupe": string,"p_href": string,"p_kind": string,"p_org": string,"p_perm": string,"p_title": string }; Returns: number
@@ -3031,6 +3084,9 @@ isOneToOne: false
 "review_creative":
 { Args: { "p_comment": string,"p_decision": string,"p_task": string }; Returns: undefined
                            },
+"revoke_client_connect_link":
+{ Args: { "p_id": string }; Returns: undefined
+                           },
 "save_ad_account":
 { Args: { "p_client": string,"p_enabled": boolean,"p_id": string }; Returns: undefined
                            },
@@ -3080,6 +3136,9 @@ isOneToOne: false
                            },
 "stop_timer":
 { Args: Record<PropertyKey, never>; Returns: undefined
+                           },
+"toggle_client_ad_account":
+{ Args: { "p_enabled": boolean,"p_id": string }; Returns: undefined
                            },
 "traffic_routine":
 { Args: Record<PropertyKey, never>; Returns: {

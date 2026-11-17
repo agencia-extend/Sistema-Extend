@@ -8,6 +8,7 @@ import { discoverAccounts, getConnection, recordFailure, saveConnection } from "
 export async function GET(request: NextRequest) {
   const c = await checkCallback(request, "google");
   if (!c.ok) return c.response;
+  if (c.via !== "session") return c.back("erro=estado");
   const { purpose, owner } = c.target;
   let id: string;
   let accountName: string;

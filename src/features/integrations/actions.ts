@@ -10,18 +10,30 @@ import { googleRevoke } from "@/lib/integrations/google";
 import { MetaError, metaRevoke, metaWhoAmI } from "@/lib/integrations/meta";
 import { discoverAccounts, getConnection, recordFailure, removeConnection, saveConnection, type StoredConnection } from "@/lib/integrations/store";
 import type { CurrentUser } from "@/lib/auth/dal";
-import { adAccountSchema, connectionIdSchema, systemTokenSchema } from "./schemas";
+import { randomBytes } from "node:crypto";
+import { hashLinkToken } from "@/lib/integrations/client-links";
+import { publicEnv } from "@/lib/env";
+import { adAccountSchema, clientAccountSchema, clientIdSchema, connectionIdSchema, linkIdSchema, systemTokenSchema } from "./schemas";
 
 const PAGE = "/configuracoes/integracoes";
 const PROFILE = "/configuracoes/perfil";
 
-/** A conexão é da agência (exige ads.connect) ou da própria pessoa. */
+/** A conexão é da agência (exige ads.connect), da própria pessoa ou de um cliente de que a pessoa cuida no tráfego. */
 async function ownConnection(id: string, user: CurrentUser): Promise<StoredConnection | null> {
   const conn = await getConnection(id);
   if (!conn || conn.organization_id !== user.organizationId) return null;
+  if (conn.owner_kind === "client") return conn.client_id && (await canManageClientAds(conn.client_id)) ? conn : null;
   if (conn.owner_kind === "agency" ? !user.permissions["ads.connect"] : conn.profile_id !== user.id) return null;
   return conn;
 }
+
+async function canManageClientAds(clientId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase.rpc("can_manage_client_ads", { p_client: clientId });
+  return data === true;
+}
+
+const clientPage = (clientId: string) => `/clientes/${clientId}/trafego`;
 
 const plural = (n: number, one: string, many: string) => `${n} ${n === 1 ? one : many}`;
 
@@ -67,6 +79,7 @@ export const refreshAccounts = defineAction({ schema: connectionIdSchema }, asyn
     const r = await discoverAccounts(conn);
     revalidatePath(PAGE);
     revalidatePath(PROFILE);
+    if (conn.client_id) revalidatePath(clientPage(conn.client_id));
     return ok(null, `Contas atualizadas: ${plural(r.accounts, "conta encontrada", "contas encontradas")}.`);
   } catch (e) {
     const message = await recordFailure(conn, e);
@@ -95,6 +108,7 @@ export const disconnect = defineAction({ schema: connectionIdSchema }, async ({ 
   }
   revalidatePath(PAGE);
   revalidatePath(PROFILE);
+  if (conn.client_id) revalidatePath(clientPage(conn.client_id));
   return ok(null, "Conexão desligada.");
 });
 
@@ -104,4 +118,30 @@ export const saveAdAccount = defineAction({ schema: adAccountSchema, permission:
   must(await supabase.rpc("save_ad_account", { p_id: id, p_enabled: enabled, p_client: clientId as string }));
   revalidatePath(PAGE);
   return ok(null, enabled ? "Conta incluída." : clientId ? "Cliente salvo." : "Conta retirada.");
+});
+
+/** Link para o cliente autorizar o Facebook dele (vale 7 dias; gerar outro cancela o anterior). */
+export const createClientConnectLink = defineAction({ schema: clientIdSchema, permission: "ads.manage" }, async ({ clientId }) => {
+  if (!configured("meta")) return fail("business_rule", "O app da Meta ainda não está configurado no servidor.");
+  const token = randomBytes(32).toString("base64url");
+  const supabase = await createClient();
+  must(await supabase.rpc("create_client_connect_link", { p_client: clientId, p_token_hash: hashLinkToken(token), p_days: 7 }));
+  revalidatePath(clientPage(clientId));
+  return ok({ url: `${publicEnv.NEXT_PUBLIC_SITE_URL}/conectar/${token}` }, "Link gerado. Copie e envie ao cliente.");
+});
+
+export const revokeClientConnectLink = defineAction({ schema: linkIdSchema, permission: "ads.manage" }, async ({ id, clientId }) => {
+  const supabase = await createClient();
+  must(await supabase.rpc("revoke_client_connect_link", { p_id: id }));
+  revalidatePath(clientPage(clientId));
+  return ok(null, "Link cancelado.");
+});
+
+/** Conta encontrada pelo Facebook do cliente: entra ou sai do sistema (a RPC confere no banco). */
+export const toggleClientAdAccount = defineAction({ schema: clientAccountSchema, permission: "ads.manage" }, async ({ id, clientId, enabled }) => {
+  const supabase = await createClient();
+  must(await supabase.rpc("toggle_client_ad_account", { p_id: id, p_enabled: enabled }));
+  revalidatePath(clientPage(clientId));
+  revalidatePath(PAGE);
+  return ok(null, enabled ? "Conta incluída no sistema." : "Conta retirada do sistema.");
 });

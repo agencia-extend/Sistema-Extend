@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Plug } from "lucide-react";
+import { connectionLabel } from "@/domain/integrations";
+import { formatDateTime } from "@/domain/shared/dates";
 import { requirePermission } from "@/lib/auth/dal";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { EmptyState } from "@/components/app/states";
@@ -41,6 +44,7 @@ export default async function IntegracoesPage({ searchParams }: { searchParams: 
   const [connections, accounts, clients] = await Promise.all([listConnections(), listAdAccounts(), listLinkableClients()]);
   const meta = connections.find((c) => c.owner === "agency" && c.provider === "meta");
   const google = connections.find((c) => c.owner === "agency" && c.provider === "google");
+  const clientConns = connections.filter((c) => c.owner === "client").sort((a, b) => (a.clientName ?? "").localeCompare(b.clientName ?? "", "pt-BR"));
   const metaReady = setup.meta.missing.length === 0;
   const googleReady = setup.google.missing.length === 0;
 
@@ -104,6 +108,34 @@ export default async function IntegracoesPage({ searchParams }: { searchParams: 
               <GoogleButton href="/api/integracoes/google/conectar?para=agencia" />
             ) : null}
           </div>
+        </section>
+
+        <section aria-labelledby="facebook-clientes" className="grid gap-4">
+          <div className="grid gap-1">
+            <h2 id="facebook-clientes" className="text-base font-semibold">Facebook dos clientes</h2>
+            <p className="text-sm text-muted-foreground">
+              Para contas de anúncio que estão no perfil do cliente e não no BM da Extend. Conecte (ou envie o link para o cliente autorizar) na aba Tráfego de cada cliente.
+            </p>
+          </div>
+          {clientConns.length === 0 ? (
+            <p className="rounded-xl border bg-card p-4 text-sm text-muted-foreground">Nenhum cliente conectou o Facebook ainda.</p>
+          ) : (
+            <ul className="divide-y rounded-xl border bg-card">
+              {clientConns.map((c) => {
+                const label = connectionLabel({ status: c.status, expiresAt: c.expiresAt });
+                const bad = label === "Expirada" || label === "Com erro";
+                return (
+                  <li key={c.id} className="flex flex-wrap items-center justify-between gap-2 px-4 py-3 text-sm">
+                    <span className="grid min-w-0">
+                      <Link href={`/clientes/${c.clientId}/trafego#facebook`} className="font-medium break-words hover:underline">{c.clientName}</Link>
+                      <span className="text-xs text-muted-foreground">Facebook de {c.accountName ?? "—"}{c.expiresAt ? ` · vale até ${formatDateTime(c.expiresAt)}` : ""}</span>
+                    </span>
+                    <span className={bad ? "font-medium text-danger" : label.startsWith("Vence") ? "font-medium text-warning" : "font-medium text-success"}>{label}</span>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </section>
 
         <section aria-labelledby="contas" className="grid gap-4">
