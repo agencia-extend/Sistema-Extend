@@ -18,6 +18,7 @@ const PUBLIC_PATHS = [
   "/conectar",
   "/api/integracoes/meta/link",
   "/api/integracoes/meta/retorno",
+  "/api/whatsapp/webhook",
 ];
 
 function isPublic(pathname: string) {

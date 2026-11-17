@@ -49,6 +49,7 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/setores", label: "Visão do setor", icon: "dashboard", anyOf: ["sector.dashboard.read"] },
       { href: "/quadros", label: "Quadros", icon: "boards", anyOf: ["tasks.read"] },
+      { href: "/trafego/painel", label: "Painel do tráfego", icon: "ads", anyOf: ["ads.read"] },
       { href: "/trafego", label: "Rotina do tráfego", icon: "ads", anyOf: ["optimization.manage"] },
       { href: "/relatorios", label: "Relatórios da semana", icon: "weekly", anyOf: ["reports.manage", "content.publish"] },
       { href: "/cronogramas", label: "Cronogramas do mês", icon: "schedule", anyOf: ["content.publish", "dashboards.read"] },
@@ -92,6 +93,7 @@ export const SETTINGS_PAGES: SettingsPage[] = [
   { href: "/configuracoes/propostas", label: "Propostas", description: "Modelos de proposta e preço padrão de cada serviço", perm: "proposals.templates.manage" },
   { href: "/configuracoes/setores", label: "Setores", description: "Setores da agência e quem faz parte", perm: "settings.manage" },
   { href: "/configuracoes/integracoes", label: "Integrações", description: "Meta, Google Ads e as contas de anúncio de cada cliente", perm: "ads.connect" },
+  { href: "/configuracoes/whatsapp", label: "WhatsApp", description: "Número da Extend por QR Code, grupos dos clientes e alertas internos", perm: "integrations.manage" },
   { href: "/configuracoes/auditoria", label: "Auditoria", description: "Quem alterou o quê, com antes e depois", perm: "audit.read" },
   { href: "/configuracoes/privacidade", label: "Privacidade (LGPD)", description: "Pedidos sobre dados pessoais e dados do controlador", perm: "privacy.manage" },
 ];

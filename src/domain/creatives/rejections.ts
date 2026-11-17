@@ -42,7 +42,7 @@ export const REJECTION_OUTCOME_LABEL: Record<RejectionOutcome, string> = {
   descartado: "Descartado",
 };
 
-export type RejectionLike = { reason: string; format: string; angle: string; lesson: string | null; rejectedOn: string };
+export type RejectionLike = { reason: string; format: string | null; angle: string; lesson: string | null; rejectedOn: string };
 
 export type AvoidItem = { reason: RejectionReason; count: number; formats: CreativeFormat[]; angles: string[]; lessons: string[]; lastOn: string };
 
@@ -57,7 +57,8 @@ export function avoidSummary(rows: RejectionLike[], max = 5): AvoidItem[] {
     const it = map.get(reason) ?? { reason, count: 0, formats: [], angles: [], lessons: [], lastOn: r.rejectedOn };
     it.count += 1;
     if (r.rejectedOn > it.lastOn) it.lastOn = r.rejectedOn;
-    if (!it.formats.includes(r.format as CreativeFormat)) it.formats.push(r.format as CreativeFormat);
+    // Reprovação detectada na sincronização não tem formato (a Meta não informa).
+    if (r.format && !it.formats.includes(r.format as CreativeFormat)) it.formats.push(r.format as CreativeFormat);
     const angle = r.angle.trim();
     if (angle && !it.angles.some((a) => a.toLowerCase() === angle.toLowerCase())) it.angles.push(angle);
     const lesson = r.lesson?.trim();

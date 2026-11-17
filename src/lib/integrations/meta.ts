@@ -6,7 +6,7 @@ import { env, redirectUri } from "./config";
 // Sem configuração do "Login do Facebook para Empresas" (META_LOGIN_CONFIG_ID), pede estas permissões.
 export const META_SCOPES = ["ads_read", "business_management", "pages_show_list", "pages_read_engagement"];
 const version = () => env("META_GRAPH_VERSION") || "v23.0";
-const graph = (path: string) => `https://graph.facebook.com/${version()}${path}`;
+export const graph = (path: string) => `https://graph.facebook.com/${version()}${path}`;
 
 export class MetaError extends Error {
   code?: number;
@@ -30,7 +30,7 @@ export function metaAuthUrl(state: string) {
 
 type GraphError = { error?: { message: string; code: number; error_subcode?: number } };
 
-async function get<T>(url: string): Promise<T> {
+export async function get<T>(url: string): Promise<T> {
   for (let attempt = 0; ; attempt++) {
     let res: Response;
     try {
@@ -49,7 +49,7 @@ async function get<T>(url: string): Promise<T> {
 }
 
 type Paged<T> = { data: T[]; paging?: { next?: string } };
-async function all<T>(url: string, max = 5000): Promise<T[]> {
+export async function all<T>(url: string, max = 5000): Promise<T[]> {
   const out: T[] = [];
   let next: string | undefined = url;
   while (next && out.length < max) {
@@ -60,7 +60,7 @@ async function all<T>(url: string, max = 5000): Promise<T[]> {
   return out;
 }
 
-const tk = (token: string) => `access_token=${encodeURIComponent(token)}`;
+export const tk = (token: string) => `access_token=${encodeURIComponent(token)}`;
 
 /** Código do login → token de longa duração (~60 dias) e quem conectou. */
 export async function metaExchangeCode(code: string) {

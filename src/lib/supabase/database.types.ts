@@ -7,14 +7,14 @@ export type Database = {
           Tables: {
             "ad_accounts": {
                   Row: {
-                    "client_id": string | null,"connection_id": string | null,"created_at": string,"currency": string | null,"external_id": string,"id": string,"is_enabled": boolean,"last_seen_at": string,"login_customer_id": string | null,"manager_id": string | null,"name": string,"organization_id": string,"provider": string,"status_label": string | null,"updated_at": string
+                    "account_status_code": number | null,"amount_spent_cents": number | null,"balance_cents": number | null,"client_id": string | null,"connection_id": string | null,"created_at": string,"currency": string | null,"disable_reason": number | null,"external_id": string,"funding_display": string | null,"funds_cents": number | null,"id": string,"is_enabled": boolean,"is_prepay": boolean | null,"last_seen_at": string,"login_customer_id": string | null,"manager_id": string | null,"name": string,"organization_id": string,"provider": string,"spend_cap_cents": number | null,"status_label": string | null,"sync_error": string | null,"synced_at": string | null,"timezone": string | null,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "client_id"?: string | null,"connection_id"?: string | null,"created_at"?: string,"currency"?: string | null,"external_id": string,"id"?: string,"is_enabled"?: boolean,"last_seen_at"?: string,"login_customer_id"?: string | null,"manager_id"?: string | null,"name": string,"organization_id": string,"provider": string,"status_label"?: string | null,"updated_at"?: string
+                    "account_status_code"?: number | null,"amount_spent_cents"?: number | null,"balance_cents"?: number | null,"client_id"?: string | null,"connection_id"?: string | null,"created_at"?: string,"currency"?: string | null,"disable_reason"?: number | null,"external_id": string,"funding_display"?: string | null,"funds_cents"?: number | null,"id"?: string,"is_enabled"?: boolean,"is_prepay"?: boolean | null,"last_seen_at"?: string,"login_customer_id"?: string | null,"manager_id"?: string | null,"name": string,"organization_id": string,"provider": string,"spend_cap_cents"?: number | null,"status_label"?: string | null,"sync_error"?: string | null,"synced_at"?: string | null,"timezone"?: string | null,"updated_at"?: string
                   }
                   Update: {
-                    "client_id"?: string | null,"connection_id"?: string | null,"created_at"?: string,"currency"?: string | null,"external_id"?: string,"id"?: string,"is_enabled"?: boolean,"last_seen_at"?: string,"login_customer_id"?: string | null,"manager_id"?: string | null,"name"?: string,"organization_id"?: string,"provider"?: string,"status_label"?: string | null,"updated_at"?: string
+                    "account_status_code"?: number | null,"amount_spent_cents"?: number | null,"balance_cents"?: number | null,"client_id"?: string | null,"connection_id"?: string | null,"created_at"?: string,"currency"?: string | null,"disable_reason"?: number | null,"external_id"?: string,"funding_display"?: string | null,"funds_cents"?: number | null,"id"?: string,"is_enabled"?: boolean,"is_prepay"?: boolean | null,"last_seen_at"?: string,"login_customer_id"?: string | null,"manager_id"?: string | null,"name"?: string,"organization_id"?: string,"provider"?: string,"spend_cap_cents"?: number | null,"status_label"?: string | null,"sync_error"?: string | null,"synced_at"?: string | null,"timezone"?: string | null,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -40,6 +40,46 @@ isOneToOne: false
       columns: ["organization_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"ad_campaigns": {
+                  Row: {
+                    "ad_account_id": string,"daily_budget_cents": number | null,"effective_status": string | null,"ends_at": string | null,"external_id": string,"id": string,"last_seen_at": string,"lifetime_budget_cents": number | null,"name": string,"objective": string | null,"starts_at": string | null,"status": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad_account_id": string,"daily_budget_cents"?: number | null,"effective_status"?: string | null,"ends_at"?: string | null,"external_id": string,"id"?: string,"last_seen_at"?: string,"lifetime_budget_cents"?: number | null,"name": string,"objective"?: string | null,"starts_at"?: string | null,"status"?: string | null
+                  }
+                  Update: {
+                    "ad_account_id"?: string,"daily_budget_cents"?: number | null,"effective_status"?: string | null,"ends_at"?: string | null,"external_id"?: string,"id"?: string,"last_seen_at"?: string,"lifetime_budget_cents"?: number | null,"name"?: string,"objective"?: string | null,"starts_at"?: string | null,"status"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ad_campaigns_ad_account_id_fkey"
+      columns: ["ad_account_id"]
+isOneToOne: false
+      referencedRelation: "ad_accounts"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"ad_insights_daily": {
+                  Row: {
+                    "ad_account_id": string,"clicks": number,"date": string,"impressions": number,"landing_page_views": number,"leads": number,"level": string,"link_clicks": number,"messages": number,"object_external_id": string,"purchase_value_cents": number,"purchases": number,"reach": number,"spend_cents": number,"video_views": number
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad_account_id": string,"clicks"?: number,"date": string,"impressions"?: number,"landing_page_views"?: number,"leads"?: number,"level": string,"link_clicks"?: number,"messages"?: number,"object_external_id": string,"purchase_value_cents"?: number,"purchases"?: number,"reach"?: number,"spend_cents"?: number,"video_views"?: number
+                  }
+                  Update: {
+                    "ad_account_id"?: string,"clicks"?: number,"date"?: string,"impressions"?: number,"landing_page_views"?: number,"leads"?: number,"level"?: string,"link_clicks"?: number,"messages"?: number,"object_external_id"?: string,"purchase_value_cents"?: number,"purchases"?: number,"reach"?: number,"spend_cents"?: number,"video_views"?: number
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ad_insights_daily_ad_account_id_fkey"
+      columns: ["ad_account_id"]
+isOneToOne: false
+      referencedRelation: "ad_accounts"
       referencedColumns: ["id"]
     }
                   ]
@@ -71,14 +111,14 @@ isOneToOne: false
                   ]
                 },"ad_rejections": {
                   Row: {
-                    "ad_name": string | null,"angle": string,"client_id": string,"created_at": string,"created_by": string | null,"format": string,"id": string,"lesson": string | null,"library_id": string | null,"organization_id": string,"outcome": string | null,"platform": string,"policy_text": string,"reason": string,"rejected_on": string,"source": string,"updated_at": string
+                    "ad_external_id": string | null,"ad_name": string | null,"angle": string,"client_id": string,"created_at": string,"created_by": string | null,"format": string | null,"id": string,"lesson": string | null,"library_id": string | null,"organization_id": string,"outcome": string | null,"platform": string,"policy_text": string,"reason": string,"rejected_on": string,"source": string,"updated_at": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "ad_name"?: string | null,"angle": string,"client_id": string,"created_at"?: string,"created_by"?: string | null,"format": string,"id"?: string,"lesson"?: string | null,"library_id"?: string | null,"organization_id"?: string,"outcome"?: string | null,"platform"?: string,"policy_text": string,"reason": string,"rejected_on"?: string,"source"?: string,"updated_at"?: string
+                    "ad_external_id"?: string | null,"ad_name"?: string | null,"angle": string,"client_id": string,"created_at"?: string,"created_by"?: string | null,"format"?: string | null,"id"?: string,"lesson"?: string | null,"library_id"?: string | null,"organization_id"?: string,"outcome"?: string | null,"platform"?: string,"policy_text": string,"reason": string,"rejected_on"?: string,"source"?: string,"updated_at"?: string
                   }
                   Update: {
-                    "ad_name"?: string | null,"angle"?: string,"client_id"?: string,"created_at"?: string,"created_by"?: string | null,"format"?: string,"id"?: string,"lesson"?: string | null,"library_id"?: string | null,"organization_id"?: string,"outcome"?: string | null,"platform"?: string,"policy_text"?: string,"reason"?: string,"rejected_on"?: string,"source"?: string,"updated_at"?: string
+                    "ad_external_id"?: string | null,"ad_name"?: string | null,"angle"?: string,"client_id"?: string,"created_at"?: string,"created_by"?: string | null,"format"?: string | null,"id"?: string,"lesson"?: string | null,"library_id"?: string | null,"organization_id"?: string,"outcome"?: string | null,"platform"?: string,"policy_text"?: string,"reason"?: string,"rejected_on"?: string,"source"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -104,6 +144,84 @@ isOneToOne: false
       columns: ["organization_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"ad_sets": {
+                  Row: {
+                    "ad_account_id": string,"campaign_id": string | null,"daily_budget_cents": number | null,"effective_status": string | null,"external_id": string,"id": string,"last_seen_at": string,"lifetime_budget_cents": number | null,"name": string,"optimization_goal": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad_account_id": string,"campaign_id"?: string | null,"daily_budget_cents"?: number | null,"effective_status"?: string | null,"external_id": string,"id"?: string,"last_seen_at"?: string,"lifetime_budget_cents"?: number | null,"name": string,"optimization_goal"?: string | null
+                  }
+                  Update: {
+                    "ad_account_id"?: string,"campaign_id"?: string | null,"daily_budget_cents"?: number | null,"effective_status"?: string | null,"external_id"?: string,"id"?: string,"last_seen_at"?: string,"lifetime_budget_cents"?: number | null,"name"?: string,"optimization_goal"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ad_sets_ad_account_id_fkey"
+      columns: ["ad_account_id"]
+isOneToOne: false
+      referencedRelation: "ad_accounts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_sets_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "ad_campaigns"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"ad_sync_runs": {
+                  Row: {
+                    "ad_account_id": string,"counts": NonNullable<Json>,"error": string | null,"finished_at": string | null,"id": string,"ok": boolean | null,"started_at": string,"trigger": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad_account_id": string,"counts"?: NonNullable<Json>,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"ok"?: boolean | null,"started_at"?: string,"trigger": string
+                  }
+                  Update: {
+                    "ad_account_id"?: string,"counts"?: NonNullable<Json>,"error"?: string | null,"finished_at"?: string | null,"id"?: string,"ok"?: boolean | null,"started_at"?: string,"trigger"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ad_sync_runs_ad_account_id_fkey"
+      columns: ["ad_account_id"]
+isOneToOne: false
+      referencedRelation: "ad_accounts"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"ads": {
+                  Row: {
+                    "ad_account_id": string,"ad_set_id": string | null,"campaign_id": string | null,"creative_external_id": string | null,"effective_status": string | null,"external_id": string,"id": string,"last_seen_at": string,"name": string,"review_feedback": string | null,"thumbnail_url": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad_account_id": string,"ad_set_id"?: string | null,"campaign_id"?: string | null,"creative_external_id"?: string | null,"effective_status"?: string | null,"external_id": string,"id"?: string,"last_seen_at"?: string,"name": string,"review_feedback"?: string | null,"thumbnail_url"?: string | null
+                  }
+                  Update: {
+                    "ad_account_id"?: string,"ad_set_id"?: string | null,"campaign_id"?: string | null,"creative_external_id"?: string | null,"effective_status"?: string | null,"external_id"?: string,"id"?: string,"last_seen_at"?: string,"name"?: string,"review_feedback"?: string | null,"thumbnail_url"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ads_ad_account_id_fkey"
+      columns: ["ad_account_id"]
+isOneToOne: false
+      referencedRelation: "ad_accounts"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ads_ad_set_id_fkey"
+      columns: ["ad_set_id"]
+isOneToOne: false
+      referencedRelation: "ad_sets"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ads_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "ad_campaigns"
       referencedColumns: ["id"]
     }
                   ]
@@ -2839,6 +2957,104 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"whatsapp_connections": {
+                  Row: {
+                    "api_key_enc": string,"base_url": string,"connected_by": string | null,"created_at": string,"id": string,"last_error": string | null,"last_event_at": string | null,"me_id": string | null,"me_name": string | null,"organization_id": string,"session": string,"status": string,"updated_at": string,"webhook_secret_enc": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "api_key_enc": string,"base_url": string,"connected_by"?: string | null,"created_at"?: string,"id"?: string,"last_error"?: string | null,"last_event_at"?: string | null,"me_id"?: string | null,"me_name"?: string | null,"organization_id": string,"session"?: string,"status"?: string,"updated_at"?: string,"webhook_secret_enc": string
+                  }
+                  Update: {
+                    "api_key_enc"?: string,"base_url"?: string,"connected_by"?: string | null,"created_at"?: string,"id"?: string,"last_error"?: string | null,"last_event_at"?: string | null,"me_id"?: string | null,"me_name"?: string | null,"organization_id"?: string,"session"?: string,"status"?: string,"updated_at"?: string,"webhook_secret_enc"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "whatsapp_connections_connected_by_fkey"
+      columns: ["connected_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "whatsapp_connections_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: true
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"whatsapp_groups": {
+                  Row: {
+                    "client_id": string | null,"connection_id": string,"id": string,"is_alerts": boolean,"is_reports": boolean,"jid": string,"last_seen_at": string,"name": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id"?: string | null,"connection_id": string,"id"?: string,"is_alerts"?: boolean,"is_reports"?: boolean,"jid": string,"last_seen_at"?: string,"name"?: string
+                  }
+                  Update: {
+                    "client_id"?: string | null,"connection_id"?: string,"id"?: string,"is_alerts"?: boolean,"is_reports"?: boolean,"jid"?: string,"last_seen_at"?: string,"name"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "whatsapp_groups_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "whatsapp_groups_connection_id_fkey"
+      columns: ["connection_id"]
+isOneToOne: false
+      referencedRelation: "whatsapp_connections"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"whatsapp_messages": {
+                  Row: {
+                    "author": string | null,"author_name": string | null,"body": string | null,"chat_id": string,"connection_id": string,"created_at": string,"from_me": boolean,"id": string,"kind": string,"sent_at": string,"wamid": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "author"?: string | null,"author_name"?: string | null,"body"?: string | null,"chat_id": string,"connection_id": string,"created_at"?: string,"from_me"?: boolean,"id"?: string,"kind"?: string,"sent_at": string,"wamid": string
+                  }
+                  Update: {
+                    "author"?: string | null,"author_name"?: string | null,"body"?: string | null,"chat_id"?: string,"connection_id"?: string,"created_at"?: string,"from_me"?: boolean,"id"?: string,"kind"?: string,"sent_at"?: string,"wamid"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "whatsapp_messages_connection_id_fkey"
+      columns: ["connection_id"]
+isOneToOne: false
+      referencedRelation: "whatsapp_connections"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"whatsapp_outbox": {
+                  Row: {
+                    "body": string,"chat_id": string,"chat_name": string | null,"connection_id": string,"created_at": string,"created_by": string | null,"dedupe_key": string | null,"error": string | null,"id": string,"kind": string,"ok": boolean | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"chat_id": string,"chat_name"?: string | null,"connection_id": string,"created_at"?: string,"created_by"?: string | null,"dedupe_key"?: string | null,"error"?: string | null,"id"?: string,"kind": string,"ok"?: boolean | null
+                  }
+                  Update: {
+                    "body"?: string,"chat_id"?: string,"chat_name"?: string | null,"connection_id"?: string,"created_at"?: string,"created_by"?: string | null,"dedupe_key"?: string | null,"error"?: string | null,"id"?: string,"kind"?: string,"ok"?: boolean | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "whatsapp_outbox_connection_id_fkey"
+      columns: ["connection_id"]
+isOneToOne: false
+      referencedRelation: "whatsapp_connections"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "whatsapp_outbox_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"workflow_steps": {
                   Row: {
                     "archived_at": string | null,"color": string,"created_at": string,"id": string,"is_rework": boolean,"name": string,"position": number,"sector_id": string | null,"status": string,"waits_client": boolean,"workflow_id": string
@@ -3105,6 +3321,9 @@ isOneToOne: false
 "save_recording":
 { Args: { "p": Json }; Returns: string
                            },
+"save_whatsapp_group":
+{ Args: { "p_alerts": boolean,"p_client": string,"p_id": string,"p_reports": boolean }; Returns: undefined
+                           },
 "schedule_overview":
 { Args: { "p_end": string,"p_start": string }; Returns: {
               "client_code": number,"client_id": string,"client_name": string,"contracted": number,"mine": boolean,"posted": number,"scheduled": number,"social": (string)[],"undated": number
@@ -3154,6 +3373,11 @@ isOneToOne: false
 "user_effective_permissions":
 { Args: { "p_user": string }; Returns: {
               "permission_key": string,"scope": Database["public"]['Enums']["permission_scope"]
+            }[]
+                           },
+"whatsapp_status":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "base_url": string,"connected_by_name": string,"id": string,"last_error": string,"last_event_at": string,"me_id": string,"me_name": string,"session": string,"status": string,"updated_at": string
             }[]
                            }
           }

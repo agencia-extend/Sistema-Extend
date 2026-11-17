@@ -22,7 +22,10 @@ export function SidebarNav({
   onNavigate?: () => void;
 }) {
   const pathname = usePathname();
-  const isActive = (href: string) => !preview && (pathname === href || pathname.startsWith(`${href}/`));
+  // O item mais específico vence: em /trafego/painel, só "Painel do tráfego" fica marcado (não "Rotina do tráfego").
+  const hrefs = groups.flatMap((g) => g.items.map((i) => i.href));
+  const matches = (href: string) => pathname === href || pathname.startsWith(`${href}/`);
+  const isActive = (href: string) => !preview && matches(href) && !hrefs.some((h) => h !== href && h.startsWith(`${href}/`) && matches(h));
 
   const item = (href: string, label: string, icon: Parameters<typeof NavIcon>[0]["icon"]) => {
     const active = isActive(href);

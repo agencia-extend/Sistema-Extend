@@ -27,7 +27,7 @@ export function RejectionList({ clientId, today, rows, library, canManage }: { c
             {top.map((t) => (
               <li key={t.reason} className="rounded-full border bg-card px-3 py-1 text-sm">
                 {REJECTION_REASON[t.reason].label} <span className="font-semibold tabular">{t.count}</span>
-                <span className="text-muted-foreground"> · {t.formats.map(fmt).join(", ")}</span>
+                {t.formats.length > 0 && <span className="text-muted-foreground"> · {t.formats.map(fmt).join(", ")}</span>}
               </li>
             ))}
           </ul>
@@ -41,7 +41,7 @@ export function RejectionList({ clientId, today, rows, library, canManage }: { c
               <span className="text-sm font-medium tabular">{br(r.rejectedOn)}</span>
               <div className="grid min-w-0 gap-1">
                 <p className="text-xs text-muted-foreground">
-                  {r.platform === "google" ? "Google Ads" : "Meta"} · {fmt(r.format)}
+                  {r.platform === "google" ? "Google Ads" : "Meta"}{r.format ? ` · ${fmt(r.format)}` : ""}
                   {r.libraryCampaign ? ` · campanha ${r.libraryCampaign}` : ""}
                   {r.adName ? ` · ${r.adName}` : ""}
                   {r.source === "sync" ? " · detectada na sincronização" : r.authorName ? ` · ${r.authorName}` : ""}
@@ -66,7 +66,7 @@ export function RejectionList({ clientId, today, rows, library, canManage }: { c
                       libraryId: r.libraryId ?? "__nenhum",
                       platform: r.platform,
                       rejectedOn: r.rejectedOn,
-                      format: r.format,
+                      format: r.format ?? "",
                       angle: r.angle,
                       reason: r.reason,
                       policyText: r.policyText,

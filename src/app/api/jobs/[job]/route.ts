@@ -2,6 +2,9 @@ import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendPush } from "@/lib/push";
+import { syncMetaAccounts } from "@/lib/ads/meta-sync";
+import { forwardAdAlerts } from "@/lib/whatsapp/alerts";
+import { sendWeeklyReports } from "@/lib/whatsapp/reports";
 
 // Relógio do banco: pg_cron → pg_net → POST /api/jobs/<job> com "Authorization: Bearer <JOBS_TOKEN>".
 export const dynamic = "force-dynamic";
@@ -29,6 +32,12 @@ async function notificationsJob() {
 
 const JOBS: Record<string, () => Promise<unknown>> = {
   notifications: notificationsJob,
+  // Anúncios da Meta (RF-ADS-03): as contas mais atrasadas primeiro, dentro de ~45 s; o resto na próxima.
+  "ads-sync": () => syncMetaAccounts({ trigger: "cron", budgetMs: 45_000 }),
+  // Alertas de anúncios no grupo interno do WhatsApp (RF-ALE-02).
+  "whatsapp-alerts": forwardAdAlerts,
+  // Relatório semanal de anúncios de cada cliente no grupo de relatórios (RF-REL-01).
+  "whatsapp-reports": sendWeeklyReports,
 };
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ job: string }> }) {

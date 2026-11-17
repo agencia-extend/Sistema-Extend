@@ -391,3 +391,48 @@ A pedido do Henrique: muitas contas de anúncio ficam no perfil do Facebook do c
   - Conexão parada ou vencendo (o token de login da Meta dura cerca de 60 dias) avisa o tráfego do cliente, ou quem conecta a agência se ninguém cuidar do cliente (cron `extend-integracoes`).
 - **Limite da Meta:** enquanto o app está em desenvolvimento, só conecta quem estiver cadastrado no app (Funções do app › Testadores). A seção mostra esse aviso até `META_APP_LIVE=1`, que deve ser ligado na Vercel quando a Meta aprovar o app e ele for para Live.
 - **Next.js 16.4.6:** o build de produção passou a recusar a 16.4.3 por uma falha de segurança conhecida.
+
+## Sincronização da Meta, painel do tráfego e alertas (17/11/2026)
+Primeira parte da fase 3 (RF-ADS-03/04/05/07/10, RF-ALE-01/02), conferida contra a Meta com a conexão real da agência:
+- **Teste com dados reais:** EXTEND - 02 e HG BRASIL. O gasto de 30 dias gravado bate com o da Meta (R$ 632,81 na HG BRASIL) e é igual nos níveis de conta, campanha e anúncio. O saldo pré-pago foi lido do texto da Meta (R$ 68,71 e R$ 279,68).
+- **Sincronização** (`src/lib/ads/meta-sync.ts`, job `ads-sync`, cron `extend-anuncios-sync` a cada 3 horas):
+  - só as contas ligadas ("Entra no sistema") com conexão ativa, das mais atrasadas para as mais recentes, dentro de cerca de 45 s; o que não couber fica para a rodada seguinte;
+  - grava a situação e o saldo da conta, as campanhas, os conjuntos, os anúncios (com miniatura e o retorno da análise) e os números por dia de conta, campanha e anúncio;
+  - na primeira vez busca 90 dias (37 por anúncio); depois, os últimos 3 dias, porque a Meta ainda ajusta a atribuição;
+  - cada rodada fica em `ad_sync_runs` (60 dias) e o erro aparece na conta;
+  - "Sincronizar agora" no painel (quem conecta) e na aba Anúncios (quem cuida do tráfego do cliente).
+- **Resultado por objetivo** (`src/domain/ads`): leads, conversas, compras, cliques no link, visualizações ou impressões. Em objetivos genéricos (engajamento, tráfego), vale o que aconteceu: conversas, depois leads, depois cliques. Indicadores: CTR, CPC, CPM, custo por resultado e ROAS.
+- **Painel do tráfego** (`/trafego/painel`, `ads.read`): por conta ligada, mostra o saldo e a previsão de dias (gasto médio dos 7 dias completos), o gasto do período e as campanhas no ar ou com gasto. Períodos: hoje, ontem, 7 dias, 30 dias e este mês.
+- **Aba Anúncios do cliente** (`ads.read`, para clientes com serviço de anúncios): a mesma tabela e os anúncios com miniatura, situação, números e o motivo de reprovação.
+- **Alertas** (`private.ads_alerts_tick`, 20 min depois de cada sincronização, um aviso por dia por conta e regra, para o tráfego do cliente):
+  - saldo para 3 dias ou menos;
+  - conta com restrição;
+  - campanha ativa sem gasto ontem.
+- **Reprovação automática:** anúncio "Reprovado" entra no histórico de reprovações (origem "sincronização", sem formato, com o texto da Meta) uma vez por anúncio, e o aviso existente segue para o tráfego.
+- **Ainda não feito nesta parte** (próximas rodadas):
+  - limites editáveis por cliente;
+  - painel de alertas com reconhecer e resolver (RF-ALE-03);
+  - fadiga de criativo, que precisa da frequência de 7 dias por anúncio;
+  - CPL acima da meta, que depende das metas (RF-T2-04);
+  - números por criativo na biblioteca (RF-BIB-03);
+  - checklist já preenchido;
+  - páginas e Instagram.
+
+## WhatsApp por QR Code com WAHA (17/11/2026)
+Decisão do Henrique: WAHA, para usar os grupos que a Extend já tem. Por enquanto roda no Docker da máquina dele e depois vai para uma VPS da Extend. Todo o resto roda no sistema.
+- **Infra** (`infra/waha`): contêiner `extend-waha` em `127.0.0.1:3032`, separado do WAHA do HubSystem; volumes próprios; chave em `infra/waha/.env`, fora do Git. O túnel (`extend-waha-tunnel`, Cloudflare Quick Tunnel, perfil `tunnel`) deixa o sistema publicado alcançar a máquina. O endereço muda quando o túnel reinicia. Passo a passo e ida para a VPS no `infra/waha/README.md`.
+- **Configurações › WhatsApp** (`integrations.manage`, só o admin):
+  - endereço e chave do servidor: a chave é conferida antes de salvar e fica cifrada no banco; trocar para a VPS não exige deploy;
+  - conectar o número por QR Code (atualiza sozinho) ou por código de 8 letras;
+  - situação da conexão;
+  - grupos do número, cada um ligado ao cliente dele, e um marcado como "alertas internos";
+  - mensagem de teste e os últimos envios.
+- **Eventos do WAHA:** chegam em `/api/whatsapp/webhook/{conexão}`, assinados com HMAC-SHA512 por um segredo da conexão. Atualizam a situação (conectado, caiu) e gravam as mensagens em `whatsapp_messages`, base da futura caixa de entrada (`inbox.read`).
+- **Alertas no grupo** (RF-ALE-02): a cada 5 minutos (`extend-whatsapp-alertas`, job `whatsapp-alerts`), os alertas de anúncios das últimas 2 horas vão para o grupo de alertas internos, um por alerta, mesmo que tenham avisado várias pessoas. Cada envio fica em `whatsapp_outbox`; a falha aparece na tela e na conexão.
+- **Retenção:** mensagens por 1 ano e envios por 90 dias.
+- **Grupo de relatórios** (decisão do Henrique): todos os relatórios dos clientes vão para **um grupo interno**, e o gestor encaminha manualmente a cada cliente. Em Configurações › WhatsApp, um grupo marcado como "Relatórios", que pode ser o mesmo dos alertas.
+  - **Automático:** toda segunda às 9h (`extend-whatsapp-relatorios`, job `whatsapp-reports`), relatório da semana anterior (segunda a domingo) de cada cliente ativo com conta ligada, só se houve gasto. Um por cliente por semana.
+  - **Na hora:** "Enviar relatório" na aba Anúncios do cliente (`ads.manage` no cliente), com o período escolhido na tela.
+  - **Texto** (`src/domain/ads/report.ts`): investimento, impressões, cada campanha com gasto, resultado principal, custo por resultado e CTR, e o saldo da conta pré-paga com a previsão de dias.
+- **Histórico:** ao ler o QR Code, o servidor carrega as conversas e os grupos do aparelho (`fullSync`).
+- **Próximas partes:** modelos de relatório editáveis com variáveis (RF-REL-02), PDF (RF-REL-05) e a caixa de entrada (RF-WPP-03).

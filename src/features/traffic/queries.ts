@@ -153,7 +153,7 @@ export type RejectionRow = {
   libraryCampaign: string | null;
   platform: "meta" | "google";
   rejectedOn: string;
-  format: string;
+  format: string | null;
   angle: string;
   reason: string;
   policyText: string;
