@@ -8,7 +8,8 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { publicEnv } from "@/lib/env";
 import { clientIp, RATE_LIMIT_MESSAGE, withinRateLimit } from "@/lib/rate-limit";
 import { fail, ok, type ActionResult } from "@/domain/shared/result";
-import { commentSchema, decisionSchema, deliverySchema, librarySchema, requestSchema, reviewSchema } from "./schemas";
+import { commentSchema, creativeAdSchema, decisionSchema, deliverySchema, librarySchema, libraryStatusSchema, requestSchema, reviewSchema } from "./schemas";
+import { LIBRARY_STATUS_LABEL } from "@/domain/creatives";
 import { z } from "zod";
 
 const refresh = (taskId?: string) => {
@@ -125,3 +126,30 @@ export async function decideApproval(raw: unknown): Promise<ActionResult<null>> 
   if (data !== "ok") return fail("business_rule", DECISION_STATE[data as string] ?? DECISION_STATE.invalido);
   return ok(null, decision === "aprovado" ? "Obrigado! Aprovação registrada." : "Obrigado! Seu pedido de alteração foi enviado para a equipe.");
 }
+
+/** Liga um anúncio da Meta ao criativo (RF-BIB-03). O banco confere o cliente e quem pode ligar. */
+export const linkCreativeAd = defineAction({ schema: creativeAdSchema }, async ({ libraryId, adId, taskId }) => {
+  const supabase = await createClient();
+  must(await supabase.rpc("link_creative_ad", { p_library: libraryId, p_ad: adId }));
+  revalidatePath(`/criativos/${taskId}`);
+  revalidatePath("/criativos/biblioteca");
+  return ok(null, "Anúncio ligado ao criativo.");
+});
+
+/** Desliga o anúncio; o código no nome não religa na próxima sincronização. */
+export const unlinkCreativeAd = defineAction({ schema: creativeAdSchema }, async ({ libraryId, adId, taskId }) => {
+  const supabase = await createClient();
+  must(await supabase.rpc("unlink_creative_ad", { p_library: libraryId, p_ad: adId }));
+  revalidatePath(`/criativos/${taskId}`);
+  revalidatePath("/criativos/biblioteca");
+  return ok(null, "Anúncio desligado do criativo.");
+});
+
+/** Muda só a situação na biblioteca (ex.: aceitar a sugestão "fadigado"). A RLS decide quem pode. */
+export const setLibraryStatus = defineAction({ schema: libraryStatusSchema }, async ({ id, status }) => {
+  const supabase = await createClient();
+  const row = must(await supabase.from("creative_library").update({ status }).eq("id", id).select("task_id").single());
+  revalidatePath("/criativos/biblioteca");
+  revalidatePath(`/criativos/${row.task_id}`);
+  return ok(null, `Criativo marcado como ${LIBRARY_STATUS_LABEL[status].toLowerCase()}.`);
+});

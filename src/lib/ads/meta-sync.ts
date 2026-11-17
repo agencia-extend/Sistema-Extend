@@ -89,7 +89,7 @@ export async function syncMetaAccount(acc: AccountRow, token: string): Promise<S
   const until = day(Date.now());
   const first = !acc.synced_at;
   let rows = 0;
-  const fields = "date_start,campaign_id,ad_id,spend,impressions,reach,clicks,actions,action_values";
+  const fields = "date_start,campaign_id,ad_id,spend,impressions,reach,clicks,actions,action_values,video_thruplay_watched_actions";
   for (const [level, days] of [["account", first ? FIRST_DAYS : RECENT_DAYS], ["campaign", first ? FIRST_DAYS : RECENT_DAYS], ["ad", first ? FIRST_AD_DAYS : RECENT_DAYS]] as const) {
     const since = day(Date.now() - (days - 1) * DAY);
     const range = encodeURIComponent(JSON.stringify({ since, until }));
@@ -115,6 +115,10 @@ export async function syncMetaAccount(acc: AccountRow, token: string): Promise<S
     p_rows: freq.filter((f) => f.ad_id && f.frequency).map((f) => ({ ad_id: f.ad_id, frequency: Number(f.frequency), impressions: Number(f.impressions ?? 0) })),
   });
   if (fe) throw fe;
+
+  // 5. Criativos da biblioteca com o código no nome do anúncio (CR-42) ficam ligados a ele (RF-BIB-03).
+  const { error: le } = await db.rpc("sync_link_creatives", { p_account: acc.id });
+  if (le) throw le;
 
   await db.from("ad_accounts").update({ synced_at: now, sync_error: null }).eq("id", acc.id);
   return { campaigns: camps.length, adSets: sets.length, ads: ads.length, insightRows: rows };

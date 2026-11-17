@@ -11,10 +11,14 @@ import { formatDate } from "@/domain/shared/dates";
 import { todayKey } from "@/domain/media";
 import { cn } from "@/lib/utils";
 import { LibraryFilters } from "./library-filters";
+import { getPerformance } from "@/features/creatives/performance";
+import { PerformanceLine } from "@/features/creatives/components/performance-summary";
+import { FatigueSuggestion } from "@/features/creatives/components/fatigue-suggestion";
+import { PERFORMANCE_SORT_LABEL, costPerResult, creativeCode, creativeKpis, parseSort, suggestedStatus, type PerformanceSort } from "@/domain/creatives/performance";
 
 export const metadata: Metadata = { title: "Biblioteca de criativos" };
 
-type Search = { q?: string; cliente?: string; situacao?: string; formato?: string; mes?: string };
+type Search = { q?: string; cliente?: string; situacao?: string; formato?: string; mes?: string; ordem?: string };
 
 /** Biblioteca: todo criativo aprovado, com a copy, a peça e a situação (em teste, vencedor…). */
 export default async function BibliotecaPage({ searchParams }: { searchParams: Promise<Search> }) {
@@ -30,18 +34,39 @@ export default async function BibliotecaPage({ searchParams }: { searchParams: P
       (!sp.situacao || i.status === sp.situacao) &&
       (!sp.formato || i.format === sp.formato),
   );
+  // Números dos anúncios ligados (RF-BIB-03): só para quem tem "Ver performance dos criativos" no cliente.
+  const canPerf = Boolean(user?.permissions["creatives.performance.read"]);
+  const perf = canPerf ? await getPerformance(items.map((i) => i.id)) : new Map();
+  const sort = canPerf ? parseSort(sp.ordem) : "recentes";
+  if (sort !== "recentes") {
+    // Sem números vai para o fim; no custo, menor primeiro.
+    const value = (id: string) => {
+      const t = perf.get(id);
+      if (!t) return null;
+      return sort === "investimento" ? t.spendCents : sort === "ctr" ? creativeKpis(t).ctr : costPerResult(t);
+    };
+    items.sort((a, b) => {
+      const va = value(a.id), vb = value(b.id);
+      if (va === null || vb === null) return va === null ? (vb === null ? 0 : 1) : -1;
+      return sort === "custo" ? va - vb : vb - va;
+    });
+  }
   const clients = [...new Map(all.map((i) => [i.clientId, i.clientName])).entries()].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
 
   return (
     <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
-        <LibraryFilters clients={clients} statuses={LIBRARY_STATUSES.map((s) => [s, LIBRARY_STATUS_LABEL[s]])} />
+        <LibraryFilters clients={clients} statuses={LIBRARY_STATUSES.map((s) => [s, LIBRARY_STATUS_LABEL[s]])}
+          sorts={canPerf ? (Object.keys(PERFORMANCE_SORT_LABEL) as PerformanceSort[]).filter((k) => k !== "recentes").map((k) => [k, PERFORMANCE_SORT_LABEL[k]]) : undefined} />
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-sm text-muted-foreground">Exportar {month.slice(5)}/{month.slice(0, 4)}:</span>
           <a href={`/criativos/biblioteca/exportar?formato=csv&mes=${month}`} download className={buttonVariants({ variant: "outline", size: "sm" })}><Download aria-hidden="true" /> CSV</a>
           <a href={`/criativos/biblioteca/exportar?formato=pdf&mes=${month}`} download className={buttonVariants({ variant: "outline", size: "sm" })}><Download aria-hidden="true" /> PDF</a>
         </div>
       </div>
+      {canPerf && all.length > 0 && (
+        <p className="text-sm text-muted-foreground">Os números vêm dos anúncios da Meta ligados a cada criativo: ponha o código do criativo (ex.: {creativeCode(all[0].ref)}) no nome do anúncio e ele se liga na sincronização, ou ligue à mão na página do criativo.</p>
+      )}
       {all.length === 0 ? (
         <EmptyState icon={Library} title="A biblioteca está vazia" description="Todo criativo aprovado (internamente ou pelo cliente) entra aqui com a copy e a peça." />
       ) : items.length === 0 ? (
@@ -68,7 +93,12 @@ export default async function BibliotecaPage({ searchParams }: { searchParams: P
                   {canEdit && <LibraryEdit item={i} />}
                 </div>
                 <span className="text-xs text-muted-foreground">{i.clientName} · {CREATIVE_FORMAT_LABEL[i.format]} · {i.campaign}</span>
-                <span className={cn("w-fit rounded-full px-2 py-0.5 text-xs font-medium", LIBRARY_STATUS_TONE[i.status])}>{LIBRARY_STATUS_LABEL[i.status]}</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={cn("w-fit rounded-full px-2 py-0.5 text-xs font-medium", LIBRARY_STATUS_TONE[i.status])}>{LIBRARY_STATUS_LABEL[i.status]}</span>
+                  <span className="text-xs text-muted-foreground tabular" title="Ponha este código no nome do anúncio para os números aparecerem aqui">{creativeCode(i.ref)}</span>
+                </div>
+                {perf.get(i.id) && <PerformanceLine t={perf.get(i.id)!} />}
+                {suggestedStatus(i.status, perf.get(i.id)) && <FatigueSuggestion libraryId={i.id} angle={i.angle} canEdit={canEdit} />}
                 {i.primaryText && <p className="line-clamp-3 text-sm break-words text-muted-foreground">{i.primaryText}</p>}
                 <span className="text-xs text-muted-foreground tabular">Aprovado em {formatDate(i.approvedAt)}</span>
               </div>

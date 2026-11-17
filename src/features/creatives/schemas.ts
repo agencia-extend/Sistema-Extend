@@ -59,3 +59,9 @@ export const decisionSchema = z
     name: z.string().trim().min(2, "Diga seu nome.").max(120),
   })
   .refine((v) => v.decision !== "ajustes" || v.comment.length >= 3, { path: ["comment"], message: "Descreva o que precisa mudar." });
+
+/** Ligar ou desligar um anúncio da Meta do criativo da biblioteca (RF-BIB-03). */
+export const creativeAdSchema = z.object({ libraryId: z.uuid("Criativo inválido."), adId: z.uuid("Escolha um anúncio."), taskId: z.uuid("Criativo inválido.") });
+
+/** Só a situação (ex.: aceitar a sugestão "fadigado"). */
+export const libraryStatusSchema = z.object({ id: z.uuid("Criativo inválido."), status: z.enum(LIBRARY_STATUSES, "Situação inválida.") });

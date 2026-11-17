@@ -167,14 +167,14 @@ isOneToOne: false
                   ]
                 },"ad_insights_daily": {
                   Row: {
-                    "ad_account_id": string,"clicks": number,"date": string,"impressions": number,"landing_page_views": number,"leads": number,"level": string,"link_clicks": number,"messages": number,"object_external_id": string,"purchase_value_cents": number,"purchases": number,"reach": number,"spend_cents": number,"video_views": number
+                    "ad_account_id": string,"clicks": number,"date": string,"impressions": number,"landing_page_views": number,"leads": number,"level": string,"link_clicks": number,"messages": number,"object_external_id": string,"purchase_value_cents": number,"purchases": number,"reach": number,"spend_cents": number,"thruplays": number,"video_views": number
                   }
                   ComputedFields: never
                   Insert: {
-                    "ad_account_id": string,"clicks"?: number,"date": string,"impressions"?: number,"landing_page_views"?: number,"leads"?: number,"level": string,"link_clicks"?: number,"messages"?: number,"object_external_id": string,"purchase_value_cents"?: number,"purchases"?: number,"reach"?: number,"spend_cents"?: number,"video_views"?: number
+                    "ad_account_id": string,"clicks"?: number,"date": string,"impressions"?: number,"landing_page_views"?: number,"leads"?: number,"level": string,"link_clicks"?: number,"messages"?: number,"object_external_id": string,"purchase_value_cents"?: number,"purchases"?: number,"reach"?: number,"spend_cents"?: number,"thruplays"?: number,"video_views"?: number
                   }
                   Update: {
-                    "ad_account_id"?: string,"clicks"?: number,"date"?: string,"impressions"?: number,"landing_page_views"?: number,"leads"?: number,"level"?: string,"link_clicks"?: number,"messages"?: number,"object_external_id"?: string,"purchase_value_cents"?: number,"purchases"?: number,"reach"?: number,"spend_cents"?: number,"video_views"?: number
+                    "ad_account_id"?: string,"clicks"?: number,"date"?: string,"impressions"?: number,"landing_page_views"?: number,"leads"?: number,"level"?: string,"link_clicks"?: number,"messages"?: number,"object_external_id"?: string,"purchase_value_cents"?: number,"purchases"?: number,"reach"?: number,"spend_cents"?: number,"thruplays"?: number,"video_views"?: number
                   }
                   Relationships: [
                     {
@@ -1201,16 +1201,48 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"creative_library": {
+                },"creative_ads": {
                   Row: {
-                    "ad_ref": string | null,"angle": string,"approved_at": string,"campaign": string,"client_id": string,"delivery_id": string | null,"description": string | null,"format": string,"headline": string | null,"id": string,"primary_text": string | null,"status": string,"task_id": string,"updated_at": string
+                    "ad_id": string,"excluded": boolean,"library_id": string,"linked_at": string,"linked_by": string | null,"source": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "ad_ref"?: string | null,"angle": string,"approved_at"?: string,"campaign": string,"client_id": string,"delivery_id"?: string | null,"description"?: string | null,"format": string,"headline"?: string | null,"id"?: string,"primary_text"?: string | null,"status"?: string,"task_id": string,"updated_at"?: string
+                    "ad_id": string,"excluded"?: boolean,"library_id": string,"linked_at"?: string,"linked_by"?: string | null,"source": string
                   }
                   Update: {
-                    "ad_ref"?: string | null,"angle"?: string,"approved_at"?: string,"campaign"?: string,"client_id"?: string,"delivery_id"?: string | null,"description"?: string | null,"format"?: string,"headline"?: string | null,"id"?: string,"primary_text"?: string | null,"status"?: string,"task_id"?: string,"updated_at"?: string
+                    "ad_id"?: string,"excluded"?: boolean,"library_id"?: string,"linked_at"?: string,"linked_by"?: string | null,"source"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "creative_ads_ad_id_fkey"
+      columns: ["ad_id"]
+isOneToOne: false
+      referencedRelation: "ads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "creative_ads_library_id_fkey"
+      columns: ["library_id"]
+isOneToOne: false
+      referencedRelation: "creative_library"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "creative_ads_linked_by_fkey"
+      columns: ["linked_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"creative_library": {
+                  Row: {
+                    "ad_ref": string | null,"angle": string,"approved_at": string,"campaign": string,"client_id": string,"delivery_id": string | null,"description": string | null,"format": string,"headline": string | null,"id": string,"primary_text": string | null,"ref_number": number,"status": string,"task_id": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad_ref"?: string | null,"angle": string,"approved_at"?: string,"campaign": string,"client_id": string,"delivery_id"?: string | null,"description"?: string | null,"format": string,"headline"?: string | null,"id"?: string,"primary_text"?: string | null,"ref_number"?: never,"status"?: string,"task_id": string,"updated_at"?: string
+                  }
+                  Update: {
+                    "ad_ref"?: string | null,"angle"?: string,"approved_at"?: string,"campaign"?: string,"client_id"?: string,"delivery_id"?: string | null,"description"?: string | null,"format"?: string,"headline"?: string | null,"id"?: string,"primary_text"?: string | null,"ref_number"?: never,"status"?: string,"task_id"?: string,"updated_at"?: string
                   }
                   Relationships: [
                     {
@@ -3283,6 +3315,21 @@ isOneToOne: false
 "create_handoff":
 { Args: { "p": Json }; Returns: string
                            },
+"creative_linkable_ads":
+{ Args: { "p_library": string }; Returns: {
+              "account_name": string,"ad_id": string,"campaign_name": string,"effective_status": string,"name": string
+            }[]
+                           },
+"creative_linked_ads":
+{ Args: { "p_library": string }; Returns: {
+              "account_name": string,"ad_id": string,"campaign_name": string,"effective_status": string,"fatigued": boolean,"frequency": number,"name": string,"source": string,"thumbnail_url": string
+            }[]
+                           },
+"creative_performance":
+{ Args: { "p_ids": (string)[],"p_since"?: string,"p_until"?: string }; Returns: {
+              "active_ads": number,"ads": number,"clicks": number,"days_live": number,"fatigued": boolean,"first_day": string,"frequency": number,"impressions": number,"last_day": string,"leads": number,"library_id": string,"link_clicks": number,"messages": number,"purchase_value_cents": number,"purchases": number,"spend_cents": number,"thruplays": number,"video_views": number
+            }[]
+                           },
 "crm_people":
 { Args: Record<PropertyKey, never>; Returns: {
               "full_name": string,"id": string
@@ -3313,6 +3360,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "account_email": string,"account_name": string,"accounts_synced_at": string,"client_id": string,"client_name": string,"connected_by_name": string,"created_at": string,"expires_at": string,"id": string,"last_error": string,"method": string,"owner_kind": string,"provider": string,"purpose": string,"status": string
             }[]
+                           },
+"link_creative_ad":
+{ Args: { "p_ad": string,"p_library": string }; Returns: undefined
                            },
 "mark_all_notifications_read":
 { Args: Record<PropertyKey, never>; Returns: number
@@ -3473,6 +3523,9 @@ isOneToOne: false
 "stop_timer":
 { Args: Record<PropertyKey, never>; Returns: undefined
                            },
+"sync_link_creatives":
+{ Args: { "p_account": string }; Returns: number
+                           },
 "toggle_client_ad_account":
 { Args: { "p_enabled": boolean,"p_id": string }; Returns: undefined
                            },
@@ -3486,6 +3539,9 @@ isOneToOne: false
                            },
 "undo_lead_import":
 { Args: { "p_import": string }; Returns: number
+                           },
+"unlink_creative_ad":
+{ Args: { "p_ad": string,"p_library": string }; Returns: undefined
                            },
 "user_effective_permissions":
 { Args: { "p_user": string }; Returns: {

@@ -193,7 +193,7 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
     - funciona também para demandas comuns com etapa de cliente;
     - há botões "Copiar link" e "Enviar no WhatsApp" (wa.me).
   - **Biblioteca** (`creative_library`): o aprovado entra com a copy. Situações: em teste, vencedor, fadigado, reprovado pela Meta e arquivado. A exportação do mês sai em CSV e PDF (pdf-lib).
-  - **Pendente para a etapa 05:** a performance (RF-BIB-03) e o botão "pedir novo criativo" a partir do anúncio (RF-CRI-08). O banco já tem `creative_requests.source_ad_ref` e `creative_library.ad_ref`, e nada falso aparece na tela.
+  - **Pendente para a etapa 05:** o botão "pedir novo criativo" a partir do anúncio (RF-CRI-08). A performance (RF-BIB-03) foi feita em 17/11/2026. O banco já tem `creative_requests.source_ad_ref` e `creative_library.ad_ref`, e nada falso aparece na tela.
   - **Limitação conhecida:** a página do criativo, para quem não tem acesso, mostra "Página não encontrada" com código HTTP 200. A tela de carregamento começa a responder antes do 404, e nenhum dado do criativo é enviado.
 - **Briefing por seções A–E (14/11/2026)** (docs/08, item 3.3): a ficha de onboarding virou o briefing completo, com 70 perguntas em 6 seções: A. Geral, B. Tráfego pago, C. Produção de vídeos, D. Design, E. Site/Landing page e Obrigações do cliente.
   - **Seções por serviço:** cada seção tem `show_for` (abas de serviço). A seção só aparece, só conta no "o que falta" e só entra no resumo operacional se o cliente tiver o serviço, vigente ou com início futuro (`private.section_applies`, `sectionApplies`).
@@ -414,7 +414,7 @@ Primeira parte da fase 3 (RF-ADS-03/04/05/07/10, RF-ALE-01/02), conferida contra
   - ~~painel de alertas com reconhecer e resolver (RF-ALE-03)~~ (feito: ver "Painel de alertas");
   - fadiga de criativo, que precisa da frequência de 7 dias por anúncio;
   - CPL acima da meta, que depende das metas (RF-T2-04);
-  - números por criativo na biblioteca (RF-BIB-03);
+  - ~~números por criativo na biblioteca (RF-BIB-03)~~ (feito: ver "Performance por criativo na biblioteca");
   - checklist já preenchido;
   - páginas e Instagram.
 
@@ -479,4 +479,19 @@ Fecha o RF-ALE-01 ("limites por cliente/conta, com padrão global").
   - avisa quando a frequência chega ao limite **e** o CTR dos últimos 3 dias completos fica pelo menos X% abaixo do CTR dos 7 dias anteriores, com no mínimo 1.000 impressões em cada janela;
   - resolve sozinho quando a condição deixa de valer (anúncio pausado ou trocado, CTR recuperado).
 - **Regras no banco:** `ad_alert_settings`, `alert_limits`, `save_alert_limits`, `reset_alert_limits` e `set_ad_frequency` (só a sincronização). Testes em `37_limites_alertas.test.sql` e `e2e/31-painel-alertas.spec.ts` (o teste devolve o padrão da agência ao que era).
-- **Ainda não feito:** marcar o criativo como "fadigado" na biblioteca (RF-BIB-02), que depende dos números por criativo na biblioteca (RF-BIB-03).
+- **Fadigado na biblioteca:** feito, ver "Performance por criativo na biblioteca".
+
+## Performance por criativo na biblioteca (17/11/2026)
+Fecha o RF-BIB-03 e a sugestão de "fadigado" do RF-BIB-02.
+- **Ligação criativo ↔ anúncio** (`creative_ads`):
+  - cada criativo da biblioteca tem um código (`ref_number`, mostrado como **CR-42**). A nomenclatura padrão (RF-PLA-03) ainda não existe no sistema, e o padrão de nome de anúncio do `docs/02` (`FORMATO_ANGULO_V#`) não identifica um criativo só. Por isso a ligação automática usa o código: a sincronização liga todo anúncio das contas do mesmo cliente que tenha o código no nome (`CR42`, `CR-42`, `cr-0042`; `CR-420` não conta);
+  - o tráfego do cliente (ou quem organiza a biblioteca) liga outros anúncios à mão e desliga os que não são do criativo; o desligado fica marcado e o código não o religa.
+- **Números** (`creative_performance`, soma dos anúncios ligados em `ad_insights_daily`): investimento, impressões, CTR, CPC, CPM, leads e CPL, conversas e custo por conversa, hook rate (visualizações de 3 s ÷ impressões), hold rate (ThruPlays ÷ impressões; a sincronização passou a ler `video_thruplay_watched_actions`), frequência de 7 dias (a maior entre os anúncios ligados), ROAS e dias no ar (dias com gasto).
+  - Período: tudo o que foi sincronizado por anúncio (37 dias na primeira sincronização, depois acumula).
+  - **Quem vê:** quem vê o criativo na biblioteca e tem "Ver performance dos criativos" no cliente (tráfego, social media, edição e design dos clientes deles). A gravação vê o criativo, mas não os números.
+- **Telas:**
+  - biblioteca: código e uma linha de números em cada cartão, e "Ordenar" (maior investimento, maior CTR, menor custo por resultado);
+  - página do criativo: seção "Desempenho nos anúncios" com a tabela completa, os anúncios ligados (miniatura, situação, conta e campanha, como foi ligado, frequência) e o "Ligar anúncio".
+- **Fadigado (RF-BIB-02):** com alerta "Criativo cansado" em aberto num anúncio ligado, o criativo em teste ou vencedor mostra "Sugestão: fadigado" e o botão "Marcar como fadigado" para quem edita a biblioteca. "Vencedor" sugerido pelo sistema fica para quando houver regra definida (o RF-ALE-01 só define a fadiga).
+- **Regras no banco:** `link_creative_ad`, `unlink_creative_ad`, `creative_linked_ads`, `creative_linkable_ads`, `creative_performance` e `sync_link_creatives` (só a sincronização). Testes em `38_performance_criativos.test.sql` e `e2e/32-performance-criativos.spec.ts`.
+- **Ainda não feito:** filtro por período e "top criativos do mês" (RF-BIB-04) e os números no relatório de criativos exportado (RF-BIB-05).

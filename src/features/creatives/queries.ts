@@ -173,6 +173,8 @@ export type LibraryItem = {
   approvedAt: string;
   previewUrl: string | null;
   previewKind: "imagem" | "video" | "link" | null;
+  /** Código para pôr no nome do anúncio (CR-42). */
+  ref: number;
 };
 
 /** Biblioteca: criativos aprovados, com a prévia da versão aprovada. */
@@ -180,7 +182,7 @@ export async function listLibrary(): Promise<LibraryItem[]> {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("creative_library")
-    .select("id, task_id, client_id, campaign, format, angle, primary_text, headline, description, status, approved_at, clients(name), task_deliveries(delivery_assets(kind, storage_path, url, mime_type))")
+    .select("id, task_id, client_id, campaign, format, angle, primary_text, headline, description, status, approved_at, ref_number, clients(name), task_deliveries(delivery_assets(kind, storage_path, url, mime_type))")
     .order("approved_at", { ascending: false })
     .limit(500);
   if (error) throw error;
@@ -209,6 +211,7 @@ export async function listLibrary(): Promise<LibraryItem[]> {
       approvedAt: l.approved_at,
       previewUrl: url,
       previewKind: !a ? null : a.mime_type?.startsWith("image/") ? "imagem" : a.mime_type?.startsWith("video/") ? "video" : "link",
+      ref: Number(l.ref_number),
     };
   });
 }

@@ -8,7 +8,7 @@ import { CREATIVE_FORMATS, CREATIVE_FORMAT_LABEL } from "@/domain/creatives";
 
 const ALL = "__todos";
 
-export function LibraryFilters({ clients, statuses }: { clients: { id: string; name: string }[]; statuses: [string, string][] }) {
+export function LibraryFilters({ clients, statuses, sorts }: { clients: { id: string; name: string }[]; statuses: [string, string][]; sorts?: [string, string][] }) {
   const router = useRouter();
   const pathname = usePathname();
   const sp = useSearchParams();
@@ -22,6 +22,7 @@ export function LibraryFilters({ clients, statuses }: { clients: { id: string; n
     ["cliente", "Filtrar por cliente", "Todos os clientes", clients.map((c) => [c.id, c.name])],
     ["situacao", "Filtrar por situação", "Qualquer situação", statuses],
     ["formato", "Filtrar por formato", "Todos os formatos", CREATIVE_FORMATS.map((f) => [f, CREATIVE_FORMAT_LABEL[f]])],
+    ...(sorts?.length ? [["ordem", "Ordenar", "Mais recentes", sorts] as [string, string, string, [string, string][]]] : []),
   ];
   return (
     <div className="grid gap-2 sm:flex sm:flex-wrap">

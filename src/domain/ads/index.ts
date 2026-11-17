@@ -41,6 +41,8 @@ export type InsightRow = {
   clicks?: string;
   actions?: Action[];
   action_values?: Action[];
+  /** ThruPlays: vídeo visto até o fim ou por 15 s (hold rate). */
+  video_thruplay_watched_actions?: Action[];
 };
 
 export type DailyMetrics = {
@@ -56,6 +58,7 @@ export type DailyMetrics = {
   purchase_value_cents: number;
   landing_page_views: number;
   video_views: number;
+  thruplays: number;
 };
 
 /** Uma linha de insights da Meta (time_increment=1) → números do dia. */
@@ -73,13 +76,14 @@ export function parseInsight(r: InsightRow): DailyMetrics {
     purchase_value_cents: toCents(pick(r.action_values, PURCHASES) || (r.action_values?.find((a) => PURCHASES.includes(a.action_type))?.value ?? 0)),
     landing_page_views: pick(r.actions, ["landing_page_view"]),
     video_views: pick(r.actions, ["video_view"]),
+    thruplays: pick(r.video_thruplay_watched_actions, ["video_view"]),
   };
 }
 
 export type Totals = Omit<DailyMetrics, "date" | "reach">;
 
 export const emptyTotals = (): Totals => ({
-  spend_cents: 0, impressions: 0, clicks: 0, link_clicks: 0, leads: 0, messages: 0, purchases: 0, purchase_value_cents: 0, landing_page_views: 0, video_views: 0,
+  spend_cents: 0, impressions: 0, clicks: 0, link_clicks: 0, leads: 0, messages: 0, purchases: 0, purchase_value_cents: 0, landing_page_views: 0, video_views: 0, thruplays: 0,
 });
 
 /** Soma os dias (alcance não soma entre dias, por isso fica de fora). */

@@ -4,6 +4,11 @@ import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/dal";
 import { getCreative, listCreativeRejections } from "@/features/creatives/queries";
+import { getCreativePerformance } from "@/features/creatives/performance";
+import { PerformanceTable } from "@/features/creatives/components/performance-summary";
+import { CreativeAdsPanel } from "@/features/creatives/components/creative-ads-panel";
+import { FatigueSuggestion } from "@/features/creatives/components/fatigue-suggestion";
+import { creativeCode, suggestedStatus } from "@/domain/creatives/performance";
 import { REJECTION_OUTCOME_LABEL, REJECTION_REASON, type RejectionOutcome, type RejectionReason } from "@/domain/creatives/rejections";
 import { DeliveryUpload } from "@/features/creatives/components/delivery-upload";
 import { AssetPreview } from "@/features/creatives/components/asset-preview";
@@ -23,6 +28,10 @@ export default async function CriativoPage({ params }: { params: Promise<{ id: s
   if (!/^[0-9a-f-]{36}$/.test(id)) notFound();
   const [user, c, rejections] = await Promise.all([getCurrentUser(), getCreative(id), listCreativeRejections(id)]);
   if (!c || !user) notFound();
+  // Desempenho nos anúncios (RF-BIB-03): criativo já na biblioteca e quem tem "Ver performance dos criativos".
+  const perf = user.permissions["creatives.performance.read"] ? await getCreativePerformance(id) : null;
+  const canLink = Boolean(perf && (perf.canLinkAsTraffic || user.permissions["creatives.library.manage"] || user.permissions["creatives.review"]));
+  const canEditLibrary = Boolean(user.permissions["creatives.library.manage"] || user.permissions["creatives.review"]);
   const r = c.request;
   const isRequester = r.requestedBy === user.id;
   const canReview = isRequester || Boolean(user.permissions["creatives.review"]);
@@ -92,6 +101,26 @@ export default async function CriativoPage({ params }: { params: Promise<{ id: s
             </ol>
           )}
         </section>
+        {perf && (
+          <section aria-labelledby="desempenho" className="grid gap-3 rounded-xl border bg-card p-4">
+            <div className="flex flex-wrap items-baseline justify-between gap-2">
+              <h3 id="desempenho" className="text-sm font-semibold">Desempenho nos anúncios</h3>
+              <span className="text-xs text-muted-foreground tabular">Código {creativeCode(perf.ref)}</span>
+            </div>
+            {suggestedStatus(perf.status, perf.totals) && <FatigueSuggestion libraryId={perf.libraryId} angle={r.angle} canEdit={canEditLibrary} />}
+            {perf.totals ? (
+              <>
+                <PerformanceTable t={perf.totals} />
+                {perf.totals.firstDay && (
+                  <p className="text-xs text-muted-foreground tabular">
+                    Soma dos anúncios ligados de {formatDate(perf.totals.firstDay + "T12:00:00Z")} a {formatDate(perf.totals.lastDay! + "T12:00:00Z")}. Hook rate: visualizações de 3 s ÷ impressões; hold rate: ThruPlays ÷ impressões.
+                  </p>
+                )}
+              </>
+            ) : null}
+            <CreativeAdsPanel taskId={c.id} libraryId={perf.libraryId} code={creativeCode(perf.ref)} linked={perf.linked} linkable={perf.linkable} canLink={canLink} />
+          </section>
+        )}
       </div>
 
       <aside className="grid content-start gap-4">
