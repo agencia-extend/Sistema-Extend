@@ -1,5 +1,6 @@
 import {
   BarChart3,
+  BellRing,
   Briefcase,
   CalendarCheck,
   CalendarDays,
@@ -27,6 +28,7 @@ const ICONS: Record<NavIconKey, LucideIcon> = {
   clients: Users,
   creatives: Palette,
   ads: Megaphone,
+  alerts: BellRing,
   reports: TriangleAlert,
   calendar: CalendarDays,
   commercial: Briefcase,

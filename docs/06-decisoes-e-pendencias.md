@@ -411,7 +411,7 @@ Primeira parte da fase 3 (RF-ADS-03/04/05/07/10, RF-ALE-01/02), conferida contra
 - **Reprovação automática:** anúncio "Reprovado" entra no histórico de reprovações (origem "sincronização", sem formato, com o texto da Meta) uma vez por anúncio, e o aviso existente segue para o tráfego.
 - **Ainda não feito nesta parte** (próximas rodadas):
   - limites editáveis por cliente;
-  - painel de alertas com reconhecer e resolver (RF-ALE-03);
+  - ~~painel de alertas com reconhecer e resolver (RF-ALE-03)~~ (feito: ver "Painel de alertas");
   - fadiga de criativo, que precisa da frequência de 7 dias por anúncio;
   - CPL acima da meta, que depende das metas (RF-T2-04);
   - números por criativo na biblioteca (RF-BIB-03);
@@ -450,3 +450,17 @@ RF-T2-04, com os números já sincronizados da Meta.
   - a projeção é linear (realizado ÷ dias completos × dias do mês) e só aparece a partir do 3º dia completo;
   - "No ritmo": a projeção chega a 80% da meta; investimento dentro de ±15% do planejado; custo dentro do limite; ROAS acima do mínimo.
 - **Avisos** (RF-ALE-01, "CPL acima da meta"): nos dias úteis às 10h (`extend-metas-anuncios`), a partir do 6º dia do mês, o tráfego do cliente recebe "Custo por … acima da meta" e "Ritmo abaixo da meta" (projeção abaixo de 80%). No máximo um de cada por semana. Chegam também ao grupo de alertas do WhatsApp.
+
+## Painel de alertas (17/11/2026)
+RF-ALE-03. Cada problema encontrado pelas verificações automáticas vira um alerta com situação, além do aviso no sino.
+- **Onde:** `/trafego/alertas` (menu "Alertas", `ads.read`), com as abas Abertos, Reconhecidos e Resolvidos. A aba Anúncios do cliente mostra os alertas em aberto dele.
+- **Tipos:** saldo acabando, conta com restrição, sem entrega, anúncio reprovado (só em campanha ativa), custo acima da meta, ritmo abaixo da meta e conexão parada ou vencendo.
+- **Situações:**
+  - **aberto:** o tráfego do cliente recebe o aviso, no máximo um por dia, como antes;
+  - **reconhecido:** alguém está cuidando, e os avisos diários desse alerta param;
+  - **resolvido à mão:** com a nota de como foi resolvido; o restante do tráfego do cliente recebe a nota;
+  - **resolvido sozinho:** quando a verificação seguinte não encontra mais o problema (saldo recarregado, conta liberada, mês virou…).
+- **Condição que continua:** se o problema continuar depois de resolvido à mão, a verificação seguinte abre um alerta novo. Anúncio reprovado é exceção: um alerta por anúncio.
+- **Quem pode:** vê quem lê os anúncios do cliente; reconhece e resolve quem cuida do tráfego dele (`ads.manage` no cliente). Alertas de conexão da agência: quem conecta as integrações (`ads.connect`). Regras no banco (`ad_alerts`, `ack_ad_alert`, `resolve_ad_alert`, `raise_ad_alert`, `settle_ad_alerts`) e testes em `36_painel_alertas.test.sql` e `e2e/31-painel-alertas.spec.ts`.
+- **Retenção:** resolvidos saem depois de 180 dias.
+- **Ainda não feito:** limites editáveis por cliente e fadiga de criativo (RF-ALE-01).

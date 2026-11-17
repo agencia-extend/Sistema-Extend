@@ -43,6 +43,44 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"ad_alerts": {
+                  Row: {
+                    "ack_at": string | null,"ack_by": string | null,"body": string | null,"client_id": string | null,"href": string | null,"id": string,"kind": string,"last_seen_at": string,"opened_at": string,"organization_id": string,"resolution": string | null,"resolved_at": string | null,"resolved_by": string | null,"status": string,"subject": string,"times_seen": number,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ack_at"?: string | null,"ack_by"?: string | null,"body"?: string | null,"client_id"?: string | null,"href"?: string | null,"id"?: string,"kind": string,"last_seen_at"?: string,"opened_at"?: string,"organization_id": string,"resolution"?: string | null,"resolved_at"?: string | null,"resolved_by"?: string | null,"status"?: string,"subject": string,"times_seen"?: number,"title": string
+                  }
+                  Update: {
+                    "ack_at"?: string | null,"ack_by"?: string | null,"body"?: string | null,"client_id"?: string | null,"href"?: string | null,"id"?: string,"kind"?: string,"last_seen_at"?: string,"opened_at"?: string,"organization_id"?: string,"resolution"?: string | null,"resolved_at"?: string | null,"resolved_by"?: string | null,"status"?: string,"subject"?: string,"times_seen"?: number,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ad_alerts_ack_by_fkey"
+      columns: ["ack_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_alerts_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_alerts_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_alerts_resolved_by_fkey"
+      columns: ["resolved_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"ad_campaigns": {
                   Row: {
                     "ad_account_id": string,"daily_budget_cents": number | null,"effective_status": string | null,"ends_at": string | null,"external_id": string,"id": string,"last_seen_at": string,"lifetime_budget_cents": number | null,"name": string,"objective": string | null,"starts_at": string | null,"status": string | null
@@ -3148,6 +3186,9 @@ isOneToOne: false
             "accept_proposal":
 { Args: { "p_ip": string,"p_name": string,"p_token": string }; Returns: string
                            },
+"ack_ad_alert":
+{ Args: { "p_id": string }; Returns: undefined
+                           },
 "add_delivery":
 { Args: { "p_assets": Json,"p_note": string,"p_task": string }; Returns: number
                            },
@@ -3328,6 +3369,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "area": string,"can_send": boolean,"client_code": number,"client_id": string,"client_name": string,"feedback": string,"feedback_note": string,"last_sent_on": string,"link": string,"report_id": string,"sent_by": string,"sent_on": string
             }[]
+                           },
+"resolve_ad_alert":
+{ Args: { "p_id": string,"p_note": string }; Returns: undefined
                            },
 "review_creative":
 { Args: { "p_comment": string,"p_decision": string,"p_task": string }; Returns: undefined

@@ -15,6 +15,8 @@ import { SyncButton } from "@/features/ads/components/sync-button";
 import { ReportButton } from "@/features/ads/components/report-button";
 import { GoalDialog } from "@/features/ads/components/goal-dialog";
 import { GoalProgress } from "@/features/ads/components/goal-progress";
+import { getClientOpenAlerts } from "@/features/alerts/queries";
+import { AlertList } from "@/features/alerts/components/alert-list";
 import { Button } from "@/components/ui/button";
 import { Target } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -30,7 +32,7 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const period = parsePeriod(sp.periodo);
   const today = todayKey(new Date());
-  const [client, data, goal] = await Promise.all([getClient(id), getClientAds(id, periodRange(period, today)), getClientGoal(id, today)]);
+  const [client, data, goal, alerts] = await Promise.all([getClient(id), getClientAds(id, periodRange(period, today)), getClientGoal(id, today), getClientOpenAlerts(id, user)]);
   const canGoal = Boolean(user.permissions["optimization.manage"]);
   const month = `${today.slice(0, 7)}-01`;
   const monthName = new Date(`${month}T12:00:00Z`).toLocaleDateString("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" });
@@ -64,6 +66,16 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
           </div>
         )}
       </div>
+
+      {alerts.length > 0 && (
+        <section id="alertas" aria-labelledby="alertas-h" className="grid scroll-mt-20 gap-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <h2 id="alertas-h" className="text-base font-semibold">Alertas em aberto</h2>
+            <Link href="/trafego/alertas" className="text-sm text-primary hover:underline">Ver todos os alertas</Link>
+          </div>
+          <AlertList rows={alerts} showClient={false} />
+        </section>
+      )}
 
       <section id="metas" aria-labelledby="metas-h" className="grid scroll-mt-20 gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
