@@ -13,6 +13,9 @@ import { ConnectionPanel } from "@/features/integrations/components/connection-p
 import { SystemTokenForm } from "@/features/integrations/components/system-token-form";
 import { SetupNotice } from "@/features/integrations/components/setup-notice";
 import { AdAccountsTable } from "@/features/integrations/components/ad-accounts-table";
+import { listSocialProfiles } from "@/features/social/queries";
+import { SocialProfilesTable } from "@/features/social/components/social-profiles-table";
+import { RefreshSocialButton } from "@/features/social/components/refresh-social-button";
 import { GoogleButton } from "@/features/integrations/components/google-button";
 
 export const metadata: Metadata = { title: "Integrações" };
@@ -37,11 +40,13 @@ function Feedback({ q }: { q: Record<string, string | undefined> }) {
   return null;
 }
 
+export const maxDuration = 60;
+
 export default async function IntegracoesPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   await requirePermission("ads.connect");
   const q = await searchParams;
   const setup = integrationSetup();
-  const [connections, accounts, clients] = await Promise.all([listConnections(), listAdAccounts(), listLinkableClients()]);
+  const [connections, accounts, clients, profiles] = await Promise.all([listConnections(), listAdAccounts(), listLinkableClients(), listSocialProfiles()]);
   const meta = connections.find((c) => c.owner === "agency" && c.provider === "meta");
   const google = connections.find((c) => c.owner === "agency" && c.provider === "google");
   const clientConns = connections.filter((c) => c.owner === "client").sort((a, b) => (a.clientName ?? "").localeCompare(b.clientName ?? "", "pt-BR"));
@@ -153,6 +158,27 @@ export default async function IntegracoesPage({ searchParams }: { searchParams: 
             />
           ) : (
             <AdAccountsTable accounts={accounts} clients={clients} />
+          )}
+        </section>
+
+        <section aria-labelledby="paginas" className="grid gap-4">
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div className="grid gap-1">
+              <h2 id="paginas" className="text-base font-semibold">Páginas e Instagram</h2>
+              <p className="text-sm text-muted-foreground">
+                Páginas do Facebook e perfis do Instagram que a conexão da Meta alcança (os que foram autorizados no login). Escolha de qual cliente é cada um: as últimas publicações aparecem na aba Redes sociais do cliente.
+              </p>
+            </div>
+            {meta && <RefreshSocialButton clientId={null} label="Buscar páginas agora" />}
+          </div>
+          {profiles.length === 0 ? (
+            <EmptyState
+              icon={Plug}
+              title="Nenhuma página encontrada ainda"
+              description={meta ? "Clique em \"Buscar páginas agora\". Se nada aparecer, inclua as páginas e os perfis do Instagram dos clientes ao autorizar a Meta (Reconectar)." : "Conecte a Meta acima. As páginas e os perfis autorizados no login aparecem aqui."}
+            />
+          ) : (
+            <SocialProfilesTable profiles={profiles} clients={clients} />
           )}
         </section>
       </PageBody>

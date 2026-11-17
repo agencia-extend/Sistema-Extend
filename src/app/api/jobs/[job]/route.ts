@@ -5,6 +5,7 @@ import { sendPush } from "@/lib/push";
 import { syncMetaAccounts } from "@/lib/ads/meta-sync";
 import { forwardAdAlerts } from "@/lib/whatsapp/alerts";
 import { sendWeeklyReports } from "@/lib/whatsapp/reports";
+import { syncSocial } from "@/lib/social/meta-social";
 
 // Relógio do banco: pg_cron → pg_net → POST /api/jobs/<job> com "Authorization: Bearer <JOBS_TOKEN>".
 export const dynamic = "force-dynamic";
@@ -38,6 +39,8 @@ const JOBS: Record<string, () => Promise<unknown>> = {
   "whatsapp-alerts": forwardAdAlerts,
   // Relatório semanal de anúncios de cada cliente no grupo de relatórios (RF-REL-01).
   "whatsapp-reports": sendWeeklyReports,
+  // Páginas e Instagram dos clientes e as últimas publicações (RF-CON-02).
+  "social-sync": () => syncSocial({ budgetMs: 45_000 }),
 };
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ job: string }> }) {

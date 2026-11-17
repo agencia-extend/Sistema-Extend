@@ -4,7 +4,7 @@ import { env, redirectUri } from "./config";
 
 // Graph API oficial da Meta (somente leitura nesta etapa).
 // Sem configuração do "Login do Facebook para Empresas" (META_LOGIN_CONFIG_ID), pede estas permissões.
-export const META_SCOPES = ["ads_read", "business_management", "pages_show_list", "pages_read_engagement"];
+export const META_SCOPES = ["ads_read", "business_management", "pages_show_list", "pages_read_engagement", "instagram_basic"];
 const version = () => env("META_GRAPH_VERSION") || "v23.0";
 export const graph = (path: string) => `https://graph.facebook.com/${version()}${path}`;
 

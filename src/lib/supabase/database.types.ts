@@ -2437,6 +2437,58 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"social_posts": {
+                  Row: {
+                    "caption": string | null,"comments": number | null,"external_id": string,"image_url": string | null,"likes": number | null,"media_type": string | null,"permalink": string | null,"profile_id": string,"published_at": string,"shares": number | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "caption"?: string | null,"comments"?: number | null,"external_id": string,"image_url"?: string | null,"likes"?: number | null,"media_type"?: string | null,"permalink"?: string | null,"profile_id": string,"published_at": string,"shares"?: number | null
+                  }
+                  Update: {
+                    "caption"?: string | null,"comments"?: number | null,"external_id"?: string,"image_url"?: string | null,"likes"?: number | null,"media_type"?: string | null,"permalink"?: string | null,"profile_id"?: string,"published_at"?: string,"shares"?: number | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "social_posts_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "social_profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"social_profiles": {
+                  Row: {
+                    "client_id": string | null,"connection_id": string | null,"external_id": string,"followers": number | null,"id": string,"last_seen_at": string,"media_count": number | null,"name": string,"organization_id": string,"page_external_id": string | null,"picture_url": string | null,"platform": string,"posts_synced_at": string | null,"sync_error": string | null,"username": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id"?: string | null,"connection_id"?: string | null,"external_id": string,"followers"?: number | null,"id"?: string,"last_seen_at"?: string,"media_count"?: number | null,"name": string,"organization_id": string,"page_external_id"?: string | null,"picture_url"?: string | null,"platform": string,"posts_synced_at"?: string | null,"sync_error"?: string | null,"username"?: string | null
+                  }
+                  Update: {
+                    "client_id"?: string | null,"connection_id"?: string | null,"external_id"?: string,"followers"?: number | null,"id"?: string,"last_seen_at"?: string,"media_count"?: number | null,"name"?: string,"organization_id"?: string,"page_external_id"?: string | null,"picture_url"?: string | null,"platform"?: string,"posts_synced_at"?: string | null,"sync_error"?: string | null,"username"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "social_profiles_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "social_profiles_connection_id_fkey"
+      columns: ["connection_id"]
+isOneToOne: false
+      referencedRelation: "integration_connections"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "social_profiles_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"tags": {
                   Row: {
                     "color": string,"created_at": string,"id": string,"name": string,"organization_id": string
@@ -3285,6 +3337,9 @@ isOneToOne: false
 "can_manage_portal":
 { Args: { "p_client": string }; Returns: boolean
                            },
+"can_refresh_social":
+{ Args: { "p_client": string }; Returns: boolean
+                           },
 "claim_pending_pushes":
 { Args: { "p_limit"?: number }; Returns: {
               "body": string,"href": string,"id": string,"kind": string,"title": string,"user_id": string
@@ -3484,6 +3539,9 @@ isOneToOne: false
                            },
 "save_recording":
 { Args: { "p": Json }; Returns: string
+                           },
+"save_social_profile":
+{ Args: { "p_client": string,"p_id": string }; Returns: undefined
                            },
 "save_whatsapp_group":
 { Args: { "p_alerts": boolean,"p_client": string,"p_id": string,"p_reports": boolean }; Returns: undefined

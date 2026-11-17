@@ -416,7 +416,7 @@ Primeira parte da fase 3 (RF-ADS-03/04/05/07/10, RF-ALE-01/02), conferida contra
   - CPL acima da meta, que depende das metas (RF-T2-04);
   - ~~números por criativo na biblioteca (RF-BIB-03)~~ (feito: ver "Performance por criativo na biblioteca");
   - ~~checklist já preenchido~~ (feito: ver "Checklist diário já preenchido");
-  - páginas e Instagram.
+  - ~~páginas e Instagram~~ (feito: ver "Páginas e Instagram dos clientes").
 
 ## WhatsApp por QR Code com WAHA (17/11/2026)
 Decisão do Henrique: WAHA, para usar os grupos que a Extend já tem. Por enquanto roda no Docker da máquina dele e depois vai para uma VPS da Extend. Todo o resto roda no sistema.
@@ -505,3 +505,15 @@ Fecha o "pré-preenche com os dados da API" do RF-OTI-01.
   - **Entrega:** campanha ativa desde antes de ontem que não gastou ontem; sem campanha ativa, "Não se aplica".
 - A caixa no topo diz de quando são os números e avisa se a última sincronização de alguma conta falhou. Cliente sem conta ligada abre vazio com o aviso.
 - Leitura com o login da pessoa (a RLS filtra as contas). Regras puras em `src/domain/traffic/prefill.ts` (testes Vitest) e tela em `e2e/33-checklist-preenchido.spec.ts`.
+
+## Páginas e Instagram dos clientes (17/11/2026)
+RF-CON-02 ("conectar páginas e Instagram dos clientes via BM da Extend"), sem publicar (RF-CON-03 é a próxima parte).
+- **Descoberta** (`social_profiles`): a sincronização (job `social-sync`, 8h05 e 16h05) lê `/me/accounts` de cada conexão ativa da Meta e grava as páginas e o Instagram ligado a cada uma (nome, @, foto, seguidores, nº de publicações). Conexão do Facebook do cliente: o que ele autorizou já fica com o cliente. Página alcançada pelas duas conexões fica com a da agência.
+- **Ligar ao cliente:** Configurações › Integrações › "Páginas e Instagram" (admin e gerente de tráfego, `ads.connect`), com "Buscar páginas agora". Ao ligar, a página e o @ entram em "Contas e acessos" do cliente (links rápidos), se ainda não estiverem lá.
+- **Aba "Redes sociais" do cliente** (clientes com gerenciamento ou anúncios; quem vê o cliente): perfil, seguidores, publicações e as últimas 9 publicações de cada um (imagem, legenda, data, tipo e link). Há o botão "Atualizar agora".
+- **Nenhum token novo guardado:** o token da página é pedido à Meta na hora com o token da conexão (já cifrado).
+- **Conferido com a conta real da Extend** (as 2 páginas autorizadas no login, Gastrô e Agência Extend, e os Instagram @gastro_praia e @agencia_extend):
+  - Facebook: as publicações vêm (texto, imagem, link e compartilhamentos). Reações e comentários da página pedem uma permissão que o app não tem (erro 10), por isso ficam de fora.
+  - Instagram: nome, seguidores e nº de publicações vêm pela página. A **lista de publicações exige a permissão `instagram_basic`**, que não está na configuração do login do app. Até ela entrar, o perfil mostra o motivo em vermelho ("A conexão da Meta não tem a permissão do Instagram…").
+- **Para o Instagram funcionar (do lado do Henrique):** no app da Meta, incluir `instagram_basic` na configuração do "Login do Facebook para Empresas" (`META_LOGIN_CONFIG_ID`) e reconectar a Meta em Integrações, marcando as páginas e os Instagram dos clientes. Para clientes fora do BM, usar o Facebook do cliente. O `META_SCOPES` (usado sem `config_id`) já pede `instagram_basic`.
+- **Regras no banco:** `save_social_profile`, `can_refresh_social` e RLS de `social_profiles`/`social_posts`. Testes em `39_paginas_instagram.test.sql` e `e2e/34-paginas-instagram.spec.ts`.
