@@ -43,6 +43,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"ad_alert_settings": {
+                  Row: {
+                    "client_id": string | null,"daily_spend_max_cents": number | null,"fatigue_ctr_drop": number,"fatigue_enabled": boolean,"fatigue_frequency": number,"funds_days": number,"funds_min_cents": number | null,"id": string,"no_delivery": boolean,"organization_id": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id"?: string | null,"daily_spend_max_cents"?: number | null,"fatigue_ctr_drop"?: number,"fatigue_enabled"?: boolean,"fatigue_frequency"?: number,"funds_days"?: number,"funds_min_cents"?: number | null,"id"?: string,"no_delivery"?: boolean,"organization_id": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "client_id"?: string | null,"daily_spend_max_cents"?: number | null,"fatigue_ctr_drop"?: number,"fatigue_enabled"?: boolean,"fatigue_frequency"?: number,"funds_days"?: number,"funds_min_cents"?: number | null,"id"?: string,"no_delivery"?: boolean,"organization_id"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ad_alert_settings_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_alert_settings_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ad_alert_settings_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"ad_alerts": {
                   Row: {
                     "ack_at": string | null,"ack_by": string | null,"body": string | null,"client_id": string | null,"href": string | null,"id": string,"kind": string,"last_seen_at": string,"opened_at": string,"organization_id": string,"resolution": string | null,"resolved_at": string | null,"resolved_by": string | null,"status": string,"subject": string,"times_seen": number,"title": string
@@ -265,14 +297,14 @@ isOneToOne: false
                   ]
                 },"ads": {
                   Row: {
-                    "ad_account_id": string,"ad_set_id": string | null,"campaign_id": string | null,"creative_external_id": string | null,"effective_status": string | null,"external_id": string,"id": string,"last_seen_at": string,"name": string,"review_feedback": string | null,"thumbnail_url": string | null
+                    "ad_account_id": string,"ad_set_id": string | null,"campaign_id": string | null,"creative_external_id": string | null,"effective_status": string | null,"external_id": string,"frequency_7d": number | null,"frequency_at": string | null,"id": string,"impressions_7d": number | null,"last_seen_at": string,"name": string,"review_feedback": string | null,"thumbnail_url": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "ad_account_id": string,"ad_set_id"?: string | null,"campaign_id"?: string | null,"creative_external_id"?: string | null,"effective_status"?: string | null,"external_id": string,"id"?: string,"last_seen_at"?: string,"name": string,"review_feedback"?: string | null,"thumbnail_url"?: string | null
+                    "ad_account_id": string,"ad_set_id"?: string | null,"campaign_id"?: string | null,"creative_external_id"?: string | null,"effective_status"?: string | null,"external_id": string,"frequency_7d"?: number | null,"frequency_at"?: string | null,"id"?: string,"impressions_7d"?: number | null,"last_seen_at"?: string,"name": string,"review_feedback"?: string | null,"thumbnail_url"?: string | null
                   }
                   Update: {
-                    "ad_account_id"?: string,"ad_set_id"?: string | null,"campaign_id"?: string | null,"creative_external_id"?: string | null,"effective_status"?: string | null,"external_id"?: string,"id"?: string,"last_seen_at"?: string,"name"?: string,"review_feedback"?: string | null,"thumbnail_url"?: string | null
+                    "ad_account_id"?: string,"ad_set_id"?: string | null,"campaign_id"?: string | null,"creative_external_id"?: string | null,"effective_status"?: string | null,"external_id"?: string,"frequency_7d"?: number | null,"frequency_at"?: string | null,"id"?: string,"impressions_7d"?: number | null,"last_seen_at"?: string,"name"?: string,"review_feedback"?: string | null,"thumbnail_url"?: string | null
                   }
                   Relationships: [
                     {
@@ -3370,6 +3402,9 @@ isOneToOne: false
               "area": string,"can_send": boolean,"client_code": number,"client_id": string,"client_name": string,"feedback": string,"feedback_note": string,"last_sent_on": string,"link": string,"report_id": string,"sent_by": string,"sent_on": string
             }[]
                            },
+"reset_alert_limits":
+{ Args: { "p_client": string }; Returns: undefined
+                           },
 "resolve_ad_alert":
 { Args: { "p_id": string,"p_note": string }; Returns: undefined
                            },
@@ -3381,6 +3416,9 @@ isOneToOne: false
                            },
 "save_ad_account":
 { Args: { "p_client": string,"p_enabled": boolean,"p_id": string }; Returns: undefined
+                           },
+"save_alert_limits":
+{ Args: { "p_client": string,"p_daily_spend_max_cents": number,"p_fatigue_ctr_drop": number,"p_fatigue_enabled": boolean,"p_fatigue_frequency": number,"p_funds_days": number,"p_funds_min_cents": number,"p_no_delivery": boolean }; Returns: undefined
                            },
 "save_client_strategy":
 { Args: { "p_body": string,"p_client": string,"p_publish": boolean }; Returns: string
@@ -3410,6 +3448,9 @@ isOneToOne: false
                            },
 "send_test_notification":
 { Args: { "p_user": string }; Returns: undefined
+                           },
+"set_ad_frequency":
+{ Args: { "p_account": string,"p_rows": Json }; Returns: undefined
                            },
 "set_client_service":
 { Args: { "p_client": string,"p_price_cents"?: number,"p_qty": number,"p_service": string }; Returns: undefined

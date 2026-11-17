@@ -15,8 +15,11 @@ import { SyncButton } from "@/features/ads/components/sync-button";
 import { ReportButton } from "@/features/ads/components/report-button";
 import { GoalDialog } from "@/features/ads/components/goal-dialog";
 import { GoalProgress } from "@/features/ads/components/goal-progress";
-import { getClientOpenAlerts } from "@/features/alerts/queries";
+import { getAlertLimits, getClientOpenAlerts } from "@/features/alerts/queries";
 import { AlertList } from "@/features/alerts/components/alert-list";
+import { LimitsDialog } from "@/features/alerts/components/limits-dialog";
+import { limitsSummary } from "@/domain/ads/alerts";
+import { SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Target } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -32,7 +35,9 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const period = parsePeriod(sp.periodo);
   const today = todayKey(new Date());
-  const [client, data, goal, alerts] = await Promise.all([getClient(id), getClientAds(id, periodRange(period, today)), getClientGoal(id, today), getClientOpenAlerts(id, user)]);
+  const [client, data, goal, alerts, limits] = await Promise.all([
+    getClient(id), getClientAds(id, periodRange(period, today)), getClientGoal(id, today), getClientOpenAlerts(id, user), getAlertLimits(id),
+  ]);
   const canGoal = Boolean(user.permissions["optimization.manage"]);
   const month = `${today.slice(0, 7)}-01`;
   const monthName = new Date(`${month}T12:00:00Z`).toLocaleDateString("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" });
@@ -67,15 +72,22 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
         )}
       </div>
 
-      {alerts.length > 0 && (
-        <section id="alertas" aria-labelledby="alertas-h" className="grid scroll-mt-20 gap-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <h2 id="alertas-h" className="text-base font-semibold">Alertas em aberto</h2>
+      <section id="alertas" aria-labelledby="alertas-h" className="grid scroll-mt-20 gap-3">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h2 id="alertas-h" className="text-base font-semibold">Alertas em aberto</h2>
+          <div className="flex flex-wrap items-center gap-3">
             <Link href="/trafego/alertas" className="text-sm text-primary hover:underline">Ver todos os alertas</Link>
+            {user.permissions["ads.manage"] && (
+              <LimitsDialog clientId={id} clientName={client.name} limits={limits.effective} custom={limits.custom}
+                trigger={<Button size="sm" variant="outline"><SlidersHorizontal aria-hidden="true" /> Limites dos alertas</Button>} />
+            )}
           </div>
-          <AlertList rows={alerts} showClient={false} />
-        </section>
-      )}
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {limits.custom ? "Limites do cliente" : "Padrão da agência"}: {limitsSummary(limits.effective, formatBRL)}.
+        </p>
+        {alerts.length > 0 ? <AlertList rows={alerts} showClient={false} /> : <p className="text-sm text-muted-foreground">Nenhum alerta em aberto para este cliente.</p>}
+      </section>
 
       <section id="metas" aria-labelledby="metas-h" className="grid scroll-mt-20 gap-3">
         <div className="flex flex-wrap items-center justify-between gap-2">

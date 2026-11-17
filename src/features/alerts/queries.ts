@@ -1,5 +1,5 @@
 import "server-only";
-import { tabStatus, type AlertKind, type AlertStatus, type AlertTab } from "@/domain/ads/alerts";
+import { SYSTEM_LIMITS, tabStatus, type AlertKind, type AlertLimits, type AlertStatus, type AlertTab } from "@/domain/ads/alerts";
 import type { CurrentUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
 
@@ -85,4 +85,30 @@ export async function getClientOpenAlerts(clientId: string, user: CurrentUser) {
   const { data, error } = await supabase.from("ad_alerts").select(SELECT).eq("client_id", clientId).neq("status", "resolvido").order("opened_at", { ascending: false }).limit(50);
   if (error) throw error;
   return withActions((data ?? []) as unknown as Raw[], user);
+}
+
+type LimitsRaw = { client_id: string | null; funds_days: number; funds_min_cents: number | null; daily_spend_max_cents: number | null; no_delivery: boolean; fatigue_enabled: boolean; fatigue_frequency: number; fatigue_ctr_drop: number };
+const toLimits = (r: LimitsRaw): AlertLimits => ({
+  fundsDays: r.funds_days,
+  fundsMinCents: r.funds_min_cents === null ? null : Number(r.funds_min_cents),
+  dailySpendMaxCents: r.daily_spend_max_cents === null ? null : Number(r.daily_spend_max_cents),
+  noDelivery: r.no_delivery,
+  fatigueEnabled: r.fatigue_enabled,
+  fatigueFrequency: Number(r.fatigue_frequency),
+  fatigueCtrDrop: r.fatigue_ctr_drop,
+});
+
+/** Limites que valem (do cliente, senão o padrão da agência, senão os do sistema) e o padrão da agência. */
+export async function getAlertLimits(clientId: string | null) {
+  if (clientId && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clientId)) throw new Error("Cliente inválido.");
+  const supabase = await createClient();
+  let q = supabase.from("ad_alert_settings").select("client_id, funds_days, funds_min_cents, daily_spend_max_cents, no_delivery, fatigue_enabled, fatigue_frequency, fatigue_ctr_drop");
+  q = clientId ? q.or(`client_id.is.null,client_id.eq.${clientId}`) : q.is("client_id", null);
+  const { data, error } = await q;
+  if (error) throw error;
+  const rows = (data ?? []) as LimitsRaw[];
+  const agencyRow = rows.find((r) => r.client_id === null);
+  const own = clientId ? rows.find((r) => r.client_id === clientId) : undefined;
+  const agency = agencyRow ? toLimits(agencyRow) : SYSTEM_LIMITS;
+  return { agency, effective: own ? toLimits(own) : agency, custom: Boolean(own) };
 }

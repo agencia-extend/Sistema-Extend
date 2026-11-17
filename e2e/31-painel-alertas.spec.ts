@@ -21,6 +21,8 @@ const clientName = `Ótica Alertas ${stamp}`;
 const people: Record<string, { id: string; email: string; name: string }> = {};
 let clientId = "";
 let accountId = "";
+let orgId = "";
+let agencyBefore: Record<string, unknown> | null = null;
 const saldo = `Saldo acabando: ${clientName}`;
 const entrega = `Anúncios sem entrega: ${clientName}`;
 
@@ -47,7 +49,12 @@ test.beforeAll(async () => {
   await makeUser("Lia", "gestor_trafego");
   await makeUser("Rui", "gestor_trafego");
   await makeUser("Teo", "gestor_trafego");
+  await makeUser("Gal", "gerente_trafego");
   const { data: org } = await admin.from("organizations").select("id").limit(1).single();
+  orgId = org!.id;
+  // O padrão da agência é real: guarda para devolver no fim.
+  const { data: before } = await admin.from("ad_alert_settings").select("*").eq("organization_id", orgId).is("client_id", null).maybeSingle();
+  agencyBefore = before;
   const { data: c, error } = await admin.from("clients").insert({ organization_id: org!.id, name: clientName, status: "ativo" }).select("id").single();
   if (error) throw error;
   clientId = c.id;
@@ -74,6 +81,8 @@ test.beforeAll(async () => {
 
 test.afterAll(async () => {
   if (!configured) return;
+  if (agencyBefore) await admin.from("ad_alert_settings").update(agencyBefore).eq("id", agencyBefore.id as string);
+  else if (orgId) await admin.from("ad_alert_settings").delete().eq("organization_id", orgId).is("client_id", null);
   if (accountId) await admin.from("ad_accounts").delete().eq("id", accountId);
   if (clientId) {
     await admin.from("ad_alerts").delete().eq("client_id", clientId);
@@ -137,4 +146,47 @@ test("3. gestor de fora do cliente não vê os alertas dele", async ({ page }) =
   await expect(page.getByText(clientName)).toHaveCount(0);
   await page.goto("/trafego/alertas?situacao=resolvidos");
   await expect(page.getByText(saldo)).toHaveCount(0);
+});
+
+test("4. limites dos alertas do cliente: definir e voltar ao padrão da agência", async ({ page }) => {
+  await login(page, "Lia");
+  await page.goto("/trafego/alertas");
+  await expect(page.getByText(/^Padrão da agência:/)).toBeVisible();
+  await expect(page.getByRole("button", { name: "Limites padrão" })).toHaveCount(0); // só quem conecta as integrações
+
+  await page.goto(`/clientes/${clientId}/anuncios`);
+  const section = page.getByRole("region", { name: "Alertas em aberto" });
+  await expect(section.getByText(/^Padrão da agência:/)).toBeVisible();
+  await section.getByRole("button", { name: "Limites dos alertas" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByText("Este cliente usa o padrão da agência.", { exact: false })).toBeVisible();
+  await dialog.getByLabel("Avisar com saldo para (dias)").fill("5");
+  await dialog.getByLabel("Gasto do dia acima de (R$)").fill("abc");
+  await dialog.getByRole("button", { name: "Salvar limites" }).click();
+  await expect(dialog.getByText("Valor inválido. Ex.: 300,00")).toBeVisible();
+  await dialog.getByLabel("Gasto do dia acima de (R$)").fill("300,00");
+  await dialog.getByRole("switch", { name: "Avisar campanha ativa sem gasto ontem" }).click();
+  await dialog.getByRole("button", { name: "Salvar limites" }).click();
+  await expect(page.getByText("Limites do cliente salvos. Valem a partir da próxima verificação.")).toBeVisible();
+  await expect(section.getByText(/^Limites do cliente: saldo 5 dias ou menos · gasto do dia acima de R\$\s300,00 · sem aviso de entrega parada/)).toBeVisible();
+
+  await section.getByRole("button", { name: "Limites dos alertas" }).click();
+  await expect(dialog.getByLabel("Gasto do dia acima de (R$)")).toHaveValue("300,00");
+  await dialog.getByRole("button", { name: "Usar o padrão da agência" }).click();
+  await expect(page.getByText("O cliente voltou a usar o padrão da agência.")).toBeVisible();
+  await expect(section.getByText(/^Padrão da agência:/)).toBeVisible();
+});
+
+test("5. gerente de tráfego muda o padrão da agência", async ({ page }) => {
+  await login(page, "Gal");
+  await page.goto("/trafego/alertas");
+  await page.getByRole("button", { name: "Limites padrão" }).click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Frequência em 7 dias a partir de").fill("25");
+  await dialog.getByRole("button", { name: "Salvar limites" }).click();
+  await expect(dialog.getByText("De 1 a 20. Ex.: 3 ou 2,5")).toBeVisible();
+  await dialog.getByLabel("Frequência em 7 dias a partir de").fill("2,5");
+  await dialog.getByRole("button", { name: "Salvar limites" }).click();
+  await expect(page.getByText("Padrão da agência salvo. Vale para os clientes sem limites próprios.")).toBeVisible();
+  await expect(page.getByText(/^Padrão da agência:.*fadiga com frequência 2,5/)).toBeVisible();
 });

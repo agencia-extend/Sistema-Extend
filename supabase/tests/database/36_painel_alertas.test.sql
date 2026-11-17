@@ -53,6 +53,7 @@ select is((select status || ':' || (ack_by = '00000000-0000-4000-bf01-0000000000
 select throws_ok($$select public.ack_ad_alert((select id from public.ad_alerts where client_id = '00000000-0000-4000-bf11-000000000001'))$$,
   'P0001', 'Este alerta já foi reconhecido.', 'não reconhece duas vezes');
 reset role;
+set local request.jwt.claims = '';
 
 select is(private.raise_ad_alert((select organization_id from public.clients where id = '00000000-0000-4000-bf11-000000000001'), '00000000-0000-4000-bf11-000000000001',
   'saldo', '00000000-0000-4000-bf21-000000000001', 'Saldo acabando: PA Ótica', 'x', null), false, 'reconhecido não avisa de novo');
@@ -75,6 +76,7 @@ select throws_ok($$select public.resolve_ad_alert((select id from public.ad_aler
 select lives_ok($$select public.resolve_ad_alert((select id from public.ad_alerts where client_id = '00000000-0000-4000-bf11-000000000001' and status = 'aberto'), 'Cliente recarregou R$ 500 no Pix.')$$,
   'gestor resolve com a nota');
 reset role;
+set local request.jwt.claims = '';
 select is((select resolution from public.ad_alerts where client_id = '00000000-0000-4000-bf11-000000000001' and resolved_by = '00000000-0000-4000-bf01-000000000001'),
   'Cliente recarregou R$ 500 no Pix.', 'fica quem resolveu e como');
 select is((select count(*)::int from public.notifications where user_id = '00000000-0000-4000-bf01-000000000004' and title = 'Alerta resolvido: Saldo acabando: PA Ótica'), 1,

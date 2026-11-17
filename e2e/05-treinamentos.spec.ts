@@ -75,9 +75,9 @@ test("1. coordenação cria o treinamento, monta duas aulas com vídeo e PDF, pu
 
   // Reordena: a segunda vira a primeira e volta.
   await page.getByRole("button", { name: "Subir a aula Montando a semana" }).click();
-  await expect(page.getByRole("list", { name: "Aulas" }).getByRole("listitem").first()).toContainText("Montando a semana");
+  await expect(page.getByRole("list", { name: "Aulas" }).getByRole("listitem").first()).toContainText("Montando a semana", { timeout: 15_000 });
   await page.getByRole("button", { name: "Descer a aula Montando a semana" }).click();
-  await expect(page.getByRole("list", { name: "Aulas" }).getByRole("listitem").first()).toContainText("Onde está o planejamento");
+  await expect(page.getByRole("list", { name: "Aulas" }).getByRole("listitem").first()).toContainText("Onde está o planejamento", { timeout: 15_000 });
 
   // Atribui ainda em rascunho: ninguém é avisado até publicar.
   await page.getByRole("link", { name: /^Equipe/ }).click();

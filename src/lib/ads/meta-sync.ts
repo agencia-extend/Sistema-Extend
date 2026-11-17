@@ -104,6 +104,18 @@ export async function syncMetaAccount(acc: AccountRow, token: string): Promise<S
     rows += ins.length;
   }
 
+  // 4. Frequência dos últimos 7 dias completos por anúncio (fadiga de criativo). A Meta calcula com o alcance único;
+  //    só vêm os anúncios com entrega no período (conferido com a conta real: 0 linhas numa conta parada).
+  const freq = await all<{ ad_id: string; impressions?: string; frequency?: string }>(
+    graph(`/${acc.external_id}/insights?level=ad&date_preset=last_7d&fields=ad_id,impressions,frequency&limit=500&${tk(token)}`),
+    5_000,
+  );
+  const { error: fe } = await db.rpc("set_ad_frequency", {
+    p_account: acc.id,
+    p_rows: freq.filter((f) => f.ad_id && f.frequency).map((f) => ({ ad_id: f.ad_id, frequency: Number(f.frequency), impressions: Number(f.impressions ?? 0) })),
+  });
+  if (fe) throw fe;
+
   await db.from("ad_accounts").update({ synced_at: now, sync_error: null }).eq("id", acc.id);
   return { campaigns: camps.length, adSets: sets.length, ads: ads.length, insightRows: rows };
 }

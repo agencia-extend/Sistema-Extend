@@ -463,4 +463,20 @@ RF-ALE-03. Cada problema encontrado pelas verificações automáticas vira um al
 - **Condição que continua:** se o problema continuar depois de resolvido à mão, a verificação seguinte abre um alerta novo. Anúncio reprovado é exceção: um alerta por anúncio.
 - **Quem pode:** vê quem lê os anúncios do cliente; reconhece e resolve quem cuida do tráfego dele (`ads.manage` no cliente). Alertas de conexão da agência: quem conecta as integrações (`ads.connect`). Regras no banco (`ad_alerts`, `ack_ad_alert`, `resolve_ad_alert`, `raise_ad_alert`, `settle_ad_alerts`) e testes em `36_painel_alertas.test.sql` e `e2e/31-painel-alertas.spec.ts`.
 - **Retenção:** resolvidos saem depois de 180 dias.
-- **Ainda não feito:** limites editáveis por cliente e fadiga de criativo (RF-ALE-01).
+- **Limites, gasto do dia e fadiga:** ver "Limites dos alertas e fadiga de criativo".
+
+## Limites dos alertas e fadiga de criativo (17/11/2026)
+Fecha o RF-ALE-01 ("limites por cliente/conta, com padrão global").
+- **Padrão da agência:** botão "Limites padrão" em `/trafego/alertas`, para quem conecta as integrações (`ads.connect`: admin e gerente de tráfego). Sem nada salvo, valem os do sistema: saldo para 3 dias, fadiga com frequência 3,0 e CTR 25% menor, aviso de entrega parada ligado.
+- **Por cliente:** botão "Limites dos alertas" na aba Anúncios, para quem cuida do tráfego do cliente (`ads.manage` no cliente). Os limites do cliente substituem o padrão inteiro. "Usar o padrão da agência" apaga os limites próprios. A aba e o painel mostram em uma linha os limites que valem.
+- **O que se ajusta:**
+  - saldo para N dias (0 desliga) e/ou abaixo de um valor;
+  - gasto do dia acima de um valor (regra nova, alerta "Gasto do dia", resolve sozinho no dia seguinte);
+  - aviso de campanha ativa sem gasto ontem (liga ou desliga);
+  - fadiga: liga ou desliga, frequência mínima e queda mínima do CTR.
+- **Fadiga de criativo** (alerta "Criativo cansado", um por anúncio ativo):
+  - a sincronização lê da Meta a frequência dos últimos 7 dias completos de cada anúncio (`date_preset=last_7d`, que já vem calculada com o alcance único; somar o alcance diário daria errado). Conferido com as contas reais: a EXTEND - 02 trouxe frequências de 1,66 e 2,19, e a HG BRASIL, parada na semana, nenhuma linha;
+  - avisa quando a frequência chega ao limite **e** o CTR dos últimos 3 dias completos fica pelo menos X% abaixo do CTR dos 7 dias anteriores, com no mínimo 1.000 impressões em cada janela;
+  - resolve sozinho quando a condição deixa de valer (anúncio pausado ou trocado, CTR recuperado).
+- **Regras no banco:** `ad_alert_settings`, `alert_limits`, `save_alert_limits`, `reset_alert_limits` e `set_ad_frequency` (só a sincronização). Testes em `37_limites_alertas.test.sql` e `e2e/31-painel-alertas.spec.ts` (o teste devolve o padrão da agência ao que era).
+- **Ainda não feito:** marcar o criativo como "fadigado" na biblioteca (RF-BIB-02), que depende dos números por criativo na biblioteca (RF-BIB-03).
