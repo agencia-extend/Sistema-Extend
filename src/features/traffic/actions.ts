@@ -8,6 +8,7 @@ import { fail, ok } from "@/domain/shared/result";
 import { createClient } from "@/lib/supabase/server";
 import { budgetSchema, changeSchema, checkSchema, rejectionSchema, utmSchema } from "./schemas";
 import { buildUtmUrl, normalizeBaseUrl, utmValue } from "@/domain/traffic/utm";
+import { getCheckPrefill } from "./prefill";
 
 const MAX_FILE = 10 * 1024 * 1024;
 const page = (clientId: string) => `/clientes/${clientId}/trafego`;
@@ -193,3 +194,9 @@ export const deleteUtmLink = defineAction({ schema: z.object({ id: z.uuid(), cli
   revalidatePath(page(clientId));
   return ok(null, "Link apagado.");
 });
+
+/** Números da sincronização para pré-preencher o checklist diário (RF-OTI-01). Só leitura; a RLS filtra as contas. */
+export const loadCheckPrefill = defineAction(
+  { schema: z.object({ clientId: z.uuid("Cliente inválido.") }), permission: "optimization.manage" },
+  async ({ clientId }) => ok(await getCheckPrefill(clientId)),
+);

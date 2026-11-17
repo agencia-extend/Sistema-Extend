@@ -8,7 +8,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { FormAlert, FormField } from "@/components/app/form-field";
 import { CHECK_ITEMS, CHECK_STATUSES, CHECK_STATUS_LABEL, type CheckKind, type CheckStatus } from "@/domain/traffic";
-import { saveCheck } from "@/features/traffic/actions";
+import { loadCheckPrefill, saveCheck } from "@/features/traffic/actions";
+import type { Hint } from "@/domain/traffic/prefill";
+import { formatDateTime } from "@/domain/shared/dates";
 import type { CheckRow } from "@/features/traffic/queries";
 import { checkSchema } from "@/features/traffic/schemas";
 import { handleResult } from "@/lib/action-feedback";
@@ -40,6 +42,21 @@ export function CheckDialog({ clientId, clientName, kind, periodOn, existing, tr
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [alert, setAlert] = useState<string | null>(null);
   const [pending, run] = useTransition();
+  // Checklist diário: números da sincronização (RF-OTI-01). Preenche só os itens ainda em branco.
+  const [sync, setSync] = useState<{ state: "idle" | "loading" | "ok" | "none" | "error"; hints?: Record<string, Hint>; syncedAt?: string | null; stale?: boolean }>({ state: "idle" });
+  const loadSync = async () => {
+    if (kind !== "diario") return;
+    setSync({ state: "loading" });
+    const res = await loadCheckPrefill({ clientId });
+    if (!res.ok) return setSync({ state: "error" });
+    if (!res.data) return setSync({ state: "none" });
+    const hints = res.data.prefill as Record<string, Hint>;
+    setSync({ state: "ok", hints, syncedAt: res.data.syncedAt, stale: res.data.syncError });
+    setV((cur) => ({
+      ...cur,
+      items: Object.fromEntries(Object.entries(cur.items).map(([k, it]) => [k, !it.status && hints[k] ? { status: hints[k].status, note: hints[k].status === "ok" ? "" : hints[k].note } : it])),
+    }));
+  };
   const setItem = (key: string, patch: Partial<ItemDraft>) => setV((s) => ({ ...s, items: { ...s.items, [key]: { ...s.items[key], ...patch } } }));
 
   const save = () => {
@@ -72,7 +89,7 @@ export function CheckDialog({ clientId, clientName, kind, periodOn, existing, tr
 
   const title = kind === "diario" ? `Checklist do dia ${br(periodOn)}` : `Checklist da semana de ${br(periodOn)}`;
   return (
-    <Dialog open={open} onOpenChange={(o) => { if (pending) return; setOpen(o); if (o) { setV(initial()); setErrors({}); setAlert(null); } }}>
+    <Dialog open={open} onOpenChange={(o) => { if (pending) return; setOpen(o); if (o) { setV(initial()); setErrors({}); setAlert(null); void loadSync(); } }}>
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent className="max-h-[90dvh] overflow-y-auto sm:max-w-2xl">
         <DialogHeader>
@@ -83,6 +100,14 @@ export function CheckDialog({ clientId, clientName, kind, periodOn, existing, tr
         </DialogHeader>
         <div className="grid gap-5">
           <FormAlert>{alert}</FormAlert>
+          {kind === "diario" && sync.state !== "idle" && (
+            <p role="status" className="rounded-lg border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+              {sync.state === "loading" && <><LoaderCircle className="mr-1.5 inline size-4 animate-spin" aria-hidden="true" />Buscando os números da sincronização…</>}
+              {sync.state === "ok" && <>Sugestões com os números da sincronização de {sync.syncedAt ? formatDateTime(sync.syncedAt) : "—"}. Confira no Gerenciador e ajuste antes de salvar.{sync.stale ? " A última sincronização de uma das contas falhou: os números podem estar atrasados." : ""}</>}
+              {sync.state === "none" && "Sem conta da Meta ligada e sincronizada para este cliente: preencha conferindo no Gerenciador."}
+              {sync.state === "error" && "Não deu para buscar os números da sincronização. Preencha conferindo no Gerenciador."}
+            </p>
+          )}
           {defs.map((d, i) => {
             const it = v.items[d.key];
             const statusError = errors[`items.${i}.status`];
@@ -91,6 +116,7 @@ export function CheckDialog({ clientId, clientName, kind, periodOn, existing, tr
               <fieldset key={d.key} className="grid gap-2" aria-describedby={statusError ? `${d.key}-err` : undefined}>
                 <legend className="text-sm font-medium">{d.label}</legend>
                 <p className="-mt-1 text-xs text-muted-foreground">{d.hint}</p>
+                {sync.hints?.[d.key] && <p className="text-xs break-words"><span className="font-medium">Na sincronização:</span> {sync.hints[d.key].note}</p>}
                 <div className="grid grid-cols-3 gap-2">
                   {CHECK_STATUSES.map((s) => (
                     <label key={s} className="relative">

@@ -415,7 +415,7 @@ Primeira parte da fase 3 (RF-ADS-03/04/05/07/10, RF-ALE-01/02), conferida contra
   - fadiga de criativo, que precisa da frequência de 7 dias por anúncio;
   - CPL acima da meta, que depende das metas (RF-T2-04);
   - ~~números por criativo na biblioteca (RF-BIB-03)~~ (feito: ver "Performance por criativo na biblioteca");
-  - checklist já preenchido;
+  - ~~checklist já preenchido~~ (feito: ver "Checklist diário já preenchido");
   - páginas e Instagram.
 
 ## WhatsApp por QR Code com WAHA (17/11/2026)
@@ -495,3 +495,13 @@ Fecha o RF-BIB-03 e a sugestão de "fadigado" do RF-BIB-02.
 - **Fadigado (RF-BIB-02):** com alerta "Criativo cansado" em aberto num anúncio ligado, o criativo em teste ou vencedor mostra "Sugestão: fadigado" e o botão "Marcar como fadigado" para quem edita a biblioteca. "Vencedor" sugerido pelo sistema fica para quando houver regra definida (o RF-ALE-01 só define a fadiga).
 - **Regras no banco:** `link_creative_ad`, `unlink_creative_ad`, `creative_linked_ads`, `creative_linkable_ads`, `creative_performance` e `sync_link_creatives` (só a sincronização). Testes em `38_performance_criativos.test.sql` e `e2e/32-performance-criativos.spec.ts`.
 - **Ainda não feito:** filtro por período e "top criativos do mês" (RF-BIB-04) e os números no relatório de criativos exportado (RF-BIB-05).
+
+## Checklist diário já preenchido (17/11/2026)
+Fecha o "pré-preenche com os dados da API" do RF-OTI-01.
+- Ao abrir o checklist do dia, o sistema busca os números da última sincronização das contas da Meta ligadas ao cliente e sugere a situação e o comentário de cada item. Só preenche os itens ainda em branco: o que a pessoa já marcou ou salvou não muda. Embaixo de cada item fica "Na sincronização: …".
+  - **Saldo e cobrança:** saldo e dias restantes de cada conta pré-paga (gasto médio dos 7 dias completos) e conta com restrição. É problema pelos mesmos limites dos alertas do cliente (dias e/ou valor mínimo).
+  - **Anúncios reprovados:** quantos e quais estão reprovados em campanha ativa.
+  - **Gasto x orçamento:** gasto de ontem contra a soma do orçamento diário das campanhas ativas (em %). Só vira problema acima do "Gasto do dia acima de" do cliente: a Meta pode gastar até 75% a mais num dia, então a diferença sozinha não é problema.
+  - **Entrega:** campanha ativa desde antes de ontem que não gastou ontem; sem campanha ativa, "Não se aplica".
+- A caixa no topo diz de quando são os números e avisa se a última sincronização de alguma conta falhou. Cliente sem conta ligada abre vazio com o aviso.
+- Leitura com o login da pessoa (a RLS filtra as contas). Regras puras em `src/domain/traffic/prefill.ts` (testes Vitest) e tela em `e2e/33-checklist-preenchido.spec.ts`.
