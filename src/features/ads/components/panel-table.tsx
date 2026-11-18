@@ -5,6 +5,7 @@ import { formatBRL } from "@/domain/shared/money";
 import { formatDateTime } from "@/domain/shared/dates";
 import type { AccountPanel } from "@/features/ads/queries";
 import { cn } from "@/lib/utils";
+import { CampaignAdjust } from "./campaign-adjust";
 
 const int = new Intl.NumberFormat("pt-BR");
 const pct = (v: number | null) => (v === null ? "—" : `${(v * 100).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}%`);
@@ -89,6 +90,7 @@ export function PanelTable({ accounts, showClient = true }: { accounts: AccountP
                         <span className="block font-medium break-words">{c.name}</span>
                         <StatusDot status={c.status} />
                         {c.dailyBudgetCents ? <span className="text-xs text-muted-foreground"> · {formatBRL(c.dailyBudgetCents)}/dia</span> : null}
+                        {a.canManage && <div className="mt-1.5"><CampaignAdjust campaign={{ id: c.id, name: c.name, status: c.status, dailyBudgetCents: c.dailyBudgetCents }} /></div>}
                       </th>
                       {cell("Gasto", formatBRL(c.totals.spend_cents))}
                       {cell("Impressões", int.format(c.totals.impressions))}

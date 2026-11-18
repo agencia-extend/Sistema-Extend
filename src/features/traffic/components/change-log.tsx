@@ -29,7 +29,7 @@ export function ChangeLog({ clientId, today, rows, userId, canManage }: { client
                     <p className="text-xs text-muted-foreground">
                       {CHANGE_CATEGORY_LABEL[r.category as ChangeCategory] ?? r.category}
                       {r.platform ? ` · ${PLATFORM_LABEL[r.platform]}` : ""}
-                      {r.source === "sync" ? " · detectada na sincronização" : r.authorName ? ` · ${r.authorName}` : ""}
+                      {r.source === "sync" ? " · detectada na sincronização" : r.source === "sistema" ? ` · feita pelo sistema${r.authorName ? ` por ${r.authorName}` : ""}` : r.authorName ? ` · ${r.authorName}` : ""}
                     </p>
                     <p className="text-sm font-medium break-words">{r.what}</p>
                     <p className="text-sm text-muted-foreground break-words"><span className="sr-only">Por quê: </span>{r.why}</p>

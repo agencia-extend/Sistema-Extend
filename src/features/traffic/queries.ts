@@ -9,7 +9,7 @@ export type ChangeRow = {
   happenedOn: string;
   what: string;
   why: string;
-  source: "manual" | "sync";
+  source: "manual" | "sync" | "sistema";
   createdBy: string | null;
   authorName: string | null;
   createdAt: string;
@@ -49,7 +49,7 @@ export async function listChanges(clientId: string): Promise<ChangeRow[]> {
     happenedOn: r.happened_on,
     what: r.what,
     why: r.why,
-    source: r.source as "manual" | "sync",
+    source: r.source as "manual" | "sync" | "sistema",
     createdBy: r.created_by,
     authorName: one(r.profiles as { full_name: string } | { full_name: string }[] | null)?.full_name ?? null,
     createdAt: r.created_at,
@@ -160,7 +160,7 @@ export type RejectionRow = {
   adName: string | null;
   outcome: string | null;
   lesson: string | null;
-  source: "manual" | "sync";
+  source: "manual" | "sync" | "sistema";
   authorName: string | null;
 };
 
@@ -190,7 +190,7 @@ export async function listRejections(clientId: string, since?: string): Promise<
     adName: r.ad_name,
     outcome: r.outcome,
     lesson: r.lesson,
-    source: r.source as "manual" | "sync",
+    source: r.source as "manual" | "sync" | "sistema",
     authorName: one(r.profiles as { full_name: string } | { full_name: string }[] | null)?.full_name ?? null,
   }));
 }

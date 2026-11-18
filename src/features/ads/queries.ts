@@ -33,6 +33,8 @@ export type AccountPanel = {
   syncError: string | null;
   totals: Totals;
   campaigns: CampaignRow[];
+  /** A pessoa pode ajustar as campanhas desta conta pelo sistema (tráfego do cliente + conexão com ads_management). */
+  canManage: boolean;
 };
 
 const n = (v: unknown) => Number(v ?? 0);
@@ -61,12 +63,15 @@ export async function getTrafficPanel(
   seven.setUTCDate(seven.getUTCDate() - 7);
   const from7 = seven.toISOString().slice(0, 10);
 
-  const [{ data: camps }, { data: ins }, { data: acc7 }] = await Promise.all([
+  const [{ data: camps }, { data: ins }, { data: acc7 }, { data: manageable }] = await Promise.all([
     supabase.from("ad_campaigns").select("id, ad_account_id, external_id, name, objective, effective_status, daily_budget_cents").in("ad_account_id", ids),
     supabase.from("ad_insights_daily").select("*").in("ad_account_id", ids).in("level", ["account", "campaign"]).gte("date", range.start).lte("date", range.end).limit(20000),
     // Gasto dos 7 dias completos antes de hoje, para a previsão do saldo.
     supabase.from("ad_insights_daily").select("ad_account_id, date, spend_cents").in("ad_account_id", ids).eq("level", "account").gte("date", from7).lt("date", today),
+    // Envio automático (sem pessoa) não ajusta nada.
+    server ? Promise.resolve({ data: [] as string[] }) : supabase.rpc("ad_accounts_manageable", { p_ids: ids }),
   ]);
+  const canManage = new Set((manageable ?? []) as string[]);
 
   return accounts
     .map((a) => {
@@ -93,6 +98,7 @@ export async function getTrafficPanel(
         syncedAt: a.synced_at, syncError: a.sync_error,
         totals: sumDays(accRows.filter((r) => r.level === "account") as never),
         campaigns,
+        canManage: canManage.has(a.id),
       };
     })
     .sort((x, y) => (x.clientName ?? "").localeCompare(y.clientName ?? "", "pt-BR") || x.name.localeCompare(y.name, "pt-BR"));
@@ -100,6 +106,7 @@ export async function getTrafficPanel(
 
 export type AdRow = {
   id: string;
+  accountId: string;
   name: string;
   status: string | null;
   thumbnailUrl: string | null;
@@ -128,7 +135,7 @@ export async function getClientAds(clientId: string, range: { start: string; end
       const totals = sumDays((ins ?? []).filter((r) => r.ad_account_id === a.ad_account_id && r.object_external_id === a.external_id) as never);
       const kind = resultKind(camp?.objective, totals);
       return {
-        id: a.id, name: a.name, status: a.effective_status, thumbnailUrl: a.thumbnail_url, reviewFeedback: a.review_feedback,
+        id: a.id, accountId: a.ad_account_id, name: a.name, status: a.effective_status, thumbnailUrl: a.thumbnail_url, reviewFeedback: a.review_feedback,
         campaignName: camp?.name ?? null, objective: camp?.objective ?? null, totals, kind, kpis: kpis(totals, kind),
       };
     })

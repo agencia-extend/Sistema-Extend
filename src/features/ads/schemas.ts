@@ -50,3 +50,30 @@ export const goalSchema = z
 export type GoalInput = z.input<typeof goalSchema>;
 
 export const goalIdSchema = z.object({ id: z.uuid(), clientId: z.uuid() });
+
+// Ajustes das campanhas da Meta pelo sistema.
+const level = z.enum(["campaign", "adset", "ad"], "Nível inválido.");
+const why = z.string().trim().max(1000, "Até 1000 caracteres.").optional();
+
+export const adStatusSchema = z.object({ level, id: z.uuid("Item inválido."), active: z.boolean(), why });
+
+export const adBudgetSchema = z.object({
+  level: z.enum(["campaign", "adset"], "Nível inválido."),
+  id: z.uuid("Item inválido."),
+  dailyBudget: z.union([z.number(), z.string()]).transform((v, ctx) => {
+    const cents = typeof v === "number" ? Math.round(v) : parseBRL(v);
+    if (cents === null || !Number.isFinite(cents) || cents < 100 || cents > 100_000_000) {
+      ctx.addIssue({ code: "custom", message: "Informe o orçamento diário. Ex.: 50,00" });
+      return z.NEVER;
+    }
+    return cents;
+  }),
+  why,
+});
+export type AdBudgetInput = z.input<typeof adBudgetSchema>;
+
+export const adRenameSchema = z.object({ level, id: z.uuid("Item inválido."), name: z.string().trim().min(3, "Pelo menos 3 caracteres.").max(400, "Até 400 caracteres.") });
+
+export const adDuplicateSchema = z.object({ level: z.enum(["campaign", "adset"], "Nível inválido."), id: z.uuid("Item inválido."), why });
+
+export const campaignIdSchema = z.object({ campaignId: z.uuid("Campanha inválida.") });

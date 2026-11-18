@@ -517,3 +517,19 @@ RF-CON-02 ("conectar páginas e Instagram dos clientes via BM da Extend"), sem p
   - Instagram: nome, seguidores e nº de publicações vêm pela página. A **lista de publicações exige a permissão `instagram_basic`**, que não está na configuração do login do app. Até ela entrar, o perfil mostra o motivo em vermelho ("A conexão da Meta não tem a permissão do Instagram…").
 - **Para o Instagram funcionar (do lado do Henrique):** no app da Meta, incluir `instagram_basic` na configuração do "Login do Facebook para Empresas" (`META_LOGIN_CONFIG_ID`) e reconectar a Meta em Integrações, marcando as páginas e os Instagram dos clientes. Para clientes fora do BM, usar o Facebook do cliente. O `META_SCOPES` (usado sem `config_id`) já pede `instagram_basic`.
 - **Regras no banco:** `save_social_profile`, `can_refresh_social` e RLS de `social_profiles`/`social_posts`. Testes em `39_paginas_instagram.test.sql` e `e2e/34-paginas-instagram.spec.ts`.
+
+## Pedido do Henrique de 17/11/2026: tráfego Meta + Google, publicações e atendimento
+Decisões dele: atendimento e funis **da própria Extend** (caixa de entrada do WhatsApp da Extend ligada ao Comercial); gestão de campanhas só com **ajustes do dia a dia** (sem criar campanha pelo sistema); ordem: 1) tráfego Meta + Google, 2) programar publicações (Feed, carrossel, Reels, Stories, vídeo), 3) atendimento e funis.
+- **Depende do Henrique:** chaves do Google Cloud da Extend (`GOOGLE_CLIENT_ID`/`GOOGLE_CLIENT_SECRET`, passo a passo entregue; a Google Ads API já está ativada no projeto "Agencia Extend") e as permissões `ads_management`, `pages_manage_posts`, `instagram_basic` e `instagram_content_publish` na configuração do login do app da Meta, com reconexão. Para clientes de fora conectarem o Facebook, o app precisa passar pela análise da Meta.
+
+## Ajustes das campanhas da Meta pelo sistema (17/11/2026)
+- **O quê:** botão "Ajustar" em cada campanha (painel do tráfego e aba Anúncios do cliente), com um diálogo:
+  - pausar ou ativar;
+  - orçamento diário da campanha ou, se o orçamento for dos conjuntos, de cada conjunto;
+  - renomear;
+  - duplicar (com conjuntos e anúncios; a cópia nasce pausada).
+  Na aba Anúncios, cada anúncio tem "Pausar" ou "Ativar". Há um campo de motivo opcional.
+- **Quem pode:** o tráfego do cliente (`ads.manage` no cliente), e só em contas ligadas cuja conexão está ativa e tem `ads_management` (`ad_accounts_manageable`). Sem a permissão, o botão não aparece.
+- **Na Meta:** POST na Graph API com `locale=pt_BR`, para a Meta explicar o motivo em português (ex.: orçamento abaixo do mínimo). Se a Meta recusar, nada muda no sistema e o motivo aparece no diálogo.
+- **Histórico:** todo ajuste aceito entra no registro de alterações do cliente como "feita pelo sistema", com quem fez e o motivo (`record_ad_change`; `change_logs.source = 'sistema'`, que só essa função consegue gravar).
+- **Testado:** `40_gestao_campanhas.test.sql`, Vitest dos textos e erros, e `e2e/35-gestao-campanhas.spec.ts`. O E2E usa uma conexão de teste com token inválido: a Meta recusa de verdade e a tela mostra o motivo. **A alteração aceita pela Meta só pode ser conferida quando a conexão real tiver `ads_management`.**

@@ -3305,6 +3305,9 @@ isOneToOne: false
 "ack_ad_alert":
 { Args: { "p_id": string }; Returns: undefined
                            },
+"ad_accounts_manageable":
+{ Args: { "p_ids": (string)[] }; Returns: string[]
+                           },
 "add_delivery":
 { Args: { "p_assets": Json,"p_note": string,"p_task": string }; Returns: number
                            },
@@ -3498,6 +3501,9 @@ isOneToOne: false
                            },
 "rate_limit_reset":
 { Args: { "p_bucket": string }; Returns: undefined
+                           },
+"record_ad_change":
+{ Args: { "p_account": string,"p_category": string,"p_what": string,"p_why": string }; Returns: string
                            },
 "refuse_proposal":
 { Args: { "p_id": string,"p_reason": string }; Returns: undefined

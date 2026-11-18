@@ -23,6 +23,7 @@ import { SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Target } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { AdStatusToggle } from "@/features/ads/components/campaign-adjust";
 
 export const metadata: Metadata = { title: "Anúncios do cliente" };
 export const maxDuration = 60;
@@ -39,6 +40,7 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
     getClient(id), getClientAds(id, periodRange(period, today)), getClientGoal(id, today), getClientOpenAlerts(id, user), getAlertLimits(id),
   ]);
   const canGoal = Boolean(user.permissions["optimization.manage"]);
+  const manageable = new Set(data.accounts.filter((a) => a.canManage).map((a) => a.id));
   const month = `${today.slice(0, 7)}-01`;
   const monthName = new Date(`${month}T12:00:00Z`).toLocaleDateString("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" });
   if (!client) notFound();
@@ -133,6 +135,7 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
                       {a.kpis.costPerResultCents !== null && a.kind !== "impressions" ? ` · ${formatBRL(a.kpis.costPerResultCents)} cada` : ""}
                     </p>
                     {a.reviewFeedback && <p className="text-xs break-words text-danger">{a.reviewFeedback}</p>}
+                    {manageable.has(a.accountId) && (a.status === "ACTIVE" || a.status === "PAUSED") && <AdStatusToggle id={a.id} name={a.name} status={a.status} />}
                   </div>
                 </li>
               );
