@@ -11,11 +11,14 @@ import { createClient } from "@supabase/supabase-js";
  * 2. a gestora abre "Relatório" no cliente: prévia com os números reais da semana passada no modelo padrão; escolhe o
  *    modelo novo (vale para o cliente) e a prévia muda; baixa o PDF; envia para o grupo de relatórios (servidor de teste
  *    no formato do WAHA, só local);
- * 3. a gestora não cria nem edita modelos; quem não vê o cliente ou não entrou não baixa o PDF.
+ * 3. a gestora não cria nem edita modelos; quem não vê o cliente ou não entrou não baixa o PDF;
+ * 4. a gestora agenda o envio diário (RF-REL-01); o job de hora em hora manda texto e PDF uma vez só; os PDFs
+ *    enviados ficam na aba Relatórios do cliente para baixar (RF-REL-06), e quem não vê os anúncios não baixa.
  */
 const url = process.env.NEXT_PUBLIC_SUPABASE_URL!;
 const secret = process.env.SUPABASE_SECRET_KEY!;
 const encKey = process.env.TOKEN_ENCRYPTION_KEY ?? "";
+const jobsToken = process.env.JOBS_TOKEN ?? "";
 const base = process.env.E2E_BASE_URL ?? "http://localhost:3000";
 const configured = Boolean(url && secret);
 const local = Boolean(encKey && /localhost|127\.0\.0\.1/.test(base));
@@ -30,6 +33,7 @@ const clientName = `Pizzaria Números ${stamp}`;
 const templateName = `Semanal curto ${stamp}`;
 const people: Record<string, { id: string; email: string }> = {};
 const texts: string[] = [];
+const files: { url: string; filename: string }[] = [];
 let orgId = "";
 let clientId = "";
 let accountId = "";
@@ -74,6 +78,7 @@ test.beforeAll(async () => {
   if (!configured) return;
   await makeUser("Ger", "gerente_trafego");
   await makeUser("Ana", "gestor_trafego");
+  await makeUser("Edi", "editor_video");
   const { data: org } = await admin.from("organizations").select("id").order("created_at").limit(1).single();
   orgId = org!.id;
   const { data: c, error } = await admin.from("clients").insert({ organization_id: orgId, name: clientName, status: "ativo" }).select("id").single();
@@ -99,6 +104,12 @@ test.beforeAll(async () => {
     ad_account_id: accountId, level, object_external_id: level === "account" ? "acc" : level === "campaign" ? campExt : `a${stamp}`, date: plus(mon, n),
     spend_cents: 15000, impressions: 5000, clicks: 120, link_clicks: 100, leads: 6,
   })));
+  // Ontem: R$ 80,00 e 4 leads (o relatório diário).
+  const today = new Date().toLocaleDateString("en-CA", { timeZone: "America/Sao_Paulo" });
+  const yesterday = plus(new Date(`${today}T12:00:00Z`), -1);
+  for (const level of ["account", "campaign", "ad"] as const) {
+    rows.push({ ad_account_id: accountId, level, object_external_id: level === "account" ? "acc" : level === "campaign" ? campExt : `a${stamp}`, date: yesterday, spend_cents: 8000, impressions: 2000, clicks: 50, link_clicks: 40, leads: 4 });
+  }
   const { error: ie } = await admin.from("ad_insights_daily").insert(rows);
   if (ie) throw ie;
 
@@ -115,6 +126,12 @@ test.beforeAll(async () => {
         req.on("end", () => { texts.push((JSON.parse(raw) as { text: string }).text); send(201, { id: { _serialized: `true_g_${stamp}` } }); });
         return;
       }
+      if (req.method === "POST" && req.url === "/api/sendFile") {
+        let raw = "";
+        req.on("data", (x) => (raw += x));
+        req.on("end", () => { files.push((JSON.parse(raw) as { file: { url: string; filename: string } }).file); send(201, { id: { _serialized: `true_f_${stamp}` } }); });
+        return;
+      }
       send(404, { error: "não existe" });
     });
     await new Promise<void>((ok) => stub!.listen(0, "127.0.0.1", ok));
@@ -129,6 +146,11 @@ test.beforeAll(async () => {
 
 test.afterAll(async () => {
   if (!configured) return;
+  if (clientId) {
+    const { data: stored } = await admin.storage.from("relatorios").list(`${orgId}/${clientId}`);
+    if (stored?.length) await admin.storage.from("relatorios").remove(stored.map((x) => `${orgId}/${clientId}/${x.name}`));
+    await admin.from("whatsapp_outbox").delete().like("dedupe_key", `relatorio:%${clientId}%`);
+  }
   if (connId) await admin.from("whatsapp_connections").delete().eq("id", connId);
   stub?.close();
   if (accountId) await admin.from("ad_accounts").delete().eq("id", accountId);
@@ -194,8 +216,12 @@ test("2. gestora vê a prévia real, escolhe o modelo do cliente, baixa o PDF e 
 
   if (connId) {
     await dialog.getByRole("button", { name: "Enviar no WhatsApp" }).click();
-    await expect(page.getByText("Relatório enviado para o grupo de relatórios do WhatsApp.")).toBeVisible();
+    await expect(page.getByText("Relatório e PDF enviados para o grupo de relatórios. O PDF ficou na aba Relatórios do cliente.")).toBeVisible();
     expect(texts.at(-1)).toContain("Investido R$ 300,00 · CPL R$ 25,00");
+    // O WAHA baixa o PDF pelo link assinado e manda como documento.
+    expect(files.at(-1)?.filename).toMatch(/^relatorio-anuncios-pizzaria-numeros-\d+-.+\.pdf$/);
+    const pdf = await fetch(files.at(-1)!.url);
+    expect(Buffer.from(await pdf.arrayBuffer()).subarray(0, 5).toString()).toBe("%PDF-");
   }
 });
 
@@ -214,4 +240,62 @@ test("3. gestora não cria nem edita modelos; quem não vê o cliente e quem nã
   await page.context().clearCookies();
   const anon = await page.request.get(`/clientes/${clientId}/anuncios/relatorio?periodo=semana`, { maxRedirects: 0 });
   expect([302, 307, 401]).toContain(anon.status());
+});
+
+test("4. agenda diária: o job manda texto e PDF uma vez; os PDFs ficam na aba Relatórios", async ({ page }) => {
+  await login(page, "Ana");
+  await page.goto(`/clientes/${clientId}/anuncios`);
+  await page.getByRole("button", { name: "Relatório", exact: true }).click();
+  const dialog = page.getByRole("dialog", { name: "Relatório de anúncios" });
+  const box = dialog.getByRole("group", { name: "Envio automático no grupo de relatórios" });
+  await expect(box).toContainText("Toda segunda, com a semana passada, às 9h.");
+  await box.getByLabel("Frequência").click();
+  await page.getByRole("option", { name: "Todo mês (mês passado)" }).click();
+  await box.getByLabel("Dia do mês").click();
+  await page.getByRole("option", { name: "Dia 5", exact: true }).click();
+  await expect(box).toContainText("Todo dia 5, com o mês passado, às 9h.");
+  await box.getByLabel("Frequência").click();
+  await page.getByRole("option", { name: "Todo dia (dia anterior)" }).click();
+  await expect(box.getByLabel("Dia do mês")).toHaveCount(0);
+  await box.getByLabel("Horário").click();
+  await page.getByRole("option", { name: "6h", exact: true }).click();
+  await box.getByRole("button", { name: "Salvar envio" }).click();
+  await expect(page.getByText("Envio automático salvo.")).toBeVisible();
+  await expect(box.getByRole("button", { name: "Salvar envio" })).toBeDisabled();
+  const { data: sch } = await admin.from("client_report_settings").select("frequency, month_day, send_hour, report_templates(name)").eq("client_id", clientId).single();
+  expect(sch).toMatchObject({ frequency: "diario", month_day: 5, send_hour: 6, report_templates: { name: templateName } });
+  await page.keyboard.press("Escape");
+
+  // O job de hora em hora (só local, com o servidor de teste e sem outros clientes que receberiam agora).
+  const hour = Number(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo", hour: "numeric", hourCycle: "h23" }));
+  const { data: others } = await admin.from("ad_accounts").select("client_id, clients!inner(status, deleted_at)").eq("is_enabled", true).neq("client_id", clientId).eq("clients.status", "ativo").is("clients.deleted_at", null);
+  if (connId && jobsToken && hour >= 6 && !others?.length) {
+    const call = () => page.request.post("/api/jobs/whatsapp-reports", { headers: { authorization: `Bearer ${jobsToken}` } });
+    const first = await (await call()).json();
+    expect(first).toMatchObject({ ok: true, result: { due: 1, sent: 1, errors: [] } });
+    expect(texts.at(-1)).toContain("Investido R$ 80,00 · CPL R$ 20,00");
+    const again = await (await call()).json();
+    expect(again).toMatchObject({ ok: true, result: { due: 1, sent: 0 } });
+    expect(texts.filter((t) => t.includes("Investido R$ 80,00")).length).toBe(1);
+    const { data: daily } = await admin.from("ads_report_files").select("frequency, sent_by").eq("client_id", clientId).eq("frequency", "diario").single();
+    expect(daily).toMatchObject({ frequency: "diario", sent_by: null });
+  }
+
+  await page.goto(`/clientes/${clientId}/relatorios`);
+  const section = page.getByRole("region", { name: "PDFs dos relatórios de anúncios" });
+  if (connId) {
+    await expect(section.getByRole("row").filter({ hasText: "Semanal" })).toHaveCount(1);
+    const link = section.getByRole("link", { name: /^Baixar o PDF do relatório de / }).first();
+    const [download] = await Promise.all([page.waitForEvent("download"), link.click()]);
+    expect(readFileSync((await download.path())!).subarray(0, 5).toString()).toBe("%PDF-");
+    expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+    const { data: stored } = await admin.from("ads_report_files").select("id").eq("client_id", clientId).limit(1).single();
+    // A gerente configura os relatórios de todos os clientes e baixa; quem não vê anúncios, não.
+    await login(page, "Ger");
+    expect((await page.request.get(`/clientes/${clientId}/relatorios/pdf/${stored!.id}`)).status()).toBe(200);
+    await login(page, "Edi");
+    expect((await page.request.get(`/clientes/${clientId}/relatorios/pdf/${stored!.id}`)).status()).toBe(404);
+  } else {
+    await expect(section).toContainText("Nenhum relatório de anúncios enviado ainda.");
+  }
 });

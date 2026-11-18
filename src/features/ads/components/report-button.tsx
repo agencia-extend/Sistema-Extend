@@ -7,6 +7,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { PERIOD_LABEL, type Period } from "@/domain/ads";
+import type { ReportSchedule } from "@/domain/ads/report";
+import { ReportScheduleForm } from "./report-schedule";
 import { sendReportNow } from "@/features/ads/actions";
 import { previewClientReport, setClientReportTemplate } from "@/features/ads/report-actions";
 import { handleResult } from "@/lib/action-feedback";
@@ -21,8 +23,9 @@ const br = (d: string) => d.split("-").reverse().join("/");
  * Relatório do cliente (RF-REL-02/03/05): escolhe o período e o modelo, vê a prévia com os números reais,
  * baixa o PDF ou envia para o grupo de relatórios do WhatsApp.
  */
-export function ReportButton({ clientId, templates, templateId, canChoose, canSend }: {
+export function ReportButton({ clientId, templates, templateId, schedule, canChoose, canSend }: {
   clientId: string;
+  schedule: ReportSchedule;
   templates: { id: string; name: string; isDefault: boolean }[];
   templateId: string | null;
   canChoose: boolean;
@@ -90,9 +93,10 @@ export function ReportButton({ clientId, templates, templateId, canChoose, canSe
                 {templates.filter((t) => !t.isDefault).map((t) => <SelectItem key={t.id} value={t.id}>{t.name}</SelectItem>)}
               </SelectContent>
             </Select>
-            {canChoose && <p className="text-xs text-muted-foreground">Vale também para o envio automático de segunda.</p>}
+            {canChoose && <p className="text-xs text-muted-foreground">Vale também para o envio automático.</p>}
           </div>
         </div>
+        <ReportScheduleForm clientId={clientId} schedule={schedule} canEdit={canChoose} />
         <section aria-labelledby="rel-previa" aria-busy={preview.loading} className="grid gap-2">
           <h3 id="rel-previa" className="text-sm font-medium">
             Prévia{preview.range ? ` · ${br(preview.range.start)} a ${br(preview.range.end)}` : ""}

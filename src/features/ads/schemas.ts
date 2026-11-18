@@ -93,4 +93,10 @@ export const reportTemplateSchema = z
   });
 export const reportTemplateIdSchema = z.object({ id: z.uuid() });
 export const clientTemplateSchema = z.object({ clientId: z.uuid("Cliente inválido."), templateId: z.uuid().nullable() });
+export const clientScheduleSchema = z.object({
+  clientId: z.uuid("Cliente inválido."),
+  frequency: z.enum(["desligado", "diario", "semanal", "mensal"], "Escolha a frequência do envio."),
+  monthDay: z.number().int().min(1, "O dia do mês vai de 1 a 28.").max(28, "O dia do mês vai de 1 a 28."),
+  hour: z.number().int().min(6, "O horário vai das 6h às 22h.").max(22, "O horário vai das 6h às 22h."),
+});
 export const reportPreviewSchema = z.object({ clientId: z.uuid("Cliente inválido."), period: reportNowSchema.shape.period, templateId: z.uuid().nullable().optional() });

@@ -8,7 +8,7 @@ import { fail, ok } from "@/domain/shared/result";
 import { defineAction, must } from "@/lib/actions";
 import { createClient } from "@/lib/supabase/server";
 import { clientReportData } from "@/lib/whatsapp/reports";
-import { clientTemplateSchema, reportPreviewSchema, reportTemplateIdSchema, reportTemplateSchema } from "./schemas";
+import { clientScheduleSchema, clientTemplateSchema, reportPreviewSchema, reportTemplateIdSchema, reportTemplateSchema } from "./schemas";
 
 // Modelos de relatório (RF-REL-02) e prévia com os números reais (RF-REL-03). O banco confere quem pode o quê.
 
@@ -32,6 +32,13 @@ export const setClientReportTemplate = defineAction({ schema: clientTemplateSche
   revalidatePath(`/clientes/${clientId}/anuncios`);
   revalidatePath("/configuracoes/relatorios");
   return ok(null, templateId ? "Modelo do cliente salvo." : "O cliente volta a usar o modelo padrão.");
+});
+
+export const setClientReportSchedule = defineAction({ schema: clientScheduleSchema, permission: "reports.manage" }, async ({ clientId, frequency, monthDay, hour }) => {
+  const supabase = await createClient();
+  must(await supabase.rpc("set_client_report_schedule", { p_client: clientId, p_frequency: frequency, p_month_day: monthDay, p_hour: hour }));
+  revalidatePath(`/clientes/${clientId}/anuncios`);
+  return ok(null, frequency === "desligado" ? "Envio automático desligado para este cliente." : "Envio automático salvo.");
 });
 
 /** Texto do relatório do cliente no período, no modelo escolhido (ou no dele), com os números que a pessoa vê. */

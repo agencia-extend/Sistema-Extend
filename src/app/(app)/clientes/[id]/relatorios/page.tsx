@@ -8,6 +8,8 @@ import { weekStart } from "@/domain/traffic";
 import { REPORT_AREA_LABEL, reportAreas } from "@/domain/reports";
 import { listReports } from "@/features/reports/queries";
 import { AreaReports } from "@/features/reports/components/client-reports";
+import { listReportFiles } from "@/features/ads/report-queries";
+import { ReportFiles } from "@/features/ads/components/report-files";
 
 export const metadata: Metadata = { title: "Relatórios do cliente" };
 
@@ -15,7 +17,8 @@ export const metadata: Metadata = { title: "Relatórios do cliente" };
 export default async function ClientReportsPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requirePermission("clients.read");
   const { id } = await params;
-  const [client, rows] = await Promise.all([getClient(id), listReports(id)]);
+  const seesAds = Boolean(user.permissions["ads.read"] || user.permissions["reports.manage"]);
+  const [client, rows, files] = await Promise.all([getClient(id), listReports(id), seesAds ? listReportFiles(id) : Promise.resolve([])]);
   if (!client) notFound();
   const tabs = currentServices(client).flatMap((s) => (Array.isArray(s.service_catalog) ? s.service_catalog : s.service_catalog ? [s.service_catalog] : []).flatMap((c) => c.tabs));
   const areas = reportAreas(tabs);
@@ -44,6 +47,11 @@ export default async function ClientReportsPage({ params }: { params: Promise<{ 
           />
         </Section>
       ))}
+      {seesAds && areas.includes("trafego") && (
+        <Section title="PDFs dos relatórios de anúncios">
+          <ReportFiles clientId={id} files={files} />
+        </Section>
+      )}
     </div>
   );
 }

@@ -50,10 +50,12 @@ export const sendReportNow = defineAction({ schema: reportNowSchema, permission:
   if (!client) return fail("not_found", "Cliente não encontrado.");
   const today = todayKey(new Date());
   const range = period === "semana" ? lastWeek(today) : periodRange(period, today);
-  const r = await sendClientReport(user.organizationId, client, range, { createdBy: user.id });
+  const r = await sendClientReport(user.organizationId, client, range, { createdBy: user.id, frequency: period === "semana" ? "semanal" : "avulso" });
   if (r.error) return fail("business_rule", r.error);
   if (!r.sent) return fail("business_rule", "Sem gasto no período: não há o que relatar.");
-  return ok(null, "Relatório enviado para o grupo de relatórios do WhatsApp.");
+  revalidatePath(`/clientes/${clientId}/relatorios`);
+  if (r.pdfError) return ok(null, r.pdfError);
+  return ok(null, "Relatório e PDF enviados para o grupo de relatórios. O PDF ficou na aba Relatórios do cliente.");
 });
 
 /** Meta do mês do cliente (uma por mês; salvar de novo substitui). A RLS confere quem otimiza o cliente. */

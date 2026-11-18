@@ -327,6 +327,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"ads_report_files": {
+                  Row: {
+                    "client_id": string,"frequency": string,"id": string,"organization_id": string,"period_end": string,"period_start": string,"sent_at": string,"sent_by": string | null,"size_bytes": number,"storage_path": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"frequency": string,"id"?: string,"organization_id": string,"period_end": string,"period_start": string,"sent_at"?: string,"sent_by"?: string | null,"size_bytes": number,"storage_path": string
+                  }
+                  Update: {
+                    "client_id"?: string,"frequency"?: string,"id"?: string,"organization_id"?: string,"period_end"?: string,"period_start"?: string,"sent_at"?: string,"sent_by"?: string | null,"size_bytes"?: number,"storage_path"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "ads_report_files_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ads_report_files_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "ads_report_files_sent_by_fkey"
+      columns: ["sent_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"approval_links": {
                   Row: {
                     "comment": string | null,"created_at": string,"created_by": string | null,"decided_at": string | null,"decision": string | null,"delivery_id": string | null,"expires_at": string,"id": string,"reviewer_ip": string | null,"reviewer_name": string | null,"revoked_at": string | null,"task_id": string,"token_hash": string
@@ -973,14 +1005,14 @@ isOneToOne: false
                   ]
                 },"client_report_settings": {
                   Row: {
-                    "client_id": string,"template_id": string | null,"updated_at": string,"updated_by": string | null
+                    "client_id": string,"frequency": string,"month_day": number,"send_hour": number,"template_id": string | null,"updated_at": string,"updated_by": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "client_id": string,"template_id"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                    "client_id": string,"frequency"?: string,"month_day"?: number,"send_hour"?: number,"template_id"?: string | null,"updated_at"?: string,"updated_by"?: string | null
                   }
                   Update: {
-                    "client_id"?: string,"template_id"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                    "client_id"?: string,"frequency"?: string,"month_day"?: number,"send_hour"?: number,"template_id"?: string | null,"updated_at"?: string,"updated_by"?: string | null
                   }
                   Relationships: [
                     {
@@ -3788,6 +3820,9 @@ isOneToOne: false
                            },
 "set_ad_frequency":
 { Args: { "p_account": string,"p_rows": Json }; Returns: undefined
+                           },
+"set_client_report_schedule":
+{ Args: { "p_client": string,"p_frequency": string,"p_hour": number,"p_month_day": number }; Returns: undefined
                            },
 "set_client_report_template":
 { Args: { "p_client": string,"p_template": string }; Returns: undefined

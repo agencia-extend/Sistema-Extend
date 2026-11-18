@@ -6,7 +6,7 @@ import { formatDateTime } from "@/domain/shared/dates";
 import { renderAdsReportPdf } from "@/features/ads/pdf/ads-report-pdf";
 import { getCurrentUser } from "@/lib/auth/dal";
 import { createClient } from "@/lib/supabase/server";
-import { clientReportData } from "@/lib/whatsapp/reports";
+import { clientReportData, reportFileName } from "@/lib/whatsapp/reports";
 
 export const maxDuration = 60;
 const PERIODS = ["hoje", "ontem", "7d", "30d", "mes", "semana"] as const;
@@ -31,11 +31,10 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ id: 
   if (reportTotals(data).spend_cents <= 0) return NextResponse.json({ error: "Sem gasto no período: não há o que relatar." }, { status: 422 });
 
   const pdf = await renderAdsReportPdf(data, formatDateTime(new Date()));
-  const slug = client.name.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "").toLowerCase() || "cliente";
   return new NextResponse(new Uint8Array(pdf), {
     headers: {
       "content-type": "application/pdf",
-      "content-disposition": `attachment; filename="relatorio-anuncios-${slug}-${range.start}-a-${range.end}.pdf"`,
+      "content-disposition": `attachment; filename="${reportFileName(client.name, range)}"`,
       "cache-control": "private, no-store",
     },
   });

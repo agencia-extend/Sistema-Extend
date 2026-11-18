@@ -632,7 +632,7 @@ RF-REL-02, RF-REL-03 e RF-REL-05.
 - A agência nasce com "Relatório padrão", o mesmo texto de antes, com cliques, CTR e destaque. Só existe um padrão: ele não é excluído e não perde a marca sem outro no lugar. O nome não pode repetir.
 - **Quem edita:** quem tem "Configurar relatórios" para todos os clientes (`reports.manage` = all: admin e gerente de tráfego). O gestor lê os modelos.
 
-**Modelo do cliente** (`client_report_settings`): é escolhido no diálogo "Relatório" da aba Anúncios por quem configura os relatórios do cliente. Vale também para o envio automático de segunda. Ao excluir um modelo, os clientes que o usavam voltam ao padrão.
+**Modelo do cliente** (`client_report_settings`): é escolhido no diálogo "Relatório" da aba Anúncios por quem configura os relatórios do cliente. Vale também para o envio automático. Ao excluir um modelo, os clientes que o usavam voltam ao padrão.
 
 **Diálogo "Relatório"** (aba Anúncios, para quem vê os anúncios):
 - período: começa em "Semana passada", e há também hoje, ontem, 7 dias, 30 dias e este mês;
@@ -655,4 +655,25 @@ Os números são lidos com o login da pessoa: quem não vê o cliente recebe 404
 - `e2e/41-modelos-relatorio.spec.ts`: criar o modelo com os botões, a prévia real, escolher o modelo do cliente, o PDF, e o envio a um servidor de teste no formato do WAHA;
 - `e2e/29` atualizado.
 
-**Ainda não:** RF-REL-06 (guardar cada PDF enviado na aba Relatórios do cliente) e o envio diário ou mensal com horário configurável (RF-REL-01). Hoje o envio automático é semanal.
+**Depois:** ~~RF-REL-06 e o envio diário ou mensal (RF-REL-01)~~ (feitos em 18/11/2026, ver "Agenda do relatório e PDFs guardados").
+
+## Agenda do relatório e PDFs guardados (18/11/2026)
+RF-REL-01 e RF-REL-06.
+
+**Agenda por cliente** (`client_report_settings`: `frequency`, `month_day`, `send_hour`; RPC `set_client_report_schedule`):
+- no diálogo "Relatório" da aba Anúncios, quadro "Envio automático no grupo de relatórios", para quem configura os relatórios do cliente (os demais veem a agenda em texto);
+- frequências: não enviar sozinho; todo dia (dia anterior); toda segunda (semana passada, o padrão); todo mês no dia 1 a 28 (mês passado);
+- horário das 6h às 22h (padrão 9h). Voltar ao modelo padrão não apaga a agenda.
+
+**Job** (`extend-whatsapp-relatorios`, agora `5 * * * *`, `sendScheduledReports`):
+- de hora em hora, pega os clientes ativos com conta ligada cuja frequência cai hoje e cujo horário já chegou (`src/domain/ads/report.ts`: `spClock`, `scheduleDue`, `scheduleRange`, `scheduleKey`);
+- o registro de envios (`whatsapp_outbox.dedupe_key`) impede repetir o mesmo período; a semanal mantém a chave antiga;
+- um cliente por vez, com 3 s entre os envios; o que não couber em ~45 s sai na hora seguinte.
+
+**PDF junto e guardado** (`ads_report_files`, bucket privado `relatorios`):
+- todo envio (botão ou automático) manda o texto e, logo abaixo, o PDF como documento (o WAHA baixa por link assinado de 1 h);
+- o PDF fica guardado, um por cliente e período (reenviar substitui), e aparece na aba Relatórios do cliente em "PDFs dos relatórios de anúncios" (período, tipo, quando e quem enviou, baixar);
+- download por `/clientes/{id}/relatorios/pdf/{arquivo}`: a linha é lida com o login da pessoa (vê quem vê os anúncios do cliente ou configura os relatórios dele); o arquivo sai pelo servidor;
+- se o texto foi e o PDF falhou, o envio vale e a mensagem avisa.
+
+**Testes:** `46_relatorios_agenda_pdf.test.sql` (12); Vitest da agenda em `domain/ads/report`; `e2e/41` (passo 4): agendar pela tela, o job manda texto e PDF uma vez só, a aba Relatórios lista e baixa, quem não vê anúncios recebe 404.

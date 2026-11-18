@@ -173,3 +173,55 @@ export function sampleReportData(): ReportData {
     topAd: { name: "VIDEO_SORRISO_CR-12_V2", kind: "leads", results: 28, costPerResultCents: 1650 },
   };
 }
+
+// Envio automático (RF-REL-01): diário (ontem), semanal na segunda (semana passada) ou mensal no dia escolhido (mês passado).
+export type ReportFrequency = "desligado" | "diario" | "semanal" | "mensal";
+export type ReportSchedule = { frequency: ReportFrequency; monthDay: number; hour: number };
+export const DEFAULT_SCHEDULE: ReportSchedule = { frequency: "semanal", monthDay: 1, hour: 9 };
+export const FREQUENCY_LABEL: Record<ReportFrequency, string> = {
+  desligado: "Não enviar sozinho",
+  diario: "Todo dia (dia anterior)",
+  semanal: "Toda segunda (semana passada)",
+  mensal: "Todo mês (mês passado)",
+};
+
+/** Data, hora, dia da semana (segunda = 1) e dia do mês em São Paulo. */
+export function spClock(now: Date): { date: string; hour: number; isoDow: number; day: number } {
+  const parts = Object.fromEntries(
+    new Intl.DateTimeFormat("en-CA", { timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", hourCycle: "h23", weekday: "short" })
+      .formatToParts(now)
+      .map((p) => [p.type, p.value]),
+  );
+  const date = `${parts.year}-${parts.month}-${parts.day}`;
+  const isoDow = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].indexOf(parts.weekday) + 1;
+  return { date, hour: Number(parts.hour), isoDow, day: Number(parts.day) };
+}
+
+const shift = (date: string, days: number) => {
+  const d = new Date(`${date}T12:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+};
+
+/** Período que o relatório da frequência cobre, enviado hoje. */
+export function scheduleRange(frequency: Exclude<ReportFrequency, "desligado">, today: string): { start: string; end: string } {
+  if (frequency === "diario") return { start: shift(today, -1), end: shift(today, -1) };
+  if (frequency === "semanal") return lastWeek(today);
+  const end = shift(`${today.slice(0, 7)}-01`, -1);
+  return { start: `${end.slice(0, 7)}-01`, end };
+}
+
+/**
+ * Hoje é dia de envio e já passou do horário? O job roda de hora em hora; a partir do horário do cliente ele
+ * tenta até conseguir no mesmo dia (o registro de envios impede repetir).
+ */
+export function scheduleDue(s: ReportSchedule, clock: { hour: number; isoDow: number; day: number }): boolean {
+  if (s.frequency === "desligado" || clock.hour < s.hour) return false;
+  if (s.frequency === "semanal") return clock.isoDow === 1;
+  if (s.frequency === "mensal") return clock.day === s.monthDay;
+  return true;
+}
+
+/** Chave que impede mandar duas vezes o mesmo relatório automático (a semanal mantém a chave antiga). */
+export const scheduleKey = (frequency: Exclude<ReportFrequency, "desligado">, clientId: string, range: { start: string }) =>
+  frequency === "semanal" ? `relatorio:${clientId}:${range.start}` : `relatorio:${frequency}:${clientId}:${range.start}`;
