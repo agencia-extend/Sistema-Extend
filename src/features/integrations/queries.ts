@@ -19,6 +19,7 @@ export type ConnectionView = {
   createdAt: string;
   clientId: string | null;
   clientName: string | null;
+  scopes: string[];
 };
 
 /** Conexões da agência e da própria pessoa, sem tokens (RPC integration_status). */
@@ -42,6 +43,7 @@ export async function listConnections(): Promise<ConnectionView[]> {
     createdAt: c.created_at,
     clientId: c.client_id,
     clientName: c.client_name,
+    scopes: c.scopes ?? [],
   }));
 }
 

@@ -3416,7 +3416,7 @@ isOneToOne: false
                            },
 "integration_status":
 { Args: Record<PropertyKey, never>; Returns: {
-              "account_email": string,"account_name": string,"accounts_synced_at": string,"client_id": string,"client_name": string,"connected_by_name": string,"created_at": string,"expires_at": string,"id": string,"last_error": string,"method": string,"owner_kind": string,"provider": string,"purpose": string,"status": string
+              "account_email": string,"account_name": string,"accounts_synced_at": string,"client_id": string,"client_name": string,"connected_by_name": string,"created_at": string,"expires_at": string,"id": string,"last_error": string,"method": string,"owner_kind": string,"provider": string,"purpose": string,"scopes": (string)[],"status": string
             }[]
                            },
 "link_creative_ad":

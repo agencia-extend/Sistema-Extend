@@ -4,7 +4,7 @@ import { useTransition, type ReactNode } from "react";
 import { LoaderCircle, RefreshCw, Unplug } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { ConfirmDialog } from "@/components/app/confirm-dialog";
-import { connectionLabel } from "@/domain/integrations";
+import { connectionLabel, metaFeatureStatus } from "@/domain/integrations";
 import { formatDateTime } from "@/domain/shared/dates";
 import { disconnect, refreshAccounts } from "@/features/integrations/actions";
 import type { ConnectionView } from "@/features/integrations/queries";
@@ -55,6 +55,22 @@ export function ConnectionPanel({
           <>
             <dt className="text-muted-foreground">Contas buscadas</dt>
             <dd>{conn.accountsSyncedAt ? formatDateTime(conn.accountsSyncedAt) : "Ainda não"}</dd>
+          </>
+        )}
+        {conn.provider === "meta" && (
+          <>
+            <dt className="text-muted-foreground">O que está liberado</dt>
+            <dd>
+              <ul className="grid gap-1" aria-label="Recursos liberados pela conexão">
+                {metaFeatureStatus(conn.scopes).map((f) => (
+                  <li key={f.label} className="flex flex-wrap items-baseline gap-x-2">
+                    <span className={cn("font-medium", f.missing.length ? "text-warning" : "text-success")}>{f.missing.length ? "Falta" : "Liberado"}</span>
+                    <span>{f.label}</span>
+                    {f.missing.length > 0 && <span className="text-xs text-muted-foreground">(permissão {f.missing.join(", ")})</span>}
+                  </li>
+                ))}
+              </ul>
+            </dd>
           </>
         )}
         <dt className="text-muted-foreground">Conectado por</dt>

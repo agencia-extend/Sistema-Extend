@@ -62,7 +62,13 @@ test("1. situação da configuração e endereço de retorno", async ({ page }) 
   const meta = page.getByRole("region", { name: "Meta (Facebook e Instagram)" });
   // Com a Meta da agência já conectada, a tela mostra a conexão no lugar da configuração.
   const { count: metaConnected } = await admin.from("integration_connections").select("id", { count: "exact", head: true }).eq("owner_kind", "agency").eq("provider", "meta");
-  if (metaReady && metaConnected) await expect(meta.getByText("Conta conectada")).toBeVisible();
+  if (metaReady && metaConnected) {
+    await expect(meta.getByText("Conta conectada")).toBeVisible();
+    // O que a conexão libera, com a permissão que falta em cada recurso.
+    const feats = meta.getByRole("list", { name: "Recursos liberados pela conexão" });
+    await expect(feats.getByRole("listitem")).toHaveCount(6);
+    await expect(feats.getByRole("listitem").filter({ hasText: "Ler contas, campanhas e números" })).toContainText("Liberado");
+  }
   else if (metaReady) await expect(meta.getByText("Configuração completa no servidor.")).toBeVisible();
   else {
     await expect(meta.getByText("Ainda não dá para conectar.")).toBeVisible();

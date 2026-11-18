@@ -108,3 +108,19 @@ export function googleEventBody(e: { title: string; startsAt: string; endsAt: st
     source: { title: "Sistema Extend", url: e.url },
   };
 }
+
+/** O que cada permissão da Meta libera no sistema (a tela mostra o que a conexão tem e o que falta). */
+export const META_FEATURES: { label: string; scopes: string[] }[] = [
+  { label: "Ler contas, campanhas e números", scopes: ["ads_read", "business_management"] },
+  { label: "Ajustar campanhas (pausar, orçamento, duplicar)", scopes: ["ads_management"] },
+  { label: "Páginas do Facebook e publicações", scopes: ["pages_show_list", "pages_read_engagement"] },
+  { label: "Publicações do Instagram", scopes: ["instagram_basic"] },
+  { label: "Programar publicações no Facebook", scopes: ["pages_manage_posts"] },
+  { label: "Programar publicações no Instagram", scopes: ["instagram_basic", "instagram_content_publish"] },
+];
+
+/** Cada recurso com as permissões que faltam na conexão (vazio = liberado). */
+export function metaFeatureStatus(scopes: string[]): { label: string; missing: string[] }[] {
+  const have = new Set(scopes);
+  return META_FEATURES.map((f) => ({ label: f.label, missing: f.scopes.filter((s) => !have.has(s)) }));
+}
