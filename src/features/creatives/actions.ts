@@ -38,6 +38,7 @@ export const createCreativeRequest = defineAction({ schema: requestSchema, permi
         due_at: new Date(`${r.dueOn}T18:00:00-03:00`).toISOString(),
         priority: r.priority,
         notes: r.notes,
+        source_ad_ref: r.sourceAdRef ?? "",
       },
     }),
   ) as string;

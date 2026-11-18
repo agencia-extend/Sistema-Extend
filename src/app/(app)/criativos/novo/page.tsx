@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { requirePermission } from "@/lib/auth/dal";
-import { clientContext, listRequestableClients } from "@/features/creatives/queries";
+import { clientContext, getAdRequestSource, listRequestableClients } from "@/features/creatives/queries";
+import { prefillFromAd } from "@/domain/creatives/from-ad";
 import { listRejections } from "@/features/traffic/queries";
 import { avoidSummary, REJECTION_REASON } from "@/domain/creatives/rejections";
 import { RequestForm } from "@/features/creatives/components/request-form";
@@ -12,11 +13,12 @@ import { ClientPicker } from "./client-picker";
 export const metadata: Metadata = { title: "Pedir criativo" };
 
 /** Pedido de criativo: escolhe o cliente, vê o resumo do onboarding e o histórico, preenche o pedido. */
-export default async function NovoCriativoPage({ searchParams }: { searchParams: Promise<{ cliente?: string }> }) {
+export default async function NovoCriativoPage({ searchParams }: { searchParams: Promise<{ cliente?: string; anuncio?: string }> }) {
   await requirePermission("creatives.request.create");
   const sp = await searchParams;
-  const clients = await listRequestableClients();
-  const client = clients.find((c) => c.id === sp.cliente);
+  const [clients, fromAd] = await Promise.all([listRequestableClients(), sp.anuncio ? getAdRequestSource(sp.anuncio) : null]);
+  const client = clients.find((c) => c.id === (fromAd?.clientId ?? sp.cliente));
+  const prefill = fromAd && client ? prefillFromAd(fromAd.source) : null;
   const since = addMonths(todayKey(), -12);
   const [ctx, rejections] = client ? await Promise.all([clientContext(client.id), listRejections(client.id, since)]) : [null, []];
   const avoid = avoidSummary(rejections);
@@ -26,8 +28,19 @@ export default async function NovoCriativoPage({ searchParams }: { searchParams:
     <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
       <div className="grid content-start gap-5">
         <h2 className="text-base font-semibold">Pedir criativo</h2>
+        {sp.anuncio && !prefill && (
+          <p role="status" className="rounded-lg border border-warning/40 bg-warning-soft/40 px-3 py-2 text-sm">
+            Não foi possível abrir o anúncio de origem (ele pode ter saído da sincronização ou o cliente não está ativo). Preencha o pedido normalmente.
+          </p>
+        )}
+        {prefill && fromAd && (
+          <div className="grid gap-0.5 rounded-lg border border-primary/30 bg-primary/5 px-3 py-2 text-sm">
+            <p className="font-medium break-words">A partir do anúncio “{fromAd.source.adName}”{fromAd.source.fatigued ? " (criativo cansado)" : ""}</p>
+            <p className="text-muted-foreground">Campanha, objetivo, formato, ângulo e referência vieram do anúncio. Confira e complete público, CTA e prazo.</p>
+          </div>
+        )}
         <ClientPicker clients={clients} value={client?.id ?? ""} />
-        {client ? <RequestForm key={client.id} clientId={client.id} /> : <p className="text-sm text-muted-foreground">Escolha o cliente para preencher o pedido. O resumo do onboarding dele aparece ao lado.</p>}
+        {client ? <RequestForm key={`${client.id}-${prefill?.sourceAdRef ?? ""}`} clientId={client.id} prefill={prefill} /> : <p className="text-sm text-muted-foreground">Escolha o cliente para preencher o pedido. O resumo do onboarding dele aparece ao lado.</p>}
       </div>
       {ctx && (
         <aside aria-label="Sobre o cliente" className="grid min-w-0 grid-cols-[minmax(0,1fr)] content-start gap-4 rounded-xl border bg-card p-4">

@@ -51,7 +51,7 @@ export default async function AlertasPage({ searchParams }: { searchParams: Prom
           })}
         </nav>
         <p className="text-sm text-muted-foreground">Padrão da agência: {limitsSummary(limits.agency, formatBRL)}. Cada cliente pode ter limites próprios na aba Anúncios.</p>
-        {rows.length === 0 ? <EmptyState icon={BellRing} title={empty.title} description={empty.description} /> : <AlertList rows={rows} />}
+        {rows.length === 0 ? <EmptyState icon={BellRing} title={empty.title} description={empty.description} /> : <AlertList rows={rows} canRequestCreative={Boolean(user.permissions["creatives.request.create"])} />}
       </PageBody>
     </>
   );

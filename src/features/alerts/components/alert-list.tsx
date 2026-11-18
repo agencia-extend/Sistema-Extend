@@ -10,6 +10,7 @@ import { ackAlert } from "@/features/alerts/actions";
 import type { AlertRow } from "@/features/alerts/queries";
 import { handleResult } from "@/lib/action-feedback";
 import { cn } from "@/lib/utils";
+import { RequestFromAdLink } from "@/features/creatives/components/request-from-ad";
 import { ResolveDialog } from "./resolve-dialog";
 
 function AckButton({ id, title }: { id: string; title: string }) {
@@ -22,7 +23,7 @@ function AckButton({ id, title }: { id: string; title: string }) {
 }
 
 /** Lista de alertas: o que é, de quem, desde quando, quem reconheceu ou resolveu e como. */
-export function AlertList({ rows, showClient = true }: { rows: AlertRow[]; showClient?: boolean }) {
+export function AlertList({ rows, showClient = true, canRequestCreative = false }: { rows: AlertRow[]; showClient?: boolean; canRequestCreative?: boolean }) {
   return (
     <ol className="divide-y rounded-xl border bg-card" aria-label="Alertas">
       {rows.map((a) => (
@@ -53,6 +54,7 @@ export function AlertList({ rows, showClient = true }: { rows: AlertRow[]; showC
           </div>
           <div className="flex flex-wrap items-start gap-2 sm:justify-end">
             {a.href && <Link href={a.href} className={buttonVariants({ size: "sm", variant: "ghost" })}>Abrir</Link>}
+            {canRequestCreative && a.kind === "fadiga" && a.adId && a.status !== "resolvido" && <RequestFromAdLink adId={a.adId} adName={a.title} className="h-8" />}
             {a.canAct && a.status === "aberto" && <AckButton id={a.id} title={a.title} />}
             {a.canAct && (
               <ResolveDialog id={a.id} title={a.title}

@@ -8,13 +8,14 @@ import { FormAlert } from "@/components/app/form-field";
 import { adStatusLabel } from "@/domain/ads";
 import { linkCreativeAd, unlinkCreativeAd } from "@/features/creatives/actions";
 import type { LinkableAd, LinkedAd } from "@/features/creatives/performance";
+import { RequestFromAdLink } from "./request-from-ad";
 import { handleResult } from "@/lib/action-feedback";
 
 const dec = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 2 });
 
 /** Anúncios da Meta ligados ao criativo: pelo código no nome ou à mão (RF-BIB-03). */
-export function CreativeAdsPanel({ taskId, libraryId, code, linked, linkable, canLink }: {
-  taskId: string; libraryId: string; code: string; linked: LinkedAd[]; linkable: LinkableAd[]; canLink: boolean;
+export function CreativeAdsPanel({ taskId, libraryId, code, linked, linkable, canLink, canRequest = false }: {
+  taskId: string; libraryId: string; code: string; linked: LinkedAd[]; linkable: LinkableAd[]; canLink: boolean; canRequest?: boolean;
 }) {
   const [adId, setAdId] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +72,7 @@ export function CreativeAdsPanel({ taskId, libraryId, code, linked, linkable, ca
                   {a.frequency !== null ? ` · frequência ${dec.format(a.frequency)} em 7 dias` : ""}
                   {a.fatigued && <span className="font-medium text-warning"> · criativo cansado</span>}
                 </p>
+                {canRequest && a.fatigued && <RequestFromAdLink adId={a.adId} adName={a.name} className="mt-1" />}
               </div>
               {canLink && (
                 <Button variant="ghost" size="icon" disabled={pending} aria-label={`Desligar ${a.name}`} onClick={() => unlink(a)}>

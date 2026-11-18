@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { FormAlert, FormField } from "@/components/app/form-field";
 import { CREATIVE_FORMATS, CREATIVE_FORMAT_LABEL, CREATIVE_OBJECTIVES, CREATIVE_OBJECTIVE_LABEL } from "@/domain/creatives";
+import type { RequestPrefill } from "@/domain/creatives/from-ad";
 import { createCreativeRequest } from "@/features/creatives/actions";
 import { requestSchema } from "@/features/creatives/schemas";
 import { handleResult } from "@/lib/action-feedback";
@@ -17,9 +18,13 @@ type V = { campaign: string; objective: string; format: string; quantity: string
 const BLANK: V = { campaign: "", objective: "", format: "", quantity: "1", variations: "0", angle: "", audience: "", cta: "", copySuggestion: "", references: [""], dueOn: "", priority: "media", notes: "" };
 
 /** Pedido de criativo (RF-CRI-01/02): não envia incompleto; mostra o que falta perto de cada campo. */
-export function RequestForm({ clientId }: { clientId: string }) {
+export function RequestForm({ clientId, prefill }: { clientId: string; prefill?: RequestPrefill | null }) {
   const router = useRouter();
-  const [v, setV] = useState<V>(BLANK);
+  const [v, setV] = useState<V>(() =>
+    prefill
+      ? { ...BLANK, campaign: prefill.campaign, objective: prefill.objective, format: prefill.format, angle: prefill.angle, references: prefill.references.length ? prefill.references : [""], priority: prefill.priority, notes: prefill.notes }
+      : BLANK,
+  );
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -28,7 +33,7 @@ export function RequestForm({ clientId }: { clientId: string }) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const input = { ...v, clientId, quantity: Number(v.quantity), variations: Number(v.variations || 0), references: v.references.map((r) => r.trim()).filter(Boolean), objective: v.objective || undefined, format: v.format || undefined };
+    const input = { ...v, clientId, sourceAdRef: prefill?.sourceAdRef, quantity: Number(v.quantity), variations: Number(v.variations || 0), references: v.references.map((r) => r.trim()).filter(Boolean), objective: v.objective || undefined, format: v.format || undefined };
     const parsed = requestSchema.safeParse(input);
     if (!parsed.success) {
       setErrors(Object.fromEntries(parsed.error.issues.map((i) => [String(i.path[0]), i.message])));

@@ -24,15 +24,17 @@ export type AlertRow = {
   resolvedName: string | null;
   resolvedAt: string | null;
   resolution: string | null;
+  /** Anúncio do alerta de criativo cansado (para pedir um novo criativo). */
+  adId: string | null;
   /** A pessoa pode reconhecer/resolver (o banco confere de novo). */
   canAct: boolean;
 };
 
 const SELECT =
-  "id, kind, status, title, body, href, client_id, opened_at, last_seen_at, times_seen, ack_at, resolved_by, resolved_at, resolution, client:clients(name), ack:profiles!ad_alerts_ack_by_fkey(full_name), solver:profiles!ad_alerts_resolved_by_fkey(full_name)";
+  "id, kind, status, title, body, href, subject, client_id, opened_at, last_seen_at, times_seen, ack_at, resolved_by, resolved_at, resolution, client:clients(name), ack:profiles!ad_alerts_ack_by_fkey(full_name), solver:profiles!ad_alerts_resolved_by_fkey(full_name)";
 
 type Raw = {
-  id: string; kind: string; status: string; title: string; body: string | null; href: string | null; client_id: string | null;
+  id: string; kind: string; status: string; title: string; body: string | null; href: string | null; subject: string; client_id: string | null;
   opened_at: string; last_seen_at: string; times_seen: number; ack_at: string | null; resolved_by: string | null; resolved_at: string | null; resolution: string | null;
   client: { name: string } | null; ack: { full_name: string } | null; solver: { full_name: string } | null;
 };
@@ -63,6 +65,7 @@ async function withActions(rows: Raw[], user: CurrentUser): Promise<AlertRow[]> 
     resolvedName: r.solver?.full_name || null,
     resolvedAt: r.resolved_at,
     resolution: r.resolution,
+    adId: r.kind === "fadiga" ? r.subject : null,
     canAct: r.status !== "resolvido" && (r.client_id ? manage.get(r.client_id) === true : Boolean(user.permissions["ads.connect"])),
   }));
 }

@@ -1,6 +1,8 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
 import type { CreativeFormat, LibraryStatus } from "@/domain/creatives";
+import type { AdSource } from "@/domain/creatives/from-ad";
+import { creativeCode } from "@/domain/creatives/performance";
 
 const arr = <T,>(v: T | T[] | null | undefined): T[] => (Array.isArray(v) ? v : v ? [v] : []);
 
@@ -151,6 +153,7 @@ export async function getCreative(id: string) {
       references: (r.reference_links as string[]) ?? [],
       notes: (r.notes as string | null) ?? null,
       requestedBy: (r.requested_by as string | null) ?? null,
+      sourceAdRef: (r.source_ad_ref as string | null) ?? null,
       requesterName: arr(r.requester)[0]?.full_name ?? null,
     },
     links: (links.data ?? []).map((l) => ({ id: l.id, createdAt: l.created_at, expiresAt: l.expires_at, revokedAt: l.revoked_at, decidedAt: l.decided_at, decision: l.decision, comment: l.comment, reviewerName: l.reviewer_name })),
@@ -243,4 +246,50 @@ export async function listCreativeRejections(taskId: string) {
     .order("rejected_on", { ascending: false });
   if (error) return [];
   return (data ?? []).map((r) => ({ id: r.id, platform: r.platform, rejectedOn: r.rejected_on, reason: r.reason, policyText: r.policy_text, lesson: r.lesson, outcome: r.outcome }));
+}
+
+/**
+ * Anúncio que origina um pedido de criativo (RF-CRI-08). Lido com o login da pessoa: sem acesso à conta do anúncio,
+ * devolve null e o pedido abre em branco.
+ */
+export async function getAdRequestSource(adId: string): Promise<{ clientId: string; source: AdSource } | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(adId)) return null;
+  const supabase = await createClient();
+  const { data: ad } = await supabase
+    .from("ads")
+    .select("id, external_id, name, frequency_7d, account:ad_accounts!inner(provider, external_id, client_id), campaign:ad_campaigns(name, objective)")
+    .eq("id", adId)
+    .maybeSingle();
+  if (!ad) return null;
+  const acc = arr(ad.account as { provider: string; external_id: string; client_id: string | null } | null)[0];
+  if (!acc?.client_id) return null;
+  const camp = arr(ad.campaign as { name: string; objective: string | null } | null)[0] ?? null;
+  const [links, fatigue] = await Promise.all([
+    supabase.from("creative_ads").select("creative_library(ref_number, format, angle, campaign)").eq("ad_id", adId).eq("excluded", false).limit(1),
+    supabase.from("ad_alerts").select("id").eq("kind", "fadiga").eq("subject", adId).neq("status", "resolvido").limit(1),
+  ]);
+  const lib = arr((links.data?.[0]?.creative_library ?? null) as { ref_number: number; format: string; angle: string; campaign: string } | null)[0];
+  return {
+    clientId: acc.client_id,
+    source: {
+      provider: acc.provider === "google" ? "google" : "meta",
+      accountExternalId: acc.external_id,
+      adExternalId: ad.external_id,
+      adName: ad.name,
+      campaignName: camp?.name ?? null,
+      campaignObjective: camp?.objective ?? null,
+      frequency: ad.frequency_7d === null ? null : Number(ad.frequency_7d),
+      fatigued: Boolean(fatigue.data?.length),
+      library: lib ? { code: creativeCode(Number(lib.ref_number)), format: lib.format as CreativeFormat, angle: lib.angle, campaign: lib.campaign } : null,
+    },
+  };
+}
+
+/** Anúncio de origem de um pedido, pelo `source_ad_ref` (só o nome; null se a pessoa não vê a conta). */
+export async function getSourceAdName(ref: string | null): Promise<string | null> {
+  const m = ref?.match(/^(meta|google):(.+)$/);
+  if (!m) return null;
+  const supabase = await createClient();
+  const { data } = await supabase.from("ads").select("name, account:ad_accounts!inner(provider)").eq("external_id", m[2]).eq("account.provider", m[1]).limit(1);
+  return data?.[0]?.name ?? null;
 }

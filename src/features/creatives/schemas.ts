@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { CREATIVE_FORMATS, CREATIVE_OBJECTIVES, LIBRARY_STATUSES } from "@/domain/creatives";
+import { AD_REF } from "@/domain/creatives/from-ad";
 
 const uuid = z.uuid();
 const req = (label: string, max: number) => z.string().trim().min(2, `Informe ${label}.`).max(max, `Use até ${max} caracteres.`);
@@ -19,6 +20,8 @@ export const requestSchema = z.object({
   dueOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Informe o prazo."),
   priority: z.enum(["baixa", "media", "alta", "urgente"], { message: "Escolha a prioridade." }),
   notes: z.string().trim().max(2000, "Use até 2000 caracteres.").default(""),
+  /** Anúncio que originou o pedido (RF-CRI-08). */
+  sourceAdRef: z.string().regex(AD_REF, "Anúncio de origem inválido.").optional(),
 });
 export type RequestInput = z.infer<typeof requestSchema>;
 

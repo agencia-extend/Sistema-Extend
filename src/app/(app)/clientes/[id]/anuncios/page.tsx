@@ -17,6 +17,7 @@ import { GoalDialog } from "@/features/ads/components/goal-dialog";
 import { GoalProgress } from "@/features/ads/components/goal-progress";
 import { getAlertLimits, getClientOpenAlerts } from "@/features/alerts/queries";
 import { AlertList } from "@/features/alerts/components/alert-list";
+import { RequestFromAdLink } from "@/features/creatives/components/request-from-ad";
 import { LimitsDialog } from "@/features/alerts/components/limits-dialog";
 import { limitsSummary } from "@/domain/ads/alerts";
 import { SlidersHorizontal } from "lucide-react";
@@ -40,6 +41,7 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
     getClient(id), getClientAds(id, periodRange(period, today)), getClientGoal(id, today), getClientOpenAlerts(id, user), getAlertLimits(id),
   ]);
   const canGoal = Boolean(user.permissions["optimization.manage"]);
+  const canRequest = Boolean(user.permissions["creatives.request.create"]) && (client?.status === "ativo" || client?.status === "onboarding");
   const manageable = new Set(data.accounts.filter((a) => a.canManage).map((a) => a.id));
   const month = `${today.slice(0, 7)}-01`;
   const monthName = new Date(`${month}T12:00:00Z`).toLocaleDateString("pt-BR", { month: "long", year: "numeric", timeZone: "UTC" });
@@ -88,7 +90,7 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
         <p className="text-sm text-muted-foreground">
           {limits.custom ? "Limites do cliente" : "Padrão da agência"}: {limitsSummary(limits.effective, formatBRL)}.
         </p>
-        {alerts.length > 0 ? <AlertList rows={alerts} showClient={false} /> : <p className="text-sm text-muted-foreground">Nenhum alerta em aberto para este cliente.</p>}
+        {alerts.length > 0 ? <AlertList rows={alerts} showClient={false} canRequestCreative={canRequest} /> : <p className="text-sm text-muted-foreground">Nenhum alerta em aberto para este cliente.</p>}
       </section>
 
       <section id="metas" aria-labelledby="metas-h" className="grid scroll-mt-20 gap-3">
@@ -136,6 +138,7 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
                     </p>
                     {a.reviewFeedback && <p className="text-xs break-words text-danger">{a.reviewFeedback}</p>}
                     {manageable.has(a.accountId) && (a.status === "ACTIVE" || a.status === "PAUSED") && <AdStatusToggle id={a.id} name={a.name} status={a.status} />}
+                    {canRequest && <RequestFromAdLink adId={a.id} adName={a.name} />}
                   </div>
                 </li>
               );

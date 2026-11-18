@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ExternalLink } from "lucide-react";
 import { getCurrentUser } from "@/lib/auth/dal";
-import { getCreative, listCreativeRejections } from "@/features/creatives/queries";
+import { getCreative, getSourceAdName, listCreativeRejections } from "@/features/creatives/queries";
 import { getCreativePerformance } from "@/features/creatives/performance";
 import { PerformanceTable } from "@/features/creatives/components/performance-summary";
 import { CreativeAdsPanel } from "@/features/creatives/components/creative-ads-panel";
@@ -29,7 +29,10 @@ export default async function CriativoPage({ params }: { params: Promise<{ id: s
   const [user, c, rejections] = await Promise.all([getCurrentUser(), getCreative(id), listCreativeRejections(id)]);
   if (!c || !user) notFound();
   // Desempenho nos anúncios (RF-BIB-03): criativo já na biblioteca e quem tem "Ver performance dos criativos".
-  const perf = user.permissions["creatives.performance.read"] ? await getCreativePerformance(id) : null;
+  const [perf, sourceAdName] = await Promise.all([
+    user.permissions["creatives.performance.read"] ? getCreativePerformance(id) : null,
+    getSourceAdName(c.request.sourceAdRef),
+  ]);
   const canLink = Boolean(perf && (perf.canLinkAsTraffic || user.permissions["creatives.library.manage"] || user.permissions["creatives.review"]));
   const canEditLibrary = Boolean(user.permissions["creatives.library.manage"] || user.permissions["creatives.review"]);
   const r = c.request;
@@ -118,7 +121,7 @@ export default async function CriativoPage({ params }: { params: Promise<{ id: s
                 )}
               </>
             ) : null}
-            <CreativeAdsPanel taskId={c.id} libraryId={perf.libraryId} code={creativeCode(perf.ref)} linked={perf.linked} linkable={perf.linkable} canLink={canLink} />
+            <CreativeAdsPanel taskId={c.id} libraryId={perf.libraryId} code={creativeCode(perf.ref)} linked={perf.linked} linkable={perf.linkable} canLink={canLink} canRequest={Boolean(user.permissions["creatives.request.create"])} />
           </section>
         )}
       </div>
@@ -144,6 +147,7 @@ export default async function CriativoPage({ params }: { params: Promise<{ id: s
           <dl className="grid gap-1.5 text-sm">
             {rows.map(([k, v]) => <div key={k} className="flex justify-between gap-3"><dt className="shrink-0 text-muted-foreground">{k}</dt><dd className="min-w-0 text-right break-words">{v}</dd></div>)}
           </dl>
+          {sourceAdName && <p className="border-t pt-2 text-sm break-words"><span className="text-muted-foreground">Pedido a partir do anúncio</span> {sourceAdName}</p>}
           {r.copySuggestion && <div className="grid gap-1 border-t pt-2"><span className="text-xs text-muted-foreground">Copy sugerida</span><p className="text-sm break-words whitespace-pre-line">{r.copySuggestion}</p></div>}
           {r.references.length > 0 && (
             <ul className="grid gap-1 border-t pt-2" aria-label="Referências">

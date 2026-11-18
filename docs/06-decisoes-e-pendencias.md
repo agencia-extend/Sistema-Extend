@@ -193,7 +193,7 @@ Tomadas pelo desenvolvedor ao seguir `docs/09` sem resposta às três perguntas 
     - funciona também para demandas comuns com etapa de cliente;
     - há botões "Copiar link" e "Enviar no WhatsApp" (wa.me).
   - **Biblioteca** (`creative_library`): o aprovado entra com a copy. Situações: em teste, vencedor, fadigado, reprovado pela Meta e arquivado. A exportação do mês sai em CSV e PDF (pdf-lib).
-  - **Pendente para a etapa 05:** o botão "pedir novo criativo" a partir do anúncio (RF-CRI-08). A performance (RF-BIB-03) foi feita em 17/11/2026. O banco já tem `creative_requests.source_ad_ref` e `creative_library.ad_ref`, e nada falso aparece na tela.
+  - ~~**Pendente para a etapa 05:** o botão "pedir novo criativo" a partir do anúncio (RF-CRI-08).~~ Feito em 18/11/2026 (ver "Pedir novo criativo a partir do anúncio"). A performance (RF-BIB-03) foi feita em 17/11/2026. O banco já tem `creative_requests.source_ad_ref` e `creative_library.ad_ref`, e nada falso aparece na tela.
   - **Limitação conhecida:** a página do criativo, para quem não tem acesso, mostra "Página não encontrada" com código HTTP 200. A tela de carregamento começa a responder antes do 404, e nenhum dado do criativo é enviado.
 - **Briefing por seções A–E (14/11/2026)** (docs/08, item 3.3): a ficha de onboarding virou o briefing completo, com 70 perguntas em 6 seções: A. Geral, B. Tráfego pago, C. Produção de vídeos, D. Design, E. Site/Landing page e Obrigações do cliente.
   - **Seções por serviço:** cada seção tem `show_for` (abas de serviço). A seção só aparece, só conta no "o que falta" e só entra no resumo operacional se o cliente tiver o serviço, vigente ou com início futuro (`private.section_applies`, `sectionApplies`).
@@ -601,3 +601,21 @@ Adaptado do HubSystem (`domain/whatsapp/media.ts`, `api/whatsapp/media`, `compos
   - o tipo recusado;
   - o áudio gravado com o microfone de teste do navegador e enviado como voz.
 - **Só com o número conectado:** a foto real chegando do celular e o áudio tocando no WhatsApp do contato.
+
+## Pedir novo criativo a partir do anúncio (18/11/2026)
+RF-CRI-08. O botão "Pedir novo criativo" aparece para quem pede criativos (`creatives.request.create`):
+- no alerta de criativo cansado, no painel de alertas e na aba Anúncios do cliente;
+- em cada anúncio da aba Anúncios (cliente ativo ou em onboarding);
+- no anúncio ligado e cansado, na página do criativo.
+
+Ele abre `/criativos/novo?anuncio={id}`. O anúncio é lido com o login da pessoa (RLS das contas). O pedido já vem com:
+- o cliente da conta;
+- a campanha e o objetivo (traduzido do objetivo da Meta);
+- o formato e o ângulo do criativo ligado ("Nova versão: …");
+- o link do anúncio no Gerenciador de Anúncios como referência;
+- prioridade alta se houver fadiga aberta;
+- uma observação com o código do criativo e a frequência.
+
+Público, CTA e prazo ficam com a pessoa. O pedido guarda `source_ad_ref` (`meta:{id do anúncio}`), e a página do criativo mostra "Pedido a partir do anúncio …". Se o anúncio não abrir (sem acesso, removido ou cliente inativo), o pedido abre em branco com o aviso.
+
+Testado em `src/domain/creatives/from-ad.test.ts` e `e2e/40-criativo-do-anuncio.spec.ts`.
