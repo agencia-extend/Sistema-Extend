@@ -971,6 +971,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"client_report_settings": {
+                  Row: {
+                    "client_id": string,"template_id": string | null,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"template_id"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "client_id"?: string,"template_id"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_report_settings_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: true
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_report_settings_template_id_fkey"
+      columns: ["template_id"]
+isOneToOne: false
+      referencedRelation: "report_templates"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_report_settings_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"client_reports": {
                   Row: {
                     "area": string,"call_task_id": string | null,"client_id": string,"created_at": string,"feedback": string | null,"feedback_at": string | null,"feedback_by": string | null,"feedback_note": string | null,"id": string,"link": string | null,"notes": string | null,"organization_id": string,"sent_by": string | null,"sent_on": string,"week_on": string
@@ -2305,6 +2337,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"report_templates": {
+                  Row: {
+                    "body": string,"created_at": string,"created_by": string | null,"id": string,"is_default": boolean,"name": string,"organization_id": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"is_default"?: boolean,"name": string,"organization_id": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "body"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"is_default"?: boolean,"name"?: string,"organization_id"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "report_templates_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "report_templates_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "report_templates_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"role_permissions": {
                   Row: {
                     "permission_key": string,"role_id": string,"scope": Database["public"]['Enums']["permission_scope"]
@@ -3527,6 +3591,9 @@ isOneToOne: false
 "delete_marketing_date":
 { Args: { "p_id": string }; Returns: undefined
                            },
+"delete_report_template":
+{ Args: { "p_id": string }; Returns: undefined
+                           },
 "duplicate_role":
 { Args: { "p_name": string,"p_role": string }; Returns: string
                            },
@@ -3696,6 +3763,9 @@ isOneToOne: false
 "save_recording":
 { Args: { "p": Json }; Returns: string
                            },
+"save_report_template":
+{ Args: { "p_body": string,"p_default": boolean,"p_id": string,"p_name": string }; Returns: string
+                           },
 "save_social_profile":
 { Args: { "p_client": string,"p_id": string }; Returns: undefined
                            },
@@ -3718,6 +3788,9 @@ isOneToOne: false
                            },
 "set_ad_frequency":
 { Args: { "p_account": string,"p_rows": Json }; Returns: undefined
+                           },
+"set_client_report_template":
+{ Args: { "p_client": string,"p_template": string }; Returns: undefined
                            },
 "set_client_service":
 { Args: { "p_client": string,"p_price_cents"?: number,"p_qty": number,"p_service": string }; Returns: undefined

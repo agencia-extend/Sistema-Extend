@@ -13,6 +13,7 @@ import { getClientAds, getClientGoal } from "@/features/ads/queries";
 import { PanelTable, StatusDot } from "@/features/ads/components/panel-table";
 import { SyncButton } from "@/features/ads/components/sync-button";
 import { ReportButton } from "@/features/ads/components/report-button";
+import { getClientTemplateId, listReportTemplates } from "@/features/ads/report-queries";
 import { GoalDialog } from "@/features/ads/components/goal-dialog";
 import { GoalProgress } from "@/features/ads/components/goal-progress";
 import { getAlertLimits, getClientOpenAlerts } from "@/features/alerts/queries";
@@ -37,8 +38,9 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
   const [{ id }, sp] = await Promise.all([params, searchParams]);
   const period = parsePeriod(sp.periodo);
   const today = todayKey(new Date());
-  const [client, data, goal, alerts, limits] = await Promise.all([
+  const [client, data, goal, alerts, limits, templates, templateId] = await Promise.all([
     getClient(id), getClientAds(id, periodRange(period, today)), getClientGoal(id, today), getClientOpenAlerts(id, user), getAlertLimits(id),
+    listReportTemplates(), getClientTemplateId(id),
   ]);
   const canGoal = Boolean(user.permissions["optimization.manage"]);
   const canRequest = Boolean(user.permissions["creatives.request.create"]) && (client?.status === "ativo" || client?.status === "onboarding");
@@ -68,12 +70,11 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
             </Link>
           ))}
         </nav>
-        {user.permissions["ads.manage"] && (
-          <div className="flex flex-wrap gap-2">
-            <SyncButton clientId={id} />
-            <ReportButton clientId={id} period={period} />
-          </div>
-        )}
+        <div className="flex flex-wrap gap-2">
+          {user.permissions["ads.manage"] && <SyncButton clientId={id} />}
+          <ReportButton clientId={id} templateId={templateId} canChoose={Boolean(user.permissions["reports.manage"])} canSend={Boolean(user.permissions["ads.manage"])}
+            templates={templates.map((t) => ({ id: t.id, name: t.name, isDefault: t.isDefault }))} />
+        </div>
       </div>
 
       <section id="alertas" aria-labelledby="alertas-h" className="grid scroll-mt-20 gap-3">

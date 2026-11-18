@@ -435,7 +435,7 @@ Decisão do Henrique: WAHA, para usar os grupos que a Extend já tem. Por enquan
   - **Na hora:** "Enviar relatório" na aba Anúncios do cliente (`ads.manage` no cliente), com o período escolhido na tela.
   - **Texto** (`src/domain/ads/report.ts`): investimento, impressões, cada campanha com gasto, resultado principal, custo por resultado e CTR, e o saldo da conta pré-paga com a previsão de dias.
 - **Histórico:** ao ler o QR Code, o servidor carrega as conversas e os grupos do aparelho (`fullSync`).
-- **Próximas partes:** modelos de relatório editáveis com variáveis (RF-REL-02), PDF (RF-REL-05) e a caixa de entrada (RF-WPP-03).
+- **Próximas partes:** ~~modelos de relatório editáveis com variáveis (RF-REL-02), PDF (RF-REL-05)~~ (feitos em 18/11/2026, ver "Modelos de relatório, prévia e PDF") e ~~a caixa de entrada (RF-WPP-03)~~ (feita).
 
 ## Metas de anúncios por cliente (17/11/2026)
 RF-T2-04, com os números já sincronizados da Meta.
@@ -619,3 +619,40 @@ Ele abre `/criativos/novo?anuncio={id}`. O anúncio é lido com o login da pesso
 Público, CTA e prazo ficam com a pessoa. O pedido guarda `source_ad_ref` (`meta:{id do anúncio}`), e a página do criativo mostra "Pedido a partir do anúncio …". Se o anúncio não abrir (sem acesso, removido ou cliente inativo), o pedido abre em branco com o aviso.
 
 Testado em `src/domain/creatives/from-ad.test.ts` e `e2e/40-criativo-do-anuncio.spec.ts`.
+
+## Modelos de relatório, prévia e PDF (18/11/2026)
+RF-REL-02, RF-REL-03 e RF-REL-05.
+
+**Modelos** (`report_templates`, em Configurações › Relatórios):
+- Texto de WhatsApp com variáveis: `{cliente}`, `{periodo}`, `{investimento}`, `{impressoes}`, `{cliques}`, `{ctr}`, `{cpc}`, `{cpm}`, `{leads}`, `{cpl}`, `{conversas}`, `{custo_conversa}`, `{compras}`, `{roas}`, `{saldo}`, `{dias_saldo}`, `{top_criativo}` e `{campanhas}` (a lista das campanhas, em várias linhas).
+- As variáveis entram por botões, e a prévia usa números de exemplo. Variável desconhecida não salva.
+- **Linha com variável sem valor some.** Exemplos: o saldo de uma conta pós-paga, o CPL sem leads. Assim um modelo serve a clientes diferentes.
+- CPL e custo por conversa usam o gasto das campanhas daquele objetivo. Se não houver nenhuma, usam o gasto total.
+- `{top_criativo}` é o anúncio com mais resultados no período; no empate, o de menor custo por resultado. Impressões não contam.
+- A agência nasce com "Relatório padrão", o mesmo texto de antes, com cliques, CTR e destaque. Só existe um padrão: ele não é excluído e não perde a marca sem outro no lugar. O nome não pode repetir.
+- **Quem edita:** quem tem "Configurar relatórios" para todos os clientes (`reports.manage` = all: admin e gerente de tráfego). O gestor lê os modelos.
+
+**Modelo do cliente** (`client_report_settings`): é escolhido no diálogo "Relatório" da aba Anúncios por quem configura os relatórios do cliente. Vale também para o envio automático de segunda. Ao excluir um modelo, os clientes que o usavam voltam ao padrão.
+
+**Diálogo "Relatório"** (aba Anúncios, para quem vê os anúncios):
+- período: começa em "Semana passada", e há também hoje, ontem, 7 dias, 30 dias e este mês;
+- prévia com os números reais que a pessoa vê (RLS);
+- "Baixar PDF";
+- "Enviar no WhatsApp" para o grupo de relatórios (`ads.manage`). Ele substitui o antigo botão "Enviar relatório".
+- Sem gasto no período: avisa e não envia nem gera PDF.
+
+**PDF** (`/clientes/{id}/anuncios/relatorio?periodo=…`, `@react-pdf/renderer`):
+- marca da Extend: logo, faixa azul e dourada, fontes Outfit e Inter;
+- indicadores do período (os de leads, conversas e compras só aparecem quando houver);
+- destaque, tabela de campanhas por conta e saldo das contas pré-pagas;
+- rodapé com a data de geração e as páginas.
+
+Os números são lidos com o login da pessoa: quem não vê o cliente recebe 404.
+
+**Testes:**
+- `45_modelos_relatorio.test.sql` (14);
+- Vitest: `domain/ads/report` e `features/ads/pdf`;
+- `e2e/41-modelos-relatorio.spec.ts`: criar o modelo com os botões, a prévia real, escolher o modelo do cliente, o PDF, e o envio a um servidor de teste no formato do WAHA;
+- `e2e/29` atualizado.
+
+**Ainda não:** RF-REL-06 (guardar cada PDF enviado na aba Relatórios do cliente) e o envio diário ou mensal com horário configurável (RF-REL-01). Hoje o envio automático é semanal.

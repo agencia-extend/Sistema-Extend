@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { parseBRL } from "@/domain/shared/money";
+import { unknownVariables } from "@/domain/ads/report";
 
 export const syncNowSchema = z.object({ clientId: z.uuid("Cliente inválido.").nullable() });
 
@@ -77,3 +78,19 @@ export const adRenameSchema = z.object({ level, id: z.uuid("Item inválido."), n
 export const adDuplicateSchema = z.object({ level: z.enum(["campaign", "adset"], "Nível inválido."), id: z.uuid("Item inválido."), why });
 
 export const campaignIdSchema = z.object({ campaignId: z.uuid("Campanha inválida.") });
+
+// Modelos de relatório (RF-REL-02).
+export const reportTemplateSchema = z
+  .object({
+    id: z.uuid().optional(),
+    name: z.string().trim().min(2, "Dê um nome ao modelo.").max(80, "Use até 80 caracteres."),
+    body: z.string().trim().min(10, "Escreva o texto do relatório.").max(4000, "Use até 4.000 caracteres."),
+    isDefault: z.boolean().default(false),
+  })
+  .superRefine((v, ctx) => {
+    const bad = unknownVariables(v.body);
+    if (bad.length) ctx.addIssue({ code: "custom", path: ["body"], message: `Variável que o sistema não conhece: ${bad.map((b) => `{${b}}`).join(", ")}. Use os botões de variáveis.` });
+  });
+export const reportTemplateIdSchema = z.object({ id: z.uuid() });
+export const clientTemplateSchema = z.object({ clientId: z.uuid("Cliente inválido."), templateId: z.uuid().nullable() });
+export const reportPreviewSchema = z.object({ clientId: z.uuid("Cliente inválido."), period: reportNowSchema.shape.period, templateId: z.uuid().nullable().optional() });

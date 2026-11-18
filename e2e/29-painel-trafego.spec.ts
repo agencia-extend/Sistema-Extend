@@ -127,8 +127,14 @@ test("2. aba Anúncios do cliente e conta sem conexão ao sincronizar", async ({
   await expect(page.getByRole("button", { name: "Editar meta" })).toBeVisible();
 
   // Sem WhatsApp configurado (ou sem grupo de relatórios), o envio diz o que falta.
-  await page.getByRole("button", { name: "Enviar relatório" }).click();
+  await page.getByRole("button", { name: "Relatório", exact: true }).click();
+  const report = page.getByRole("dialog", { name: "Relatório de anúncios" });
+  await report.getByLabel("Período").click();
+  await page.getByRole("option", { name: "Últimos 7 dias" }).click();
+  await expect(report.getByRole("region", { name: /^Prévia/ })).toContainText("Investimento:");
+  await report.getByRole("button", { name: "Enviar no WhatsApp" }).click();
   await expect(page.getByText(/Configurações › WhatsApp/).first()).toBeVisible();
+  await page.keyboard.press("Escape");
   await page.getByRole("button", { name: "Sincronizar agora" }).click();
   await expect(page.getByText(/sem conexão ativa com a Meta/)).toBeVisible();
 });
