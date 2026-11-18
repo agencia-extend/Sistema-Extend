@@ -2,6 +2,7 @@ import { canAny, type PermissionKey, type PermissionMap } from "@/domain/permiss
 
 export type NavIcon =
   | "home"
+  | "inbox"
   | "weekly"
   | "schedule"
   | "tasks"
@@ -64,7 +65,10 @@ export const NAV_GROUPS: NavGroup[] = [
   },
   {
     label: "Comercial",
-    items: [{ href: "/comercial", label: "Comercial", icon: "commercial", anyOf: ["crm.leads.read"] }],
+    items: [
+      { href: "/comercial", label: "Comercial", icon: "commercial", anyOf: ["crm.leads.read"] },
+      { href: "/atendimento", label: "Atendimento", icon: "inbox", anyOf: ["inbox.read"], mobile: true },
+    ],
   },
   {
     label: "Equipe",

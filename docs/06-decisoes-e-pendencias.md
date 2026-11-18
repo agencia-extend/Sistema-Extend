@@ -549,3 +549,18 @@ RF-CON-03 e RF-CON-04.
 - **Cancelar e reagendar:** cancelar a agendada ou a com erro; reagendar a agendada, a com erro ou a cancelada (volta para a fila).
 - **Testado:** `41_publicacoes.test.sql`, Vitest das regras e `e2e/36-publicacoes.spec.ts`, que programa com envio do arquivo, roda a fila e recebe a recusa real da Meta (conexão de teste com token inválido).
 - **Pendente do lado da Extend:** a conexão real (usuário do sistema "Sistema-Extend") ainda não tem `pages_manage_posts`, `instagram_basic` e `instagram_content_publish`. Sem elas, os perfis aparecem como "falta …" e nada sai. Também é preciso atribuir ao usuário do sistema as páginas e os Instagram dos clientes (hoje são 2 páginas).
+
+## Atendimento da Extend: caixa de entrada do WhatsApp (17/11/2026)
+RF-WPP-03, como o Henrique decidiu: o atendimento é da própria Extend, ligado ao Comercial.
+- **Conversas** (`wa_conversations`): toda mensagem de contato que chega ao número da Extend pelo WAHA (`whatsapp_messages`) vira ou atualiza uma conversa. Os grupos (dos clientes) ficam de fora.
+  - Cada conversa guarda telefone, nome do WhatsApp, última mensagem, não lidas, "aguardando resposta", responsável, aberta ou encerrada e o lead ligado.
+  - O contato escrever de novo reabre a conversa encerrada.
+- **Telas:**
+  - `/atendimento` (menu Comercial): abas Abertas, Aguardando resposta, Minhas e Encerradas, com contagem; aviso quando o WhatsApp da Extend não está conectado; atualiza ao vivo pelo Realtime;
+  - `/atendimento/[id]`: mensagens, resposta (Enter envia, Shift+Enter quebra a linha), responsável, encerrar ou reabrir, e o lead.
+- **Lead:** "Criar lead no funil" cria o lead no início do funil padrão, com origem WhatsApp, o telefone e o responsável da conversa como dono. Lead com o mesmo telefone é ligado sozinho, inclusive quando é cadastrado depois no Comercial.
+- **Avisos** (tipo `inbox`): conversa nova sem responsável vai para quem responde o atendimento; conversa reaberta vai para o responsável; conversa passada para alguém vai para essa pessoa.
+- **Permissões:** ver (`inbox.read`), responder, encerrar e assumir (`inbox.reply`): papéis Comercial, Atendimento e admin. Criar lead pede também `crm.leads.manage`.
+- **Resposta:** sai pelo WAHA. Antes de enviar, confere se a sessão está conectada. A mensagem entra na conversa na hora, com o mesmo id que o webhook manda, então não duplica.
+- **Testado:** `42_atendimento.test.sql`, Vitest e `e2e/37-atendimento.spec.ts`. O E2E roda só local, com o WAHA da `infra/waha`, e não mexe numa conexão real: mensagem pelo webhook assinado, leitura, resposta recusada pelo WAHA (sessão de teste), lead criado e conversa encerrada.
+- **Para usar de verdade:** ligar o túnel (`docker compose --profile tunnel up -d` em `infra/waha`), salvar o endereço em Configurações › WhatsApp e ler o QR Code com o número da Extend. Mídia (foto, áudio) aparece como "[Mídia]"; abrir e enviar mídia pelo sistema fica para a próxima rodada.

@@ -16,6 +16,7 @@ export const NOTIFICATION_KINDS = [
   { key: "client_report", label: "Relatórios ao cliente: envio da semana em aberto e retorno do cliente" },
   { key: "client_onboarding", label: "Cliente novo em onboarding" },
   { key: "training", label: "Treinamento atribuído, atrasado ou concluído" },
+  { key: "inbox", label: "Atendimento: conversa nova, reaberta ou passada para mim" },
   { key: "crm", label: "Comercial: próximas ações e leads parados" },
   { key: "proposal", label: "Propostas: aberta pelo cliente, aceita ou vencida" },
   { key: "portal", label: "Área do cliente: entrada de pessoas do cliente" },

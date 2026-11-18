@@ -3187,6 +3187,44 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"wa_conversations": {
+                  Row: {
+                    "assignee_id": string | null,"chat_id": string,"connection_id": string,"contact_name": string,"created_at": string,"id": string,"last_inbound_at": string | null,"last_message_at": string | null,"last_preview": string | null,"lead_id": string | null,"organization_id": string,"phone": string | null,"status": string,"unread_count": number,"waiting_reply": boolean
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "assignee_id"?: string | null,"chat_id": string,"connection_id": string,"contact_name"?: string,"created_at"?: string,"id"?: string,"last_inbound_at"?: string | null,"last_message_at"?: string | null,"last_preview"?: string | null,"lead_id"?: string | null,"organization_id": string,"phone"?: string | null,"status"?: string,"unread_count"?: number,"waiting_reply"?: boolean
+                  }
+                  Update: {
+                    "assignee_id"?: string | null,"chat_id"?: string,"connection_id"?: string,"contact_name"?: string,"created_at"?: string,"id"?: string,"last_inbound_at"?: string | null,"last_message_at"?: string | null,"last_preview"?: string | null,"lead_id"?: string | null,"organization_id"?: string,"phone"?: string | null,"status"?: string,"unread_count"?: number,"waiting_reply"?: boolean
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "wa_conversations_assignee_id_fkey"
+      columns: ["assignee_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "wa_conversations_connection_id_fkey"
+      columns: ["connection_id"]
+isOneToOne: false
+      referencedRelation: "whatsapp_connections"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "wa_conversations_lead_id_fkey"
+      columns: ["lead_id"]
+isOneToOne: false
+      referencedRelation: "leads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "wa_conversations_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"whatsapp_connections": {
                   Row: {
                     "api_key_enc": string,"base_url": string,"connected_by": string | null,"created_at": string,"id": string,"last_error": string | null,"last_event_at": string | null,"me_id": string | null,"me_name": string | null,"organization_id": string,"session": string,"status": string,"updated_at": string,"webhook_secret_enc": string
@@ -3378,6 +3416,9 @@ isOneToOne: false
 "archive_client":
 { Args: { "p_client": string }; Returns: undefined
                            },
+"assign_conversation":
+{ Args: { "p_id": string,"p_user": string }; Returns: undefined
+                           },
 "can_manage_client_ads":
 { Args: { "p_client": string }; Returns: boolean
                            },
@@ -3425,6 +3466,9 @@ isOneToOne: false
 "create_handoff":
 { Args: { "p": Json }; Returns: string
                            },
+"create_lead_from_conversation":
+{ Args: { "p_id": string,"p_name": string }; Returns: string
+                           },
 "creative_linkable_ads":
 { Args: { "p_library": string }; Returns: {
               "account_name": string,"ad_id": string,"campaign_name": string,"effective_status": string,"name": string
@@ -3469,16 +3513,27 @@ isOneToOne: false
 "import_leads":
 { Args: { "p_file": string,"p_pipeline": string,"p_rows": Json }; Returns: Json
                            },
+"inbox_agents":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "full_name": string,"id": string
+            }[]
+                           },
 "integration_status":
 { Args: Record<PropertyKey, never>; Returns: {
               "account_email": string,"account_name": string,"accounts_synced_at": string,"client_id": string,"client_name": string,"connected_by_name": string,"created_at": string,"expires_at": string,"id": string,"last_error": string,"method": string,"owner_kind": string,"provider": string,"purpose": string,"scopes": (string)[],"status": string
             }[]
+                           },
+"link_conversation_lead":
+{ Args: { "p_id": string,"p_lead": string }; Returns: undefined
                            },
 "link_creative_ad":
 { Args: { "p_ad": string,"p_library": string }; Returns: undefined
                            },
 "mark_all_notifications_read":
 { Args: Record<PropertyKey, never>; Returns: number
+                           },
+"mark_conversation_read":
+{ Args: { "p_id": string }; Returns: undefined
                            },
 "marketing_calendar_clients":
 { Args: Record<PropertyKey, never>; Returns: {
@@ -3640,6 +3695,9 @@ isOneToOne: false
                            },
 "set_content_cover":
 { Args: { "p_path": string,"p_task": string }; Returns: undefined
+                           },
+"set_conversation_status":
+{ Args: { "p_id": string,"p_status": string }; Returns: undefined
                            },
 "set_onboarding_recipients":
 { Args: { "p_ids": (string)[] }; Returns: undefined
