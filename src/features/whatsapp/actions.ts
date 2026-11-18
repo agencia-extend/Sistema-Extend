@@ -9,10 +9,17 @@ import { decrypt, encrypt } from "@/lib/crypto";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getWhatsapp, sendAndLog, wahaConn, webhookUrl } from "@/lib/whatsapp/store";
-import { WahaError, wahaGroups, wahaLogout, wahaPing, wahaQr, wahaRequestCode, wahaSession, wahaStartSession } from "@/lib/whatsapp/waha";
+import { NO_SERVER_MESSAGE, ensureConnection } from "@/lib/whatsapp/server";
+import { WahaError, wahaGroups, wahaLogout, wahaPing, wahaQr, wahaRelink, wahaRequestCode, wahaSession, wahaStartSession } from "@/lib/whatsapp/waha";
 import { groupSchema, pairingSchema, serverSchema, testSchema } from "./schemas";
 
 const PAGE = "/configuracoes/whatsapp";
+/** Conectar o número e compilar: quem gerencia o atendimento (Comercial) ou as integrações (admin). */
+const CONNECT = ["inbox.manage", "integrations.manage"] as const;
+const refreshAll = () => {
+  revalidatePath(PAGE);
+  revalidatePath("/atendimento");
+};
 const none = z.object({});
 const msg = (e: unknown, fallback: string) => (e instanceof WahaError ? e.message : fallback);
 
@@ -36,22 +43,36 @@ export const saveWhatsappServer = defineAction({ schema: serverSchema, permissio
   return ok(null, "Servidor do WhatsApp salvo. Agora conecte o número.");
 });
 
-/** Sobe a sessão (com o webhook do sistema) para mostrar o QR Code. */
-export const startWhatsapp = defineAction({ schema: none, permission: "integrations.manage" }, async (_, { user }) => {
-  const c = await getWhatsapp(user.organizationId);
-  if (!c) return fail("business_rule", "Salve o endereço e a chave do servidor primeiro.");
+/** Sobe a sessão (com o webhook do sistema) para mostrar o QR Code. O servidor já vem configurado. */
+export const startWhatsapp = defineAction({ schema: none, permission: [...CONNECT] }, async (_, { user }) => {
+  const c = await ensureConnection(user.organizationId, user.id);
+  if (!c) return fail("business_rule", NO_SERVER_MESSAGE);
   try {
     await wahaStartSession(wahaConn(c), webhookUrl(c.id), decrypt(c.webhook_secret_enc));
     await createAdminClient().from("whatsapp_connections").update({ status: "STARTING", last_error: null, connected_by: user.id }).eq("id", c.id);
   } catch (e) {
     return fail("network", msg(e, "Não foi possível iniciar a conexão."));
   }
-  revalidatePath(PAGE);
+  refreshAll();
   return ok(null, "Conexão iniciada. Leia o QR Code com o celular do número da Extend.");
 });
 
+/** Sai do aparelho e gera um QR novo com o histórico ligado ("Conectar de novo e trazer tudo"). */
+export const relinkWhatsapp = defineAction({ schema: none, permission: [...CONNECT] }, async (_, { user }) => {
+  const c = await getWhatsapp(user.organizationId);
+  if (!c) return fail("business_rule", NO_SERVER_MESSAGE);
+  try {
+    await wahaRelink(wahaConn(c), webhookUrl(c.id), decrypt(c.webhook_secret_enc));
+  } catch (e) {
+    return fail("network", msg(e, "Não foi possível preparar o QR Code."));
+  }
+  await createAdminClient().from("whatsapp_connections").update({ status: "STARTING", last_error: null, me_id: null, me_name: null, connected_by: user.id }).eq("id", c.id);
+  refreshAll();
+  return ok(null);
+});
+
 /** Situação atual e, se estiver esperando, o QR Code (a tela consulta a cada poucos segundos). */
-export const whatsappState = defineAction({ schema: none, permission: "integrations.manage" }, async (_, { user }) => {
+export const whatsappState = defineAction({ schema: none, permission: [...CONNECT] }, async (_, { user }) => {
   const c = await getWhatsapp(user.organizationId);
   if (!c) return ok({ status: "SEM_SERVIDOR", qr: null as string | null, me: null as string | null });
   try {
@@ -64,7 +85,7 @@ export const whatsappState = defineAction({ schema: none, permission: "integrati
         .from("whatsapp_connections")
         .update({ status, ...(status === "WORKING" ? { me_id: s?.me?.id ?? null, me_name: s?.me?.pushName ?? null, last_error: null } : {}) })
         .eq("id", c.id);
-      if (status === "WORKING") revalidatePath(PAGE);
+      if (status === "WORKING") refreshAll();
     }
     const qr = status === "SCAN_QR_CODE" ? await wahaQr(conn).catch(() => null) : null;
     return ok({ status, qr, me });
@@ -74,7 +95,7 @@ export const whatsappState = defineAction({ schema: none, permission: "integrati
 });
 
 /** Alternativa ao QR Code: código de 8 letras digitado no celular (Aparelhos conectados › Conectar com número). */
-export const requestPairingCode = defineAction({ schema: pairingSchema, permission: "integrations.manage" }, async ({ phone }, { user }) => {
+export const requestPairingCode = defineAction({ schema: pairingSchema, permission: [...CONNECT] }, async ({ phone }, { user }) => {
   const c = await getWhatsapp(user.organizationId);
   if (!c) return fail("business_rule", "Salve o servidor e inicie a conexão primeiro.");
   let digits = phone.replace(/\D/g, "");
@@ -133,6 +154,6 @@ export const disconnectWhatsapp = defineAction({ schema: none, permission: "inte
   if (!c) return fail("not_found", "Nada para desconectar.");
   await wahaLogout(wahaConn(c)).catch(() => null);
   must(await createAdminClient().from("whatsapp_connections").update({ status: "STOPPED", me_id: null, me_name: null }).eq("id", c.id));
-  revalidatePath(PAGE);
+  refreshAll();
   return ok(null, "WhatsApp desconectado.");
 });

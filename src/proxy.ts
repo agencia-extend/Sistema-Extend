@@ -19,6 +19,7 @@ const PUBLIC_PATHS = [
   "/api/integracoes/meta/link",
   "/api/integracoes/meta/retorno",
   "/api/whatsapp/webhook",
+  "/api/whatsapp/servidor", // o túnel do WAHA anuncia o endereço (assinado com a chave do servidor)
 ];
 
 function isPublic(pathname: string) {

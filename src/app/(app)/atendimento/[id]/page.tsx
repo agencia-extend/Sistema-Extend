@@ -20,7 +20,7 @@ export default async function ConversaPage({ params }: { params: Promise<{ id: s
   const canSeeLeads = Boolean(user.permissions["crm.leads.read"]);
   const [data, agents, wa] = await Promise.all([getConversation(id, canSeeLeads), listAgents(), getWhatsappState()]);
   if (!data) notFound();
-  const { conversation: c, messages, lead } = data;
+  const { conversation: c, messages, lead, group } = data;
   const name = contactLabel(c);
   const canReply = Boolean(user.permissions["inbox.reply"]);
   const disabledReason = !canReply ? "Você pode ler, mas não responder conversas." : !wa?.connected ? "O WhatsApp da Extend não está conectado: não dá para responder agora." : null;
@@ -34,7 +34,7 @@ export default async function ConversaPage({ params }: { params: Promise<{ id: s
           <div className="grid min-w-0">
             <h1 className="truncate text-base font-semibold">{name}</h1>
             <p className="truncate text-xs text-muted-foreground">
-              {[formatPhone(c.phone) || null, c.status === "encerrada" ? "Encerrada" : c.waitingReply ? "Aguardando resposta" : null].filter(Boolean).join(" · ")}
+              {[c.kind === "grupo" ? "Grupo" : formatPhone(c.phone) || null, c.status === "encerrada" ? "Encerrada" : c.waitingReply ? "Aguardando resposta" : null].filter(Boolean).join(" · ")}
             </p>
           </div>
         </header>
@@ -42,7 +42,7 @@ export default async function ConversaPage({ params }: { params: Promise<{ id: s
           {messages.length === 0 && <li className="text-center text-sm text-muted-foreground">Nenhuma mensagem guardada nesta conversa.</li>}
           {messages.map((m) => (
             <li key={m.id} className={cn("max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-xs sm:max-w-[70%]", m.fromMe ? "self-end rounded-br-sm bg-primary text-primary-foreground" : "self-start rounded-bl-sm border bg-card")}>
-              {m.fromMe && m.authorName && <p className="mb-0.5 text-[11px] font-medium opacity-80">{m.authorName}</p>}
+              {(m.fromMe || c.kind === "grupo") && m.authorName && <p className="mb-0.5 text-[11px] font-medium opacity-80">{m.authorName}</p>}
               <p className="whitespace-pre-wrap break-words">{m.body || (m.kind === "media" ? "[Mídia: abra no WhatsApp para ver]" : "")}</p>
               <p className={cn("mt-1 text-right text-[11px] tabular", m.fromMe ? "opacity-80" : "text-muted-foreground")} suppressHydrationWarning>{formatDateTime(m.sentAt)}</p>
             </li>
@@ -61,6 +61,7 @@ export default async function ConversaPage({ params }: { params: Promise<{ id: s
           suggestedName={c.contactName || ""}
           canReply={canReply}
           canCreateLead={canReply && Boolean(user.permissions["crm.leads.manage"])}
+          group={group}
         />
       </aside>
     </div>

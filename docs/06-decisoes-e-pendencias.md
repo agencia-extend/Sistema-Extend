@@ -552,7 +552,7 @@ RF-CON-03 e RF-CON-04.
 
 ## Atendimento da Extend: caixa de entrada do WhatsApp (17/11/2026)
 RF-WPP-03, como o Henrique decidiu: o atendimento é da própria Extend, ligado ao Comercial.
-- **Conversas** (`wa_conversations`): toda mensagem de contato que chega ao número da Extend pelo WAHA (`whatsapp_messages`) vira ou atualiza uma conversa. Os grupos (dos clientes) ficam de fora.
+- **Conversas** (`wa_conversations`): toda mensagem de contato que chega ao número da Extend pelo WAHA (`whatsapp_messages`) vira ou atualiza uma conversa. Desde 18/11 os grupos também entram (ver a seção seguinte).
   - Cada conversa guarda telefone, nome do WhatsApp, última mensagem, não lidas, "aguardando resposta", responsável, aberta ou encerrada e o lead ligado.
   - O contato escrever de novo reabre a conversa encerrada.
 - **Telas:**
@@ -564,3 +564,22 @@ RF-WPP-03, como o Henrique decidiu: o atendimento é da própria Extend, ligado 
 - **Resposta:** sai pelo WAHA. Antes de enviar, confere se a sessão está conectada. A mensagem entra na conversa na hora, com o mesmo id que o webhook manda, então não duplica.
 - **Testado:** `42_atendimento.test.sql`, Vitest e `e2e/37-atendimento.spec.ts`. O E2E roda só local, com o WAHA da `infra/waha`, e não mexe numa conexão real: mensagem pelo webhook assinado, leitura, resposta recusada pelo WAHA (sessão de teste), lead criado e conversa encerrada.
 - **Para usar de verdade:** ligar o túnel (`docker compose --profile tunnel up -d` em `infra/waha`), salvar o endereço em Configurações › WhatsApp e ler o QR Code com o número da Extend. Mídia (foto, áudio) aparece como "[Mídia]"; abrir e enviar mídia pelo sistema fica para a próxima rodada.
+
+## Atendimento como no HubSystem: conectar com um clique e compilar conversas (18/11/2026)
+Pedido do Henrique: "só conectando, abre o QR Code, escaneia e já faz toda a conexão; um botão para compilar as mensagens, na mesma esquematização do HubSystem".
+- **Servidor já configurado:** a `WAHA_API_KEY` está na Vercel (secreta). O endereço vem sozinho: o contêiner `extend-waha-anuncio` (perfil `tunnel` do `infra/waha/compose.yaml`) lê o endereço do túnel e avisa `POST /api/whatsapp/servidor`, assinado com HMAC-SHA256 pela chave e com horário (vale 5 minutos). O sistema só troca o endereço se o WAHA responder nele com a chave. Na VPS, `WAHA_URL` fixa faz o mesmo papel. O formulário manual ficou recolhido em "Servidor do WhatsApp" (Configurações).
+- **Conectar WhatsApp** (no Atendimento e em Configurações, para `inbox.manage` ou `integrations.manage`, ou seja, Comercial e admin): um clique, e o QR Code aparece e se renova sozinho (gera outro se expirar, até 3 vezes). Também dá para conectar com o código de 8 letras. Conectado, o mesmo diálogo passa para a compilação. Desconectar continua só para o admin.
+- **Compilar conversas** (`wa_imports` + `wa_import_chat`, adaptado de `src/lib/whatsapp-import.ts` do HubSystem):
+  - traz conversas individuais e/ou grupos, com até 500 mensagens recentes de cada; a mídia antiga vira aviso, sem o arquivo;
+  - roda em etapas: a tela chama de novo até terminar e o relógio do banco (`extend-whatsapp-compilar`, a cada minuto, só quando há compilação na fila) continua com a tela fechada;
+  - faz 3 passadas (2 e 5 minutos depois) porque o aparelho manda o histórico aos poucos;
+  - não avisa conversa por conversa (`extend.wa_import`) e avisa quem compilou ao terminar;
+  - conversa parada há mais de 30 dias entra encerrada; contato que falou por último nos últimos 3 dias entra "aguardando"; o lead é ligado pelo telefone;
+  - quem tem id oculto (@lid) tem o telefone buscado no WAHA;
+  - se o número foi conectado sem guardar o histórico, oferece "Conectar de novo e trazer tudo".
+- **Grupos no Atendimento:** nova aba Grupos. A prévia mostra quem escreveu e a conversa mostra o nome de cada pessoa. No lugar do lead aparece o cliente ligado ao grupo. Grupo novo não avisa ninguém; reaberto avisa só o responsável. Grupo desconhecido entra em `whatsapp_groups` e o nome de "Buscar grupos" passa para a conversa.
+- **Testado:** `43_whatsapp_compilar.test.sql` (14), Vitest (`domain/whatsapp/history`) e `e2e/38-whatsapp-compilar.spec.ts` (local). O E2E cobre:
+  - o aviso do túnel, recusando assinatura errada e aviso vencido;
+  - o QR Code real do WAHA local, aberto pela pessoa do Comercial;
+  - a compilação contra um servidor de teste que responde como o WAHA: 1 conversa, 1 grupo e 3 mensagens no Atendimento.
+- **Pendente do lado do Henrique:** rodar uma vez `docker compose --profile tunnel up -d` em `infra/waha` (com o Docker aberto) e ler o QR Code. A leitura real e a compilação com o celular de verdade só podem ser conferidas com o número conectado.

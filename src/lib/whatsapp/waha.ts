@@ -7,9 +7,12 @@ export type WahaConn = { url: string; key: string; session: string };
 
 export class WahaError extends Error {
   status?: number;
-  constructor(message: string, status?: number) {
+  /** Começo da resposta do servidor (sem a chave), para reconhecer erros conhecidos. */
+  detail?: string;
+  constructor(message: string, status?: number, detail?: string) {
     super(message);
     this.status = status;
+    this.detail = detail;
   }
 }
 
@@ -32,7 +35,7 @@ async function call<T>(conn: Pick<WahaConn, "url" | "key">, path: string, init?:
     throw new WahaError("Não foi possível falar com o servidor do WhatsApp. Confira se ele está ligado e se o endereço está certo.");
   }
   if (res.status === 401 || res.status === 403) throw new WahaError("O servidor do WhatsApp recusou a chave. Confira a chave da API.", res.status);
-  if (!res.ok) throw new WahaError(`O servidor do WhatsApp respondeu com erro (${res.status}).`, res.status);
+  if (!res.ok) throw new WahaError(`O servidor do WhatsApp respondeu com erro (${res.status}).`, res.status, (await res.text().catch(() => "")).slice(0, 300));
   return (await res.json().catch(() => ({}))) as T;
 }
 
@@ -62,7 +65,7 @@ export async function wahaStartSession(conn: WahaConn, webhookUrl: string, secre
   }
 }
 
-export type WahaSession = { status: string; me: { id?: string; pushName?: string } | null };
+export type WahaSession = { status: string; me: { id?: string; pushName?: string } | null; config?: { noweb?: { store?: { enabled?: boolean } } } | null };
 
 export async function wahaSession(conn: WahaConn): Promise<WahaSession | null> {
   try {
@@ -83,6 +86,48 @@ export async function wahaQr(conn: WahaConn) {
 export async function wahaRequestCode(conn: WahaConn, phone: string) {
   const r = await call<{ code?: string }>(conn, `/api/${conn.session}/auth/request-code`, { method: "POST", body: JSON.stringify({ phoneNumber: phone }), timeoutMs: 15000 });
   return r.code ?? null;
+}
+
+/** Gera um QR novo: os códigos expiram e a sessão para depois de algumas tentativas. */
+export async function wahaRestart(conn: WahaConn) {
+  await call(conn, `/api/sessions/${conn.session}/restart`, { method: "POST" });
+}
+
+/** O histórico só fica guardado com o store ligado antes do QR Code. */
+export const wahaStoreOn = (s: WahaSession | null) => s?.config?.noweb?.store?.enabled === true;
+
+/** Sai do aparelho e sobe a sessão de novo com o histórico ligado, pronta para outro QR Code. */
+export async function wahaRelink(conn: WahaConn, webhookUrl: string, secret: string) {
+  await call(conn, `/api/sessions/${conn.session}/logout`, { method: "POST" }).catch((e: WahaError) => {
+    if (e.status !== 404) throw e;
+  });
+  await wahaStartSession(conn, webhookUrl, secret);
+}
+
+export type WahaChat = { id: string; name?: string | null };
+
+/** Conversas do aparelho, das mais recentes para as mais antigas. */
+export async function wahaChatsOverview(conn: WahaConn, limit: number, offset: number) {
+  const raw = await call<unknown>(conn, `/api/${conn.session}/chats/overview?limit=${limit}&offset=${offset}`, { timeoutMs: 20000 });
+  return (Array.isArray(raw) ? raw : []).flatMap((c: { id?: unknown; name?: unknown }) => {
+    const id = typeof c.id === "string" ? c.id : (c.id as { _serialized?: string } | undefined)?._serialized;
+    return id ? [{ id, name: typeof c.name === "string" ? c.name : null }] : [];
+  });
+}
+
+/** Mensagens de uma conversa, das mais recentes para as mais antigas, sem baixar mídia. */
+export const wahaChatMessages = (conn: WahaConn, chatId: string, limit: number, offset: number) =>
+  call<unknown[]>(conn, `/api/${conn.session}/chats/${encodeURIComponent(chatId)}/messages?limit=${limit}&offset=${offset}&downloadMedia=false&sortBy=messageTimestamp&sortOrder=desc`, { timeoutMs: 20000 });
+
+export async function wahaGroupName(conn: WahaConn, groupId: string) {
+  const r = await call<{ subject?: string; name?: string }>(conn, `/api/${conn.session}/groups/${encodeURIComponent(groupId)}`, { timeoutMs: 8000 });
+  return r.subject ?? r.name ?? null;
+}
+
+/** Telefone real de quem tem id oculto (@lid), quando o servidor já conhece. */
+export async function wahaLidPhone(conn: WahaConn, lid: string) {
+  const r = await call<{ pn?: string | null }>(conn, `/api/${conn.session}/lids/${encodeURIComponent(lid)}`, { timeoutMs: 8000 });
+  return r.pn ?? null;
 }
 
 /** Sai do aparelho (o número desconecta) e apaga a sessão. */

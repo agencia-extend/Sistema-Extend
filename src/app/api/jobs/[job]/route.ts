@@ -7,6 +7,7 @@ import { forwardAdAlerts } from "@/lib/whatsapp/alerts";
 import { sendWeeklyReports } from "@/lib/whatsapp/reports";
 import { syncSocial } from "@/lib/social/meta-social";
 import { runPublisher } from "@/lib/social/publisher";
+import { runWhatsappImports } from "@/lib/whatsapp/history";
 
 // Relógio do banco: pg_cron → pg_net → POST /api/jobs/<job> com "Authorization: Bearer <JOBS_TOKEN>".
 export const dynamic = "force-dynamic";
@@ -44,6 +45,8 @@ const JOBS: Record<string, () => Promise<unknown>> = {
   "social-sync": () => syncSocial({ budgetMs: 45_000 }),
   // Publicações programadas no Facebook e no Instagram (RF-CON-03).
   "publish-posts": runPublisher,
+  // "Compilar conversas" do WhatsApp continua com a tela fechada.
+  "whatsapp-import": () => runWhatsappImports(45_000),
 };
 
 export async function POST(request: NextRequest, { params }: { params: Promise<{ job: string }> }) {

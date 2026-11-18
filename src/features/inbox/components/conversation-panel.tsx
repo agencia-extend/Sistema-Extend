@@ -16,9 +16,11 @@ const NONE = "__ninguem";
 type Lead = { id: string; name: string; company: string | null; valueCents: number | null; stageName: string | null; stageColor: string | null } | null;
 
 /** Responsável, encerrar/reabrir e o lead do Comercial ligado à conversa. */
-export function ConversationPanel({ id, status, assigneeId, agents, lead, hasLead, suggestedName, canReply, canCreateLead }: {
+export function ConversationPanel({ id, status, assigneeId, agents, lead, hasLead, suggestedName, canReply, canCreateLead, group = null }: {
   id: string; status: "aberta" | "encerrada"; assigneeId: string | null; agents: { id: string; name: string }[]; lead: Lead; hasLead: boolean;
   suggestedName: string; canReply: boolean; canCreateLead: boolean;
+  /** Conversa de grupo: no lugar do lead, o cliente ligado ao grupo (Configurações › WhatsApp). */
+  group?: { clientId: string | null; clientName: string | null } | null;
 }) {
   const [pending, run] = useTransition();
   const [name, setName] = useState(suggestedName);
@@ -50,6 +52,18 @@ export function ConversationPanel({ id, status, assigneeId, agents, lead, hasLea
         </Select>
       </section>
 
+      {group ? (
+        <section aria-labelledby="cv-cliente" className="grid gap-2">
+          <h2 id="cv-cliente" className="text-sm font-semibold">Cliente do grupo</h2>
+          {group.clientId && group.clientName ? (
+            <Link href={`/clientes/${group.clientId}`} className="text-sm font-medium break-words hover:underline">{group.clientName}</Link>
+          ) : group.clientId ? (
+            <p className="text-sm text-muted-foreground">Ligado a um cliente que você não vê.</p>
+          ) : (
+            <p className="text-sm text-muted-foreground">Grupo sem cliente. Quem administra liga o grupo ao cliente em Configurações › WhatsApp.</p>
+          )}
+        </section>
+      ) : (
       <section aria-labelledby="cv-lead" className="grid gap-2">
         <h2 id="cv-lead" className="text-sm font-semibold">Lead no Comercial</h2>
         {lead ? (
@@ -83,6 +97,7 @@ export function ConversationPanel({ id, status, assigneeId, agents, lead, hasLea
           <p className="text-sm text-muted-foreground">Sem lead ligado.</p>
         )}
       </section>
+      )}
 
       {canReply && (
         <Button variant="outline" disabled={pending} className="w-fit"

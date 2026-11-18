@@ -28,27 +28,22 @@ export default async function WhatsappPage() {
 
   return (
     <>
-      <PageHeader title="WhatsApp" description="Número da Extend conectado por QR Code (WAHA). Envia os relatórios dos clientes e os alertas de anúncios para os grupos internos da equipe." />
+      <PageHeader title="WhatsApp" description="Número da Extend conectado por QR Code. Recebe as conversas do Atendimento e envia os relatórios dos clientes e os alertas de anúncios para os grupos da equipe." />
       <PageBody className="grid max-w-4xl gap-10">
-        <section aria-labelledby="servidor" className="grid gap-4">
+        <section aria-labelledby="numero" className="grid gap-4">
           <div className="grid gap-1">
-            <h2 id="servidor" className="text-base font-semibold">Servidor</h2>
-            <p className="text-sm text-muted-foreground">Onde o WAHA está rodando. Por enquanto, a máquina local com o túnel; depois, a VPS. Trocar o endereço aqui não exige novo deploy.</p>
+            <h2 id="numero" className="text-base font-semibold">Número</h2>
+            <p className="text-sm text-muted-foreground">Clique em Conectar WhatsApp e leia o QR Code com o celular do número da Extend. Depois, compile as conversas para trazer o histórico ao Atendimento.</p>
           </div>
           <div className="rounded-xl border bg-card p-4 sm:p-5">
-            <ServerForm baseUrl={conn?.base_url ?? null} hasServer={Boolean(conn)} />
+            <ConnectionCard
+              status={conn?.status ?? null}
+              canDisconnect
+              me={conn && (conn.me_name || conn.me_id) ? `${conn.me_name ?? ""} (${(conn.me_id ?? "").replace(/@.*/, "")})`.trim() : null}
+            />
+            {conn?.last_error && <p role="alert" className="mt-3 rounded-md border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger">{conn.last_error}</p>}
           </div>
         </section>
-
-        {conn && (
-          <section aria-labelledby="numero" className="grid gap-4">
-            <h2 id="numero" className="text-base font-semibold">Número</h2>
-            <div className="rounded-xl border bg-card p-4 sm:p-5">
-              <ConnectionCard key={conn.status} initialStatus={conn.status} me={conn.me_name || conn.me_id ? `${conn.me_name ?? ""} (${(conn.me_id ?? "").replace(/@.*/, "")})`.trim() : null} />
-              {conn.last_error && <p role="alert" className="mt-3 rounded-md border border-danger/30 bg-danger-soft px-3 py-2 text-sm text-danger">{conn.last_error}</p>}
-            </div>
-          </section>
-        )}
 
         {conn && (
           <section aria-labelledby="grupos" className="grid gap-4">
@@ -59,6 +54,16 @@ export default async function WhatsappPage() {
             <GroupsTable connected={connected} clients={clients} groups={(groups ?? []).map((g) => ({ id: g.id, name: g.name, clientId: g.client_id, isAlerts: g.is_alerts, isReports: g.is_reports }))} />
           </section>
         )}
+
+        <details className="group rounded-xl border bg-card">
+          <summary className="cursor-pointer list-none rounded-xl px-4 py-3 text-sm font-medium outline-none hover:bg-muted/50 focus-visible:ring-2 focus-visible:ring-ring sm:px-5 [&::-webkit-details-marker]:hidden">
+            Servidor do WhatsApp <span className="font-normal text-muted-foreground">· {conn ? conn.base_url : "ainda não informado"}</span>
+          </summary>
+          <div className="grid gap-3 border-t px-4 py-4 sm:px-5">
+            <p className="text-sm text-muted-foreground">O túnel da máquina do servidor informa o endereço sozinho quando liga ou muda. Só preencha aqui para usar outro servidor (por exemplo, a VPS). Trocar não exige novo deploy.</p>
+            <ServerForm baseUrl={conn?.base_url ?? null} hasServer={Boolean(conn)} />
+          </div>
+        </details>
 
         {conn && (sends ?? []).length > 0 && (
           <section aria-labelledby="envios" className="grid gap-3">

@@ -1,4 +1,4 @@
--- Atendimento (RF-WPP-03): mensagens de contato viram conversas (grupos não), não lidas e "aguardando resposta",
+-- Atendimento (RF-WPP-03): mensagens de contato e de grupo viram conversas, não lidas e "aguardando resposta",
 -- aviso de conversa nova, responsável, encerrar/reabrir e o vínculo com o lead do Comercial.
 begin;
 create extension if not exists pgtap with schema extensions;
@@ -24,7 +24,8 @@ insert into public.whatsapp_messages (connection_id, wamid, chat_id, from_me, au
   ('00000000-0000-4000-bf27-000000000001', 'm1', '5511987654321@c.us', false, 'Marina', 'Quero saber dos planos', now() - interval '2 minutes'),
   ('00000000-0000-4000-bf27-000000000001', 'm2', '5511987654321@c.us', false, 'Marina', 'Vocês fazem tráfego?', now() - interval '1 minute');
 
-select is((select count(*)::int from public.wa_conversations where connection_id = '00000000-0000-4000-bf27-000000000001'), 1, 'só o contato vira conversa (grupo fica de fora)');
+select is((select string_agg(kind || ':' || contact_name, ',' order by kind) from public.wa_conversations where connection_id = '00000000-0000-4000-bf27-000000000001'),
+  'contato:Marina,grupo:', 'contato e grupo viram conversas (grupo com o nome do grupo, ainda vazio)');
 select is((select contact_name || '/' || phone || '/' || unread_count || '/' || waiting_reply || '/' || last_preview from public.wa_conversations where chat_id = '5511987654321@c.us'),
   'Marina/5511987654321/2/true/Vocês fazem tráfego?', 'nome, telefone, 2 não lidas, aguardando, última mensagem');
 select is((select count(*)::int from public.notifications where user_id = '00000000-0000-4000-bf07-000000000001' and kind = 'inbox'), 1,

@@ -17,3 +17,8 @@ export const pairingSchema = z.object({ phone: z.string().trim().regex(/^\+?\d[\
 export const groupSchema = z.object({ id: uuid, clientId: uuid.nullable(), alerts: z.boolean(), reports: z.boolean() });
 
 export const testSchema = z.object({ groupId: uuid });
+
+/** O que trazer ao compilar as conversas do aparelho. */
+export const importSchema = z
+  .object({ contacts: z.boolean(), groups: z.boolean() })
+  .refine((v) => v.contacts || v.groups, { message: "Escolha as conversas individuais, os grupos ou os dois.", path: ["contacts"] });

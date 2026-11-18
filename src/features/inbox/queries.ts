@@ -6,6 +6,7 @@ import type { InboxTab } from "@/domain/inbox";
 
 export type ConversationRow = {
   id: string;
+  kind: "contato" | "grupo";
   contactName: string;
   phone: string | null;
   leadId: string | null;
@@ -20,14 +21,14 @@ export type ConversationRow = {
 };
 
 type Raw = {
-  id: string; contact_name: string; phone: string | null; lead_id: string | null; assignee_id: string | null; status: string; waiting_reply: boolean;
+  id: string; kind: string; contact_name: string; phone: string | null; lead_id: string | null; assignee_id: string | null; status: string; waiting_reply: boolean;
   unread_count: number; last_preview: string | null; last_message_at: string | null; assignee: { full_name: string } | null; lead: { name: string } | null;
 };
 
-const SELECT = "id, contact_name, phone, lead_id, assignee_id, status, waiting_reply, unread_count, last_preview, last_message_at, assignee:profiles!wa_conversations_assignee_id_fkey(full_name), lead:leads(name)";
+const SELECT = "id, kind, contact_name, phone, lead_id, assignee_id, status, waiting_reply, unread_count, last_preview, last_message_at, assignee:profiles!wa_conversations_assignee_id_fkey(full_name), lead:leads(name)";
 
 const toRow = (r: Raw): ConversationRow => ({
-  id: r.id, contactName: r.contact_name, phone: r.phone, leadId: r.lead_id, leadName: r.lead?.name ?? null, assigneeId: r.assignee_id,
+  id: r.id, kind: r.kind === "grupo" ? "grupo" : "contato", contactName: r.contact_name, phone: r.phone, leadId: r.lead_id, leadName: r.lead?.name ?? null, assigneeId: r.assignee_id,
   assigneeName: r.assignee?.full_name ?? null, status: r.status as ConversationRow["status"], waitingReply: r.waiting_reply,
   unread: r.unread_count, preview: r.last_preview, lastMessageAt: r.last_message_at,
 });
@@ -38,15 +39,19 @@ export async function listConversations(tab: InboxTab, userId: string) {
   let q = supabase.from("wa_conversations").select(SELECT).order("last_message_at", { ascending: false, nullsFirst: false }).limit(300);
   if (tab === "encerradas") q = q.eq("status", "encerrada");
   else q = q.eq("status", "aberta");
+  if (tab === "abertas") q = q.eq("kind", "contato");
+  if (tab === "grupos") q = q.eq("kind", "grupo");
   if (tab === "aguardando") q = q.eq("waiting_reply", true);
   if (tab === "minhas") q = q.eq("assignee_id", userId);
   const count = (f: (b: ReturnType<typeof base>) => ReturnType<typeof base>) => f(base());
   const base = () => supabase.from("wa_conversations").select("id", { count: "exact", head: true }).eq("status", "aberta");
-  const [list, open, waiting, mine] = await Promise.all([q, count((b) => b), count((b) => b.eq("waiting_reply", true)), count((b) => b.eq("assignee_id", userId))]);
+  const [list, open, groups, waiting, mine] = await Promise.all([
+    q, count((b) => b.eq("kind", "contato")), count((b) => b.eq("kind", "grupo")), count((b) => b.eq("waiting_reply", true)), count((b) => b.eq("assignee_id", userId)),
+  ]);
   if (list.error) throw list.error;
   return {
     rows: ((list.data ?? []) as unknown as Raw[]).map(toRow),
-    counts: { abertas: open.count ?? 0, aguardando: waiting.count ?? 0, minhas: mine.count ?? 0 },
+    counts: { abertas: open.count ?? 0, grupos: groups.count ?? 0, aguardando: waiting.count ?? 0, minhas: mine.count ?? 0 },
   };
 }
 
@@ -60,17 +65,22 @@ export async function getConversation(id: string, canSeeLeads: boolean) {
   if (error) throw error;
   if (!data) return null;
   const raw = data as unknown as Raw & { connection_id: string; chat_id: string };
-  const [{ data: msgs }, lead] = await Promise.all([
+  const [{ data: msgs }, lead, group] = await Promise.all([
     supabase.from("whatsapp_messages").select("id, from_me, body, kind, sent_at, author_name").eq("connection_id", raw.connection_id).eq("chat_id", raw.chat_id)
       .order("sent_at", { ascending: false }).limit(200),
     raw.lead_id && canSeeLeads
       ? supabase.from("leads").select("id, name, company, value_cents, stage:pipeline_stages(name, color)").eq("id", raw.lead_id).maybeSingle()
       : Promise.resolve({ data: null }),
+    raw.kind === "grupo"
+      ? supabase.from("whatsapp_groups").select("client_id, client:clients(name)").eq("connection_id", raw.connection_id).eq("jid", raw.chat_id).maybeSingle()
+      : Promise.resolve({ data: null }),
   ]);
+  const g = group.data as { client_id: string | null; client: { name: string } | null } | null;
   const l = lead.data as { id: string; name: string; company: string | null; value_cents: number | null; stage: { name: string; color: string } | null } | null;
   return {
     conversation: toRow(raw),
     messages: (msgs ?? []).reverse().map((m): ChatMessage => ({ id: m.id, fromMe: m.from_me, body: m.body, kind: m.kind, sentAt: m.sent_at, authorName: m.author_name })),
+    group: raw.kind === "grupo" ? { clientId: g?.client_id ?? null, clientName: g?.client?.name ?? null } : null,
     lead: l ? { id: l.id, name: l.name, company: l.company, valueCents: l.value_cents === null ? null : Number(l.value_cents), stageName: l.stage?.name ?? null, stageColor: l.stage?.color ?? null } : null,
   };
 }

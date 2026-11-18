@@ -24,14 +24,29 @@ services:
       - media:/app/.media
 
   # Túnel HTTPS para o sistema na Vercel alcançar o WAHA da máquina local (Cloudflare Quick Tunnel, sem conta).
-  # O endereço muda quando o túnel reinicia: atualize em Configurações › WhatsApp. Na VPS, não é usado.
+  # O endereço muda quando o túnel reinicia; o serviço "anuncio" avisa o sistema sozinho. Na VPS, não é usado.
   tunnel:
     image: cloudflare/cloudflared:2025.11.1
     container_name: extend-waha-tunnel
     restart: unless-stopped
     profiles: ["tunnel"]
     depends_on: [waha]
-    command: ["tunnel", "--no-autoupdate", "--url", "http://waha:3000"]
+    command: ["tunnel", "--no-autoupdate", "--metrics", "0.0.0.0:2000", "--url", "http://waha:3000"]
+
+  # Avisa o sistema do endereço do túnel (assinado com a chave do WAHA). Só fala com o túnel e com o sistema.
+  anuncio:
+    image: node:22.11.0-alpine3.20
+    container_name: extend-waha-anuncio
+    restart: unless-stopped
+    profiles: ["tunnel"]
+    depends_on: [tunnel]
+    environment:
+      WAHA_API_KEY: ${WAHA_API_KEY:?Defina WAHA_API_KEY no .env}
+      SITE_URL: ${SITE_URL:-https://hub.agenciaextend.com.br}
+      TUNNEL_METRICS: http://tunnel:2000
+    volumes:
+      - ./anuncio.mjs:/anuncio.mjs:ro
+    command: ["node", "/anuncio.mjs"]
 
 volumes:
   sessions:

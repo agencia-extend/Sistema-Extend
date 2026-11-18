@@ -79,6 +79,8 @@ test("1. salvar o servidor, iniciar a conexão e ver o QR Code", async ({ page }
   test.skip(skipReal, "Já existe uma conexão de WhatsApp real: o teste não mexe nela.");
   await login(page, process.env.E2E_ADMIN_EMAIL!, process.env.E2E_ADMIN_PASSWORD!);
   await page.goto("/configuracoes/whatsapp");
+  await expect(page.getByRole("status").filter({ hasText: "Ainda não conectado" })).toBeVisible();
+  await page.getByText("Servidor do WhatsApp").click();
   await page.getByLabel("Endereço do servidor").fill("http://127.0.0.1:3032");
   await page.getByLabel("Chave da API (WAHA_API_KEY)").fill("chave-errada-com-tamanho-ok");
   await page.getByRole("button", { name: "Testar e salvar" }).click();
@@ -90,9 +92,10 @@ test("1. salvar o servidor, iniciar a conexão e ver o QR Code", async ({ page }
   connId = conn!.id;
   expect(conn!.api_key_enc).not.toContain(wahaKey); // cifrada
 
-  await page.getByRole("button", { name: "Conectar número" }).click();
-  await expect(page.getByRole("img", { name: "QR Code para conectar o WhatsApp" })).toBeVisible({ timeout: 60_000 });
-  await expect(page.getByText("Esperando a leitura do QR Code")).toBeVisible();
+  await page.getByRole("button", { name: "Conectar WhatsApp" }).click();
+  const dialog = page.getByRole("dialog", { name: "Conectar o WhatsApp da Extend" });
+  await expect(dialog.getByRole("img", { name: "QR Code para conectar o WhatsApp" })).toBeVisible({ timeout: 60_000 });
+  await expect(dialog.getByRole("button", { name: /Conectar com código/ })).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
 
@@ -110,6 +113,8 @@ test("2. webhook assinado marca como conectado; assinatura errada é recusada", 
   expect(m.status()).toBe(200);
   const { data: saved } = await admin.from("whatsapp_messages").select("body, chat_id").eq("connection_id", connId).single();
   expect(saved).toEqual({ body: "Bom dia, equipe!", chat_id: "222@g.us" });
+  // O grupo que mandou mensagem passa a ser conhecido (sem nome até Buscar grupos) e vira conversa no Atendimento.
+  await expect.poll(async () => (await admin.from("wa_conversations").select("kind, last_preview").eq("connection_id", connId).eq("chat_id", "222@g.us").single()).data).toEqual({ kind: "grupo", last_preview: "Bom dia, equipe!" });
 
   await login(page, process.env.E2E_ADMIN_EMAIL!, process.env.E2E_ADMIN_PASSWORD!);
   await page.goto("/configuracoes/whatsapp");
@@ -130,7 +135,7 @@ test("3. grupos: cliente, alertas internos e envio de teste registrado", async (
   await expect(page.getByText("Grupo salvo.").first()).toBeVisible();
   await page.getByLabel("Cliente do grupo Clínica WhatsApp (teste)").click();
   await page.getByRole("option", { name: `Clínica WhatsApp ${stamp}` }).click();
-  await expect.poll(async () => (await admin.from("whatsapp_groups").select("name, client_id, is_alerts, is_reports").eq("connection_id", connId).order("name")).data).toEqual([
+  await expect.poll(async () => (await admin.from("whatsapp_groups").select("name, client_id, is_alerts, is_reports").eq("connection_id", connId).neq("name", "").order("name")).data).toEqual([
     { name: "Clínica WhatsApp (teste)", client_id: clientId, is_alerts: false, is_reports: false },
     { name: "Equipe Extend (teste)", client_id: null, is_alerts: true, is_reports: true },
   ]);

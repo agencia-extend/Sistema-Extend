@@ -3189,14 +3189,14 @@ isOneToOne: false
                   ]
                 },"wa_conversations": {
                   Row: {
-                    "assignee_id": string | null,"chat_id": string,"connection_id": string,"contact_name": string,"created_at": string,"id": string,"last_inbound_at": string | null,"last_message_at": string | null,"last_preview": string | null,"lead_id": string | null,"organization_id": string,"phone": string | null,"status": string,"unread_count": number,"waiting_reply": boolean
+                    "assignee_id": string | null,"chat_id": string,"connection_id": string,"contact_name": string,"created_at": string,"id": string,"imported_at": string | null,"kind": string,"last_inbound_at": string | null,"last_message_at": string | null,"last_preview": string | null,"lead_id": string | null,"organization_id": string,"phone": string | null,"status": string,"unread_count": number,"waiting_reply": boolean
                   }
                   ComputedFields: never
                   Insert: {
-                    "assignee_id"?: string | null,"chat_id": string,"connection_id": string,"contact_name"?: string,"created_at"?: string,"id"?: string,"last_inbound_at"?: string | null,"last_message_at"?: string | null,"last_preview"?: string | null,"lead_id"?: string | null,"organization_id": string,"phone"?: string | null,"status"?: string,"unread_count"?: number,"waiting_reply"?: boolean
+                    "assignee_id"?: string | null,"chat_id": string,"connection_id": string,"contact_name"?: string,"created_at"?: string,"id"?: string,"imported_at"?: string | null,"kind"?: string,"last_inbound_at"?: string | null,"last_message_at"?: string | null,"last_preview"?: string | null,"lead_id"?: string | null,"organization_id": string,"phone"?: string | null,"status"?: string,"unread_count"?: number,"waiting_reply"?: boolean
                   }
                   Update: {
-                    "assignee_id"?: string | null,"chat_id"?: string,"connection_id"?: string,"contact_name"?: string,"created_at"?: string,"id"?: string,"last_inbound_at"?: string | null,"last_message_at"?: string | null,"last_preview"?: string | null,"lead_id"?: string | null,"organization_id"?: string,"phone"?: string | null,"status"?: string,"unread_count"?: number,"waiting_reply"?: boolean
+                    "assignee_id"?: string | null,"chat_id"?: string,"connection_id"?: string,"contact_name"?: string,"created_at"?: string,"id"?: string,"imported_at"?: string | null,"kind"?: string,"last_inbound_at"?: string | null,"last_message_at"?: string | null,"last_preview"?: string | null,"lead_id"?: string | null,"organization_id"?: string,"phone"?: string | null,"status"?: string,"unread_count"?: number,"waiting_reply"?: boolean
                   }
                   Relationships: [
                     {
@@ -3219,6 +3219,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     },{
       foreignKeyName: "wa_conversations_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"wa_imports": {
+                  Row: {
+                    "connection_id": string,"contacts_done": number,"created_at": string,"created_by": string | null,"finished_at": string | null,"groups_done": number,"id": string,"include_contacts": boolean,"include_groups": boolean,"last_error": string | null,"lease_until": string | null,"messages_done": number,"next_offset": number,"not_before": string,"organization_id": string,"pass": number,"skipped": number,"status": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "connection_id": string,"contacts_done"?: number,"created_at"?: string,"created_by"?: string | null,"finished_at"?: string | null,"groups_done"?: number,"id"?: string,"include_contacts"?: boolean,"include_groups"?: boolean,"last_error"?: string | null,"lease_until"?: string | null,"messages_done"?: number,"next_offset"?: number,"not_before"?: string,"organization_id": string,"pass"?: number,"skipped"?: number,"status"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "connection_id"?: string,"contacts_done"?: number,"created_at"?: string,"created_by"?: string | null,"finished_at"?: string | null,"groups_done"?: number,"id"?: string,"include_contacts"?: boolean,"include_groups"?: boolean,"last_error"?: string | null,"lease_until"?: string | null,"messages_done"?: number,"next_offset"?: number,"not_before"?: string,"organization_id"?: string,"pass"?: number,"skipped"?: number,"status"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "wa_imports_connection_id_fkey"
+      columns: ["connection_id"]
+isOneToOne: false
+      referencedRelation: "whatsapp_connections"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "wa_imports_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "wa_imports_organization_id_fkey"
       columns: ["organization_id"]
 isOneToOne: false
       referencedRelation: "organizations"
@@ -3735,6 +3767,9 @@ isOneToOne: false
 { Args: { "p_user": string }; Returns: {
               "permission_key": string,"scope": Database["public"]['Enums']["permission_scope"]
             }[]
+                           },
+"wa_import_chat":
+{ Args: { "p_chat": string,"p_connection": string,"p_kind": string,"p_messages": Json,"p_name": string,"p_phone": string }; Returns: number
                            },
 "whatsapp_status":
 { Args: Record<PropertyKey, never>; Returns: {
