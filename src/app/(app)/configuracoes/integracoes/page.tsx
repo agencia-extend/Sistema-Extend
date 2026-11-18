@@ -80,7 +80,16 @@ export default async function IntegracoesPage({ searchParams }: { searchParams: 
                       <summary className="cursor-pointer text-sm font-medium text-primary">Trocar o token</summary>
                       <div className="pt-3"><SystemTokenForm replacing /></div>
                     </details>
-                  ) : null
+                  ) : (
+                    // Conectada pelo login: dá para trocar pelo usuário do sistema do BM (permissões no próprio token, não vence).
+                    <details className="w-full">
+                      <summary className="cursor-pointer text-sm font-medium text-primary">Usar o token do usuário do sistema do BM</summary>
+                      <div className="grid gap-2 pt-3">
+                        <p className="text-sm text-muted-foreground">Substitui a conexão pelo login. As contas, páginas e vínculos com clientes continuam.</p>
+                        <SystemTokenForm replacing />
+                      </div>
+                    </details>
+                  )
                 }
               />
             ) : metaReady ? (
