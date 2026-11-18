@@ -11,6 +11,7 @@ export const NOTIFICATION_KINDS = [
   { key: "creative_live", label: "Criativo aprovado há 2 dias úteis e ainda não está no ar" },
   { key: "marketing", label: "Calendário de marketing: pedidos de criativo criados ou com erro" },
   { key: "ad_alert", label: "Alertas de anúncios" },
+  { key: "post", label: "Publicações programadas: publicada ou não publicou" },
   { key: "traffic_check", label: "Tráfego: checklist do dia ou da semana em aberto" },
   { key: "client_report", label: "Relatórios ao cliente: envio da semana em aberto e retorno do cliente" },
   { key: "client_onboarding", label: "Cliente novo em onboarding" },

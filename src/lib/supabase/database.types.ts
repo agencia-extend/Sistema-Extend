@@ -1885,6 +1885,50 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"post_schedules": {
+                  Row: {
+                    "attempts": number,"caption": string,"client_id": string,"container_id": string | null,"created_at": string,"created_by": string | null,"error": string | null,"external_id": string | null,"format": string,"id": string,"images": (string)[],"organization_id": string,"permalink": string | null,"profile_id": string,"published_at": string | null,"scheduled_at": string,"status": string,"task_id": string | null,"updated_at": string,"video_drive_id": string | null,"video_path": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "attempts"?: number,"caption"?: string,"client_id": string,"container_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"error"?: string | null,"external_id"?: string | null,"format": string,"id"?: string,"images"?: (string)[],"organization_id": string,"permalink"?: string | null,"profile_id": string,"published_at"?: string | null,"scheduled_at": string,"status"?: string,"task_id"?: string | null,"updated_at"?: string,"video_drive_id"?: string | null,"video_path"?: string | null
+                  }
+                  Update: {
+                    "attempts"?: number,"caption"?: string,"client_id"?: string,"container_id"?: string | null,"created_at"?: string,"created_by"?: string | null,"error"?: string | null,"external_id"?: string | null,"format"?: string,"id"?: string,"images"?: (string)[],"organization_id"?: string,"permalink"?: string | null,"profile_id"?: string,"published_at"?: string | null,"scheduled_at"?: string,"status"?: string,"task_id"?: string | null,"updated_at"?: string,"video_drive_id"?: string | null,"video_path"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "post_schedules_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "post_schedules_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "post_schedules_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "post_schedules_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "social_profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "post_schedules_task_id_fkey"
+      columns: ["task_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"privacy_consents": {
                   Row: {
                     "accepted_at": string,"profile_id": string,"version": string
@@ -3343,6 +3387,14 @@ isOneToOne: false
 "can_refresh_social":
 { Args: { "p_client": string }; Returns: boolean
                            },
+"cancel_post":
+{ Args: { "p_id": string }; Returns: undefined
+                           },
+"claim_due_posts":
+{ Args: { "p_limit": number }; Returns: {
+              "attempts": number,"client_id": string,"container_id": string,"id": string,"organization_id": string,"profile_id": string
+            }[]
+                           },
 "claim_pending_pushes":
 { Args: { "p_limit"?: number }; Returns: {
               "body": string,"href": string,"id": string,"kind": string,"title": string,"user_id": string
@@ -3404,6 +3456,9 @@ isOneToOne: false
                            },
 "finalize_invitation":
 { Args: { "p_full_name": string,"p_invitation": string }; Returns: string
+                           },
+"finish_post":
+{ Args: { "p_container": string,"p_error": string,"p_external": string,"p_id": string,"p_permalink": string,"p_status": string }; Returns: undefined
                            },
 "finish_pushes":
 { Args: { "p_failed": (string)[],"p_sent": (string)[],"p_skipped": (string)[] }; Returns: undefined
@@ -3493,6 +3548,11 @@ isOneToOne: false
 "publish_onboarding_form":
 { Args: { "p_sections": Json }; Returns: number
                            },
+"publish_targets":
+{ Args: { "p_client": string }; Returns: {
+              "missing": (string)[],"name": string,"platform": string,"profile_id": string,"username": string
+            }[]
+                           },
 "rate_limit_blocked":
 { Args: { "p_bucket": string,"p_max": number,"p_window_seconds": number }; Returns: boolean
                            },
@@ -3512,6 +3572,9 @@ isOneToOne: false
 { Args: Record<PropertyKey, never>; Returns: {
               "area": string,"can_send": boolean,"client_code": number,"client_id": string,"client_name": string,"feedback": string,"feedback_note": string,"last_sent_on": string,"link": string,"report_id": string,"sent_by": string,"sent_on": string
             }[]
+                           },
+"reschedule_post":
+{ Args: { "p_at": string,"p_id": string }; Returns: undefined
                            },
 "reset_alert_limits":
 { Args: { "p_client": string }; Returns: undefined
@@ -3556,6 +3619,9 @@ isOneToOne: false
 { Args: { "p_end": string,"p_start": string }; Returns: {
               "client_code": number,"client_id": string,"client_name": string,"contracted": number,"mine": boolean,"posted": number,"scheduled": number,"social": (string)[],"undated": number
             }[]
+                           },
+"schedule_post":
+{ Args: { "p_at": string,"p_caption": string,"p_client": string,"p_format": string,"p_images": (string)[],"p_profiles": (string)[],"p_task": string,"p_video_drive_id": string,"p_video_path": string }; Returns: (string)[]
                            },
 "send_proposal":
 { Args: { "p_id": string }; Returns: string

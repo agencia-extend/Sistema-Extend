@@ -533,3 +533,19 @@ Decisões dele: atendimento e funis **da própria Extend** (caixa de entrada do 
 - **Na Meta:** POST na Graph API com `locale=pt_BR`, para a Meta explicar o motivo em português (ex.: orçamento abaixo do mínimo). Se a Meta recusar, nada muda no sistema e o motivo aparece no diálogo.
 - **Histórico:** todo ajuste aceito entra no registro de alterações do cliente como "feita pelo sistema", com quem fez e o motivo (`record_ad_change`; `change_logs.source = 'sistema'`, que só essa função consegue gravar).
 - **Testado:** `40_gestao_campanhas.test.sql`, Vitest dos textos e erros, e `e2e/35-gestao-campanhas.spec.ts`. O E2E usa uma conexão de teste com token inválido: a Meta recusa de verdade e a tela mostra o motivo. **A alteração aceita pela Meta só pode ser conferida quando a conexão real tiver `ads_management`.**
+
+## Programar publicações no Facebook e no Instagram (17/11/2026)
+RF-CON-03 e RF-CON-04.
+- **Onde:** cliente › Redes sociais › "Programação" (botão "Programar publicação"); agenda geral em `/publicacoes` (Próximas, Com erro, Publicadas; menu Produção); no cronograma do mês, "Publicar nas redes" abre a programação já com a legenda, o formato e a data do conteúdo.
+- **Quem:** "Programar e publicar nas redes" (`content.publish`: admin, coordenação de conteúdo e social media dos clientes dela). Vê a programação quem tem também `content.read`.
+- **Formatos:** Feed (1 a 10 imagens; mais de uma vira carrossel), Reels, Vídeo e Stories (uma imagem ou um vídeo, sem legenda). Mídia por arquivo (JPG, PNG, MP4 ou MOV até 50 MB, bucket `publicacoes`) ou link do Drive (arquivo aberto para qualquer pessoa). No Instagram valem 2.200 caracteres e 30 hashtags. A mesma publicação pode ir para a página e o Instagram juntos.
+- **Perfis prontos:** só perfis cuja conexão da Meta está ativa e tem as permissões. Facebook: `pages_manage_posts` e `pages_read_engagement`. Instagram: `instagram_basic` e `instagram_content_publish`. O diálogo mostra o que falta em cada perfil, e o banco recusa (`publish_targets`, `schedule_post`).
+- **Fila** (job `publish-posts` a cada 5 minutos):
+  - a Meta baixa a mídia por link assinado (1 hora) ou do Drive;
+  - no Instagram, o vídeo pode levar mais de uma rodada para processar (até 8);
+  - publicação interrompida no meio sem contêiner não é refeita, para não duplicar o post: vira erro com "confira no perfil";
+  - publicada ou com erro, avisa quem programou (tipo de aviso `post`);
+  - publicada a partir do cronograma, o link vai para o conteúdo (`task_content.post_url`).
+- **Cancelar e reagendar:** cancelar a agendada ou a com erro; reagendar a agendada, a com erro ou a cancelada (volta para a fila).
+- **Testado:** `41_publicacoes.test.sql`, Vitest das regras e `e2e/36-publicacoes.spec.ts`, que programa com envio do arquivo, roda a fila e recebe a recusa real da Meta (conexão de teste com token inválido).
+- **Pendente do lado da Extend:** a conexão real (usuário do sistema "Sistema-Extend") ainda não tem `pages_manage_posts`, `instagram_basic` e `instagram_content_publish`. Sem elas, os perfis aparecem como "falta …" e nada sai. Também é preciso atribuir ao usuário do sistema as páginas e os Instagram dos clientes (hoje são 2 páginas).

@@ -21,6 +21,7 @@ export default async function CronogramaPage({ params, searchParams }: { params:
   const { start, end } = monthRange(month);
   const posts = await listSchedule(id, start, end);
   const canEdit = Boolean(user.permissions["tasks.manage"]);
+  const canPublish = Boolean(user.permissions["content.publish"]);
   const base = `/clientes/${id}/cronograma`;
   const q = (m: string, v: string) => `${base}?mes=${m}${v === "grid" ? "&visao=grid" : ""}`;
 
@@ -50,13 +51,13 @@ export default async function CronogramaPage({ params, searchParams }: { params:
       ) : view === "grid" ? (
         <Grid posts={posts} clientId={id} canEdit={canEdit} />
       ) : (
-        <List posts={posts} clientId={id} canEdit={canEdit} />
+        <List posts={posts} clientId={id} canEdit={canEdit} canPublish={canPublish} />
       )}
     </div>
   );
 }
 
-function List({ posts, clientId, canEdit }: { posts: PostRow[]; clientId: string; canEdit: boolean }) {
+function List({ posts, clientId, canEdit, canPublish }: { posts: PostRow[]; clientId: string; canEdit: boolean; canPublish: boolean }) {
   const groups = new Map<string, { label: string; items: PostRow[] }>();
   for (const p of posts) {
     const w = p.postOn ? weekOf(p.postOn) : { key: "zzz", label: "Sem data" };
@@ -84,6 +85,9 @@ function List({ posts, clientId, canEdit }: { posts: PostRow[]; clientId: string
                     <div className="flex flex-wrap gap-3 text-xs">
                       {p.postUrl && <a href={p.postUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 font-medium text-primary hover:underline"><ExternalLink className="size-3.5" aria-hidden="true" /> Ver post</a>}
                       {p.finalUrl && <a href={p.finalUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-muted-foreground hover:underline"><ExternalLink className="size-3.5" aria-hidden="true" /> Arquivo final</a>}
+                      {canPublish && !p.postUrl && (
+                        <Link href={`/clientes/${clientId}/redes?programar=${p.taskId}#programacao`} className="inline-flex items-center gap-1 font-medium text-primary hover:underline" aria-label={`Publicar nas redes: ${p.title}`}>Publicar nas redes</Link>
+                      )}
                     </div>
                   </div>
                   {canEdit && (
