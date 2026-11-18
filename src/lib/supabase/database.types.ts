@@ -3311,14 +3311,14 @@ isOneToOne: false
                   ]
                 },"whatsapp_messages": {
                   Row: {
-                    "author": string | null,"author_name": string | null,"body": string | null,"chat_id": string,"connection_id": string,"created_at": string,"from_me": boolean,"id": string,"kind": string,"sent_at": string,"wamid": string
+                    "author": string | null,"author_name": string | null,"body": string | null,"chat_id": string,"connection_id": string,"created_at": string,"from_me": boolean,"id": string,"kind": string,"media_mime": string | null,"media_name": string | null,"media_path": string | null,"sent_at": string,"wamid": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "author"?: string | null,"author_name"?: string | null,"body"?: string | null,"chat_id": string,"connection_id": string,"created_at"?: string,"from_me"?: boolean,"id"?: string,"kind"?: string,"sent_at": string,"wamid": string
+                    "author"?: string | null,"author_name"?: string | null,"body"?: string | null,"chat_id": string,"connection_id": string,"created_at"?: string,"from_me"?: boolean,"id"?: string,"kind"?: string,"media_mime"?: string | null,"media_name"?: string | null,"media_path"?: string | null,"sent_at": string,"wamid": string
                   }
                   Update: {
-                    "author"?: string | null,"author_name"?: string | null,"body"?: string | null,"chat_id"?: string,"connection_id"?: string,"created_at"?: string,"from_me"?: boolean,"id"?: string,"kind"?: string,"sent_at"?: string,"wamid"?: string
+                    "author"?: string | null,"author_name"?: string | null,"body"?: string | null,"chat_id"?: string,"connection_id"?: string,"created_at"?: string,"from_me"?: boolean,"id"?: string,"kind"?: string,"media_mime"?: string | null,"media_name"?: string | null,"media_path"?: string | null,"sent_at"?: string,"wamid"?: string
                   }
                   Relationships: [
                     {

@@ -150,6 +150,44 @@ export async function wahaSendText(conn: WahaConn, chatId: string, text: string)
   return call<{ id?: unknown }>(conn, "/api/sendText", { method: "POST", body: JSON.stringify({ session: conn.session, chatId, text }) });
 }
 
+export type OutgoingMedia = { url: string; mime: string; name: string; caption?: string | null; kind: "image" | "video" | "audio" | "document" | "sticker" };
+
+/** Envia foto, vídeo, áudio (vira mensagem de voz) ou documento. O WAHA baixa o arquivo pelo link assinado. */
+export async function wahaSendMedia(conn: WahaConn, chatId: string, media: OutgoingMedia) {
+  const file = { url: media.url, mimetype: media.mime, filename: media.name };
+  const caption = media.caption ? { caption: media.caption } : {};
+  const plan =
+    media.kind === "image" ? { path: "/api/sendImage", body: { file, ...caption } }
+    : media.kind === "video" ? { path: "/api/sendVideo", body: { file, convert: true, ...caption } }
+    : media.kind === "audio" ? { path: "/api/sendVoice", body: { file, convert: true } }
+    : { path: "/api/sendFile", body: { file, ...caption } };
+  return call<{ id?: unknown }>(conn, plan.path, { method: "POST", body: JSON.stringify({ session: conn.session, chatId, ...plan.body }), timeoutMs: 45000 });
+}
+
+/**
+ * Baixa a mídia recebida. O WAHA monta o link com o próprio endereço interno, então só o caminho é aproveitado:
+ * a chave nunca vai para outro servidor.
+ */
+export async function wahaDownload(conn: Pick<WahaConn, "url" | "key">, mediaUrl: string, maxBytes = 50 * 1024 * 1024) {
+  const path = new URL(mediaUrl, conn.url);
+  let res: Response;
+  try {
+    res = await fetch(`${conn.url}${path.pathname}${path.search}`, { headers: { "X-Api-Key": conn.key, ...tunnelHeaders(conn.url) }, cache: "no-store", redirect: "error", signal: AbortSignal.timeout(40000) });
+  } catch {
+    throw new WahaError("Não foi possível baixar o arquivo do servidor do WhatsApp.");
+  }
+  if (!res.ok) throw new WahaError(`O servidor do WhatsApp não entregou o arquivo (${res.status}).`, res.status);
+  const body = await res.arrayBuffer();
+  if (body.byteLength > maxBytes) throw new WahaError("O arquivo é grande demais para guardar.");
+  return body;
+}
+
+/** Id da mensagem na resposta de envio (o formato varia por motor). */
+export function sentMessageId(raw: { id?: unknown } | null | undefined): string | null {
+  const id = raw?.id as string | { _serialized?: string } | undefined;
+  return (typeof id === "string" ? id : id?._serialized) || null;
+}
+
 /** Assinatura do webhook: HMAC-SHA512 do corpo bruto com o segredo da sessão. */
 export function validWahaSignature(rawBody: string, header: string | null, secret: string) {
   if (!header || !secret) return false;

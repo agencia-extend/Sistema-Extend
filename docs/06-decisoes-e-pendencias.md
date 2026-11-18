@@ -563,7 +563,7 @@ RF-WPP-03, como o Henrique decidiu: o atendimento é da própria Extend, ligado 
 - **Permissões:** ver (`inbox.read`), responder, encerrar e assumir (`inbox.reply`): papéis Comercial, Atendimento e admin. Criar lead pede também `crm.leads.manage`.
 - **Resposta:** sai pelo WAHA. Antes de enviar, confere se a sessão está conectada. A mensagem entra na conversa na hora, com o mesmo id que o webhook manda, então não duplica.
 - **Testado:** `42_atendimento.test.sql`, Vitest e `e2e/37-atendimento.spec.ts`. O E2E roda só local, com o WAHA da `infra/waha`, e não mexe numa conexão real: mensagem pelo webhook assinado, leitura, resposta recusada pelo WAHA (sessão de teste), lead criado e conversa encerrada.
-- **Para usar de verdade:** ligar o túnel (`docker compose --profile tunnel up -d` em `infra/waha`), salvar o endereço em Configurações › WhatsApp e ler o QR Code com o número da Extend. Mídia (foto, áudio) aparece como "[Mídia]"; abrir e enviar mídia pelo sistema fica para a próxima rodada.
+- **Para usar de verdade:** ligar o túnel (`docker compose --profile tunnel up -d` em `infra/waha`), salvar o endereço em Configurações › WhatsApp e ler o QR Code com o número da Extend. Mídia: ver a seção "Fotos, áudios, vídeos e documentos no Atendimento" (18/11).
 
 ## Atendimento como no HubSystem: conectar com um clique e compilar conversas (18/11/2026)
 Pedido do Henrique: "só conectando, abre o QR Code, escaneia e já faz toda a conexão; um botão para compilar as mensagens, na mesma esquematização do HubSystem".
@@ -583,3 +583,21 @@ Pedido do Henrique: "só conectando, abre o QR Code, escaneia e já faz toda a c
   - o QR Code real do WAHA local, aberto pela pessoa do Comercial;
   - a compilação contra um servidor de teste que responde como o WAHA: 1 conversa, 1 grupo e 3 mensagens no Atendimento.
 - **Pendente do lado do Henrique:** rodar uma vez `docker compose --profile tunnel up -d` em `infra/waha` (com o Docker aberto) e ler o QR Code. A leitura real e a compilação com o celular de verdade só podem ser conferidas com o número conectado.
+
+## Fotos, áudios, vídeos e documentos no Atendimento (18/11/2026)
+Adaptado do HubSystem (`domain/whatsapp/media.ts`, `api/whatsapp/media`, `composer-tools.tsx`).
+- **Recebida:** o arquivo do WAHA expira em 1 hora (`WHATSAPP_FILES_LIFETIME`). Por isso o webhook baixa a mídia na hora e guarda no armazenamento privado `whatsapp-midia`, uma vez só por mensagem. A mensagem guarda `media_path`, `media_mime` e `media_name`. Se o download falhar, a mensagem entra assim mesmo, sem o arquivo.
+- **Na conversa:** foto (abre em tamanho real), player de áudio e de vídeo, documento para baixar. A prévia da lista diz o tipo: [foto], [áudio], [vídeo], [documento] ou [figurinha]. A mídia do histórico compilado aparece como "Foto antiga: abra no WhatsApp para ver".
+- **Quem vê:** `/api/whatsapp/midia/[id]` lê a mensagem com o login da pessoa (RLS do Atendimento) e só então entrega o arquivo. Só serve tipos conhecidos, com `nosniff` e CSP `sandbox`. O armazenamento não tem nenhuma regra de leitura ou envio direto.
+- **Enviar:**
+  - o clipe anexa foto JPG/PNG (5 MB), vídeo MP4 (16 MB), áudio (16 MB) ou documento PDF/Word/Excel/PowerPoint/texto (50 MB); o texto vira a legenda;
+  - o microfone grava até 5 minutos e envia ao parar, como mensagem de voz;
+  - o arquivo sobe do navegador direto para o armazenamento, por um link de envio criado pelo servidor;
+  - o WAHA baixa o arquivo por um link assinado de 1 hora.
+- **Corrigido:** o cabeçalho `Permissions-Policy` bloqueava o microfone em todo o site. Agora vale `microphone=(self)`.
+- **Testado:** `44_whatsapp_midia.test.sql` (8), Vitest (`domain/whatsapp/media`) e `e2e/39-atendimento-midia.spec.ts`. O E2E roda local, com um servidor de teste no formato do WAHA, e cobre:
+  - a foto recebida pelo webhook assinado, que aparece na conversa, enquanto quem não atende recebe 403;
+  - o PDF com legenda, baixado pelo "WhatsApp" pelo link temporário;
+  - o tipo recusado;
+  - o áudio gravado com o microfone de teste do navegador e enviado como voz.
+- **Só com o número conectado:** a foto real chegando do celular e o áudio tocando no WhatsApp do contato.

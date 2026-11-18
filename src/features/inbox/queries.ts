@@ -55,7 +55,11 @@ export async function listConversations(tab: InboxTab, userId: string) {
   };
 }
 
-export type ChatMessage = { id: string; fromMe: boolean; body: string | null; kind: string; sentAt: string; authorName: string | null };
+export type ChatMessage = {
+  id: string; fromMe: boolean; body: string | null; kind: string; sentAt: string; authorName: string | null;
+  /** Arquivo guardado no sistema (aberto por /api/whatsapp/midia/[id]); sem ele, a mídia é antiga ou não chegou. */
+  hasFile: boolean; mediaMime: string | null; mediaName: string | null;
+};
 
 /** Uma conversa com as últimas 200 mensagens e o lead ligado (se a pessoa vê o Comercial). */
 export async function getConversation(id: string, canSeeLeads: boolean) {
@@ -66,7 +70,7 @@ export async function getConversation(id: string, canSeeLeads: boolean) {
   if (!data) return null;
   const raw = data as unknown as Raw & { connection_id: string; chat_id: string };
   const [{ data: msgs }, lead, group] = await Promise.all([
-    supabase.from("whatsapp_messages").select("id, from_me, body, kind, sent_at, author_name").eq("connection_id", raw.connection_id).eq("chat_id", raw.chat_id)
+    supabase.from("whatsapp_messages").select("id, from_me, body, kind, sent_at, author_name, media_path, media_mime, media_name").eq("connection_id", raw.connection_id).eq("chat_id", raw.chat_id)
       .order("sent_at", { ascending: false }).limit(200),
     raw.lead_id && canSeeLeads
       ? supabase.from("leads").select("id, name, company, value_cents, stage:pipeline_stages(name, color)").eq("id", raw.lead_id).maybeSingle()
@@ -79,7 +83,7 @@ export async function getConversation(id: string, canSeeLeads: boolean) {
   const l = lead.data as { id: string; name: string; company: string | null; value_cents: number | null; stage: { name: string; color: string } | null } | null;
   return {
     conversation: toRow(raw),
-    messages: (msgs ?? []).reverse().map((m): ChatMessage => ({ id: m.id, fromMe: m.from_me, body: m.body, kind: m.kind, sentAt: m.sent_at, authorName: m.author_name })),
+    messages: (msgs ?? []).reverse().map((m): ChatMessage => ({ id: m.id, fromMe: m.from_me, body: m.body, kind: m.kind, sentAt: m.sent_at, authorName: m.author_name, hasFile: Boolean(m.media_path), mediaMime: m.media_mime, mediaName: m.media_name })),
     group: raw.kind === "grupo" ? { clientId: g?.client_id ?? null, clientName: g?.client?.name ?? null } : null,
     lead: l ? { id: l.id, name: l.name, company: l.company, valueCents: l.value_cents === null ? null : Number(l.value_cents), stageName: l.stage?.name ?? null, stageColor: l.stage?.color ?? null } : null,
   };

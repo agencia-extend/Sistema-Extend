@@ -115,7 +115,7 @@ test("1. mensagem chega, a pessoa abre, tenta responder, cria o lead e encerra",
   // Responder: o WAHA local diz que a sessão de teste não existe → motivo na tela.
   await page.getByLabel("Mensagem").fill("Olá! Te mando os planos já.");
   await page.getByLabel("Mensagem").press("Enter");
-  await expect(page.getByText("O WhatsApp da Extend não está conectado no servidor. Leia o QR Code em Configurações › WhatsApp.")).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText("O WhatsApp da Extend não está conectado no servidor. Conecte pelo QR Code no Atendimento.")).toBeVisible({ timeout: 20_000 });
 
   // Lead no funil a partir da conversa.
   await expect(page.getByLabel("Nome do lead")).toHaveValue(contact);

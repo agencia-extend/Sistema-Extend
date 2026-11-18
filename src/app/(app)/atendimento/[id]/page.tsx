@@ -9,6 +9,7 @@ import { getConversation, getWhatsappState, listAgents } from "@/features/inbox/
 import { Composer } from "@/features/inbox/components/composer";
 import { ConversationPanel } from "@/features/inbox/components/conversation-panel";
 import { InboxLive } from "@/features/inbox/components/inbox-live";
+import { MessageMedia } from "@/features/inbox/components/message-media";
 import { cn } from "@/lib/utils";
 
 export const metadata: Metadata = { title: "Conversa" };
@@ -43,7 +44,8 @@ export default async function ConversaPage({ params }: { params: Promise<{ id: s
           {messages.map((m) => (
             <li key={m.id} className={cn("max-w-[85%] rounded-2xl px-3 py-2 text-sm shadow-xs sm:max-w-[70%]", m.fromMe ? "self-end rounded-br-sm bg-primary text-primary-foreground" : "self-start rounded-bl-sm border bg-card")}>
               {(m.fromMe || c.kind === "grupo") && m.authorName && <p className="mb-0.5 text-[11px] font-medium opacity-80">{m.authorName}</p>}
-              <p className="whitespace-pre-wrap break-words">{m.body || (m.kind === "media" ? "[Mídia: abra no WhatsApp para ver]" : "")}</p>
+              {m.kind === "media" && <MessageMedia message={m} />}
+              {m.body && <p className="whitespace-pre-wrap break-words">{m.body}</p>}
               <p className={cn("mt-1 text-right text-[11px] tabular", m.fromMe ? "opacity-80" : "text-muted-foreground")} suppressHydrationWarning>{formatDateTime(m.sentAt)}</p>
             </li>
           ))}

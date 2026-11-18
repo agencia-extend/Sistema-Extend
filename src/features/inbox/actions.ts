@@ -5,11 +5,12 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { defineAction, must } from "@/lib/actions";
 import { fail, ok } from "@/domain/shared/result";
-import { leadNameSchema, replySchema } from "./schemas";
+import { leadNameSchema, prepareMediaSchema, replySchema, sendMediaSchema } from "./schemas";
+import { baseMime, checkOutgoingMedia, isOutgoingPath, outgoingPath } from "@/domain/whatsapp/media";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getWhatsapp, wahaConn } from "@/lib/whatsapp/store";
-import { WahaError, wahaSendText, wahaSession } from "@/lib/whatsapp/waha";
+import { WahaError, sentMessageId, wahaSendMedia, wahaSendText, wahaSession } from "@/lib/whatsapp/waha";
 
 const id = z.uuid("Conversa inválida.");
 
@@ -32,17 +33,65 @@ export const replyConversation = defineAction({ schema: replySchema, permission:
     const live = await wahaSession(conn);
     if (live?.status !== "WORKING") {
       await createAdminClient().from("whatsapp_connections").update({ status: live?.status ?? "STOPPED" }).eq("id", c.id);
-      return fail("business_rule", "O WhatsApp da Extend não está conectado no servidor. Leia o QR Code em Configurações › WhatsApp.");
+      return fail("business_rule", "O WhatsApp da Extend não está conectado no servidor. Conecte pelo QR Code no Atendimento.");
     }
     const sent = await wahaSendText(conn, conv.chat_id, text);
-    const sid = sent.id as string | { _serialized?: string } | undefined;
-    wamid = (typeof sid === "string" ? sid : sid?._serialized) || `sistema-${randomUUID()}`;
+    wamid = sentMessageId(sent) || `sistema-${randomUUID()}`;
   } catch (e) {
     return fail("network", e instanceof WahaError ? e.message : "Falha ao enviar pelo WhatsApp. Tente de novo.");
   }
   await createAdminClient().from("whatsapp_messages").upsert(
     { connection_id: conv.connection_id, wamid: wamid.slice(0, 200), chat_id: conv.chat_id, from_me: true, author_name: user.fullName ?? null, body: text, kind: "text", sent_at: new Date().toISOString() },
     { onConflict: "connection_id,wamid", ignoreDuplicates: true },
+  );
+  refresh(id);
+  return ok(null);
+});
+
+/** Reserva o envio do arquivo direto do navegador para o armazenamento (arquivos grandes não passam pelo servidor). */
+export const prepareMediaUpload = defineAction({ schema: prepareMediaSchema, permission: "inbox.reply" }, async ({ id, mime, size }, { user }) => {
+  const supabase = await createClient();
+  const { data: conv } = await supabase.from("wa_conversations").select("id").eq("id", id).maybeSingle();
+  if (!conv) return fail("not_found", "Conversa não encontrada.");
+  const check = checkOutgoingMedia({ mime, size });
+  if (!check.ok) return fail("validation", check.message);
+  const path = outgoingPath(user.organizationId, randomUUID());
+  const { data, error } = await createAdminClient().storage.from("whatsapp-midia").createSignedUploadUrl(path);
+  if (error || !data) return fail("network", "Não foi possível preparar o envio do arquivo. Tente de novo.");
+  return ok({ path, token: data.token });
+});
+
+/** Envia o arquivo já guardado: o WhatsApp baixa por um link temporário, sem o armazenamento ficar público. */
+export const sendMediaMessage = defineAction({ schema: sendMediaSchema, permission: "inbox.reply" }, async ({ id, path, mime, size, name, caption }, { user }) => {
+  if (!isOutgoingPath(path, user.organizationId)) return fail("forbidden", "Arquivo inválido. Anexe de novo.");
+  const check = checkOutgoingMedia({ mime, size });
+  if (!check.ok) return fail("validation", check.message);
+  const supabase = await createClient();
+  const { data: conv } = await supabase.from("wa_conversations").select("id, connection_id, chat_id").eq("id", id).maybeSingle();
+  if (!conv) return fail("not_found", "Conversa não encontrada.");
+  const c = await getWhatsapp(user.organizationId);
+  if (!c || c.id !== conv.connection_id) return fail("business_rule", "O número desta conversa não está mais conectado ao sistema.");
+  const db = createAdminClient();
+  const { data: signed } = await db.storage.from("whatsapp-midia").createSignedUrl(path, 3600);
+  if (!signed) return fail("not_found", "O arquivo não chegou ao sistema. Anexe de novo.");
+  const type = baseMime(mime);
+  let wamid: string;
+  try {
+    const conn = wahaConn(c);
+    const live = await wahaSession(conn);
+    if (live?.status !== "WORKING") {
+      await db.from("whatsapp_connections").update({ status: live?.status ?? "STOPPED" }).eq("id", c.id);
+      return fail("business_rule", "O WhatsApp da Extend não está conectado no servidor. Conecte pelo QR Code no Atendimento.");
+    }
+    const sent = await wahaSendMedia(conn, conv.chat_id, { url: signed.signedUrl, mime: type, name, caption: caption || null, kind: check.kind });
+    wamid = sentMessageId(sent) || `sistema-${randomUUID()}`;
+  } catch (e) {
+    return fail("network", e instanceof WahaError ? e.message : "O WhatsApp não aceitou o arquivo. Tente de novo.");
+  }
+  await db.from("whatsapp_messages").upsert(
+    { connection_id: conv.connection_id, wamid: wamid.slice(0, 200), chat_id: conv.chat_id, from_me: true, author_name: user.fullName ?? null, body: caption || null, kind: "media",
+      media_path: path, media_mime: type, media_name: name, sent_at: new Date().toISOString() },
+    { onConflict: "connection_id,wamid" },
   );
   refresh(id);
   return ok(null);
