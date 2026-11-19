@@ -8,8 +8,8 @@ import { listSectors } from "@/features/admin/queries";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { Kanban } from "@/features/tasks/components/kanban";
 import { NewTaskDialog } from "@/features/tasks/components/new-task-dialog";
-import { BoardDialog } from "../board-dialog";
-import { ColumnsEditor } from "./columns-editor";
+import { BoardDialog } from "@/features/tasks/components/board-dialog";
+import { ColumnsEditor } from "@/features/tasks/components/columns-editor";
 
 export const metadata: Metadata = { title: "Quadro" };
 

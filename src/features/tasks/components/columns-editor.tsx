@@ -1,22 +1,25 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Archive, Columns3, Plus, Trash2 } from "lucide-react";
+import { Archive, ChevronLeft, ChevronRight, Columns3, Plus, Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { archiveBoard, deleteColumn, saveColumn } from "@/features/tasks/actions";
+import { archiveBoard, deleteColumn, moveColumn, saveColumn } from "@/features/tasks/actions";
 import { handleResult } from "@/lib/action-feedback";
 
 type Col = { id: string; name: string; color: string; is_done: boolean };
 
+/** Colunas do quadro: nome, cor, concluído, ordem (← →), nova coluna e arquivar. */
 export function ColumnsEditor({ boardId, columns, archived }: { boardId: string; columns: Col[]; archived: boolean }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [pending, startTransition] = useTransition();
-  const run = (p: Promise<{ ok: boolean; message?: string }>) => startTransition(async () => void handleResult((await p) as never));
+  const run = (p: Promise<{ ok: boolean; message?: string }>) => startTransition(async () => { if (handleResult((await p) as never)) router.refresh(); });
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild><Button variant="outline"><Columns3 aria-hidden="true" /> Colunas</Button></DialogTrigger>
@@ -25,12 +28,16 @@ export function ColumnsEditor({ boardId, columns, archived }: { boardId: string;
           <DialogTitle>Colunas do quadro</DialogTitle>
           <DialogDescription>Cards em coluna marcada como “concluído” contam como entregues.</DialogDescription>
         </DialogHeader>
-        <ul className="grid gap-2">
-          {columns.map((c) => (
-            <li key={c.id} className="flex items-center gap-2">
+        <ul className="grid gap-2" aria-label="Colunas, da esquerda para a direita">
+          {columns.map((c, i) => (
+            <li key={c.id} className="flex items-center gap-1.5">
+              <div className="flex flex-col">
+                <Button variant="ghost" size="icon" className="h-5 w-7" aria-label={`Levar ${c.name} para a esquerda`} disabled={pending || i === 0} onClick={() => run(moveColumn({ id: c.id, direction: "left" }))}><ChevronLeft className="size-3.5" /></Button>
+                <Button variant="ghost" size="icon" className="h-5 w-7" aria-label={`Levar ${c.name} para a direita`} disabled={pending || i === columns.length - 1} onClick={() => run(moveColumn({ id: c.id, direction: "right" }))}><ChevronRight className="size-3.5" /></Button>
+              </div>
               <input type="color" aria-label={`Cor de ${c.name}`} defaultValue={c.color} className="size-9 rounded border p-0.5"
                 onBlur={(e) => e.target.value !== c.color && run(saveColumn({ id: c.id, boardId, name: c.name, color: e.target.value, isDone: c.is_done }))} />
-              <Input defaultValue={c.name} aria-label="Nome da coluna" className="flex-1"
+              <Input key={c.name} defaultValue={c.name} aria-label={`Nome da coluna ${i + 1}`} className="min-w-0 flex-1"
                 onBlur={(e) => e.target.value.trim() && e.target.value !== c.name && run(saveColumn({ id: c.id, boardId, name: e.target.value, color: c.color, isDone: c.is_done }))} />
               <div className="flex items-center gap-1.5">
                 <Checkbox id={`done-${c.id}`} checked={c.is_done} onCheckedChange={(v) => run(saveColumn({ id: c.id, boardId, name: c.name, color: c.color, isDone: v === true }))} />
@@ -40,7 +47,7 @@ export function ColumnsEditor({ boardId, columns, archived }: { boardId: string;
             </li>
           ))}
         </ul>
-        <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); startTransition(async () => { if (handleResult(await saveColumn({ boardId, name, color: "#64748B", isDone: false }))) setName(""); }); }}>
+        <form className="flex gap-2" onSubmit={(e) => { e.preventDefault(); startTransition(async () => { if (handleResult(await saveColumn({ boardId, name, color: "#64748B", isDone: false }))) { setName(""); router.refresh(); } }); }}>
           <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Nova coluna…" aria-label="Nova coluna" autoComplete="off" />
           <Button type="submit" variant="outline" disabled={pending || !name.trim()}><Plus aria-hidden="true" /> Adicionar</Button>
         </form>

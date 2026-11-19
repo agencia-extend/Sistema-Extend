@@ -42,6 +42,7 @@ export function Kanban({
   showClient = true,
   columnOf,
   stepFor,
+  moveTo,
 }: {
   columns: KanbanColumn[];
   tasks: TaskRow[];
@@ -53,6 +54,8 @@ export function Kanban({
   columnOf?: (t: TaskRow) => string;
   /** …e para qual etapa ele vai ao ser solto numa coluna (null = não pode). */
   stepFor?: (t: TaskRow, columnId: string) => { id: string; name: string; color: string; waitsClient: boolean } | null;
+  /** Movimento próprio (ex.: Minhas tarefas por situação): o que muda no card na hora e a ação que grava. */
+  moveTo?: (t: TaskRow, col: KanbanColumn, position: number) => { patch: Partial<TaskRow>; run: () => Promise<{ ok: boolean; message?: string }> };
 }) {
   const router = useRouter();
   // Id estável entre servidor e navegador: sem ele o dnd-kit numera os aria-describedby e a hidratação diverge.
@@ -99,6 +102,22 @@ export function Kanban({
     const col = columns.find((c) => c.id === targetCol)!;
     if (colOf(task) === targetCol && Math.abs(task.position - position) < 1e-9) return;
 
+    if (moveTo) {
+      const m = moveTo(task, col, position);
+      const before = tasks;
+      setTasks((all) => all.map((t) => (t.id === id ? { ...t, position, ...m.patch } : t)));
+      startTransition(async () => {
+        const res = await m.run();
+        if (!res.ok) {
+          setTasks(before);
+          toast.error(res.message ?? "Não foi possível mover.");
+        } else if (colOf(task) !== targetCol) {
+          toast.success(`Movida para ${col.name}.`);
+          router.refresh();
+        }
+      });
+      return;
+    }
     const step = stepFor ? stepFor(task, targetCol) : col.kind === "step" ? { id: col.id, name: col.name, color: col.color, waitsClient: Boolean(col.waitsClient) } : null;
     if (stepFor && !step) return void toast.error(`Este fluxo não tem etapa para "${col.name}".`);
 

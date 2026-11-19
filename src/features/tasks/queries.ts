@@ -74,6 +74,10 @@ export type TaskFilter = {
   sectorId?: string;
   type?: string;
   boardId?: string;
+  /** Só demandas fora de quadro próprio (quadros por tipo de demanda do cliente). */
+  withoutBoard?: boolean;
+  /** Várias pessoas (Minhas tarefas em quadro, para quem distribui). */
+  assigneeIds?: string[];
   openOnly?: boolean;
   sinceIso?: string;
   limit?: number;
@@ -87,6 +91,8 @@ export async function listTasks(f: TaskFilter = {}): Promise<TaskRow[]> {
   if (f.sectorId) q = q.eq("sector_id", f.sectorId);
   if (f.type) q = q.eq("type", f.type);
   if (f.boardId) q = q.eq("board_id", f.boardId);
+  if (f.withoutBoard) q = q.is("board_id", null);
+  if (f.assigneeIds) q = q.in("assignee_id", f.assigneeIds.length ? f.assigneeIds : ["00000000-0000-0000-0000-000000000000"]);
   if (f.openOnly) q = q.not("status", "in", "(concluido,cancelado)");
   if (f.sinceIso) q = q.or(`due_at.gte.${f.sinceIso},created_at.gte.${f.sinceIso},completed_at.gte.${f.sinceIso}`);
   const { data, error } = await q.order("position").limit(f.limit ?? 500);
@@ -177,6 +183,14 @@ export async function listBoards() {
     .order("name");
   if (error) throw error;
   return data;
+}
+
+/** Quadros próprios do cliente (aba Quadros do cliente), os ativos primeiro. */
+export async function listClientBoards(clientId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("boards").select("id, name, archived_at").eq("client_id", clientId).order("archived_at", { nullsFirst: true }).order("created_at");
+  if (error) throw error;
+  return data ?? [];
 }
 
 export async function getBoard(id: string) {

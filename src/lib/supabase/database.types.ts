@@ -3778,6 +3778,9 @@ isOneToOne: false
               "can_request": boolean,"id": string,"name": string
             }[]
                            },
+"move_board_column":
+{ Args: { "p_direction": string,"p_id": string }; Returns: undefined
+                           },
 "move_lead":
 { Args: { "p_lead": string,"p_reason"?: string,"p_stage": string }; Returns: undefined
                            },
@@ -3963,6 +3966,9 @@ isOneToOne: false
                            },
 "set_portal_user_active":
 { Args: { "p_active": boolean,"p_user": string }; Returns: string
+                           },
+"set_task_status":
+{ Args: { "p_position"?: number,"p_status": string,"p_task": string }; Returns: undefined
                            },
 "start_timer":
 { Args: { "p_task": string }; Returns: undefined

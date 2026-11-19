@@ -55,7 +55,7 @@ export default async function TaskPage({ params }: { params: Promise<{ id: strin
       <PageHeader
         breadcrumbs={[
           { label: "Minhas tarefas", href: "/tarefas" },
-          ...(task.clientId ? [{ label: task.clientName ?? "Cliente", href: `/clientes/${task.clientId}/quadros?tipo=${task.type}` }] : []),
+          ...(task.clientId ? [{ label: task.clientName ?? "Cliente", href: task.boardId ? `/clientes/${task.clientId}/quadros?quadro=${task.boardId}` : `/clientes/${task.clientId}/quadros?tipo=${task.type}` }] : []),
           { label: task.title },
         ]}
         title={task.title}

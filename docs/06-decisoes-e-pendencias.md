@@ -710,3 +710,16 @@ RF-BIB-04 e RF-BIB-05, para quem vê a performance dos criativos (`creatives.per
 - **Top criativos** do período: os 3 com mais resultados (leads + conversas + compras); no empate, o menor custo por resultado. Criativo sem resultado não entra (`topCreatives` em `src/domain/creatives/performance.ts`).
 - **Relatório de criativos** (CSV e PDF, `/criativos/biblioteca/exportar?mes=`): segue o mês escolhido no período (senão, o mês atual). Entram os aprovados no mês e os que tiveram gasto nele; quem vê a performance recebe as colunas investimento, impressões, CTR, resultados, custo por resultado, hook rate e ROAS, e o PDF abre com o top do mês. Os demais recebem o relatório sem números, como antes.
 - **Testes:** Vitest de `domain/creatives/performance` (período, top, CSV) e `e2e/32` (passo 4).
+
+## Quadros no estilo Trello (18/11/2026)
+Pedido do Henrique: quadros do cliente com colunas prontas e editáveis, cards arrastáveis como no Comercial, e Minhas tarefas em quadro com as tarefas de todas as pessoas para quem administra. Migration `20261118000600_quadros_trello.sql`.
+- **Quadros do cliente** (aba Quadros): além dos quadros por tipo de demanda (colunas = etapas do fluxo), o cliente tem quadros próprios. "Novo quadro" cria já com as colunas Ideias e pedidos, A fazer, Em produção, Revisão interna, Aprovação do cliente e Concluído. Em "Colunas": renomear, cor, marcar como concluído, levar para a esquerda ou a direita (`move_board_column`), criar e excluir (só coluna vazia), arquivar o quadro.
+  - Quem cria e edita: quem tem "Configurar quadros" ou quem distribui as demandas daquele cliente (`tasks.assign` no cliente; RLS de `boards` e `board_columns`). Quadros livres (`/quadros`) continuam só com "Configurar quadros".
+  - Demanda criada no quadro fica com quem criou (dá para trocar) e só aparece nele, não no quadro por tipo de demanda.
+  - Todo quadro novo (livre ou do cliente) nasce com as 6 colunas.
+- **Minhas tarefas › Quadro** (`?ver=quadro`): colunas A fazer, Fazendo, Aguardando aprovação e Concluídas (últimos 14 dias). Arrastar chama `set_task_status`:
+  - demanda de fluxo vai para a etapa mais próxima com aquela situação e passa para o responsável da etapa (como no quadro do cliente); se o fluxo não tem a etapa, avisa;
+  - demanda de quadro vai para a coluna de concluído (ou sai dela);
+  - demanda solta só muda a situação.
+  - Quem distribui demandas (`tasks.assign` ou "Configurar quadros") escolhe ver as próprias, as de uma pessoa ou as de todas.
+- **Testes:** `48_quadros_trello.test.sql` (13) e `e2e/43-quadros-trello.spec.ts`.

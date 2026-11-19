@@ -6,7 +6,7 @@ import { listBoards } from "@/features/tasks/queries";
 import { listSectors } from "@/features/admin/queries";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { EmptyState } from "@/components/app/states";
-import { BoardDialog } from "./board-dialog";
+import { BoardDialog } from "@/features/tasks/components/board-dialog";
 
 export const metadata: Metadata = { title: "Quadros" };
 

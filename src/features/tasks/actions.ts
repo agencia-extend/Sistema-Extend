@@ -10,7 +10,7 @@ import { createClient } from "@/lib/supabase/server";
 import { fail, ok } from "@/domain/shared/result";
 import { findMentions } from "@/domain/tasks";
 import type { TablesUpdate } from "@/lib/supabase/database.types";
-import { boardSchema, columnSchema, commentSchema, createTaskSchema, eventSchema, linkSchema, moveSchema, stepSchema, tagSchema, updateTaskSchema } from "./schemas";
+import { boardSchema, taskStatusSchema, columnSchema, commentSchema, createTaskSchema, eventSchema, linkSchema, moveSchema, stepSchema, tagSchema, updateTaskSchema } from "./schemas";
 
 const uuid = z.uuid();
 const touch = (id?: string | null, clientId?: string | null) => {
@@ -240,33 +240,45 @@ export const setStepDefault = defineAction(
 
 // --- Quadros livres -----------------------------------------------------------------
 
-export const saveBoard = defineAction({ schema: boardSchema, permission: "tasks.boards.configure" }, async ({ id, name, sectorId }, { user }) => {
+/** Colunas com que todo quadro novo nasce (editáveis depois). */
+const PRESET_COLUMNS = [
+  { name: "Ideias e pedidos", color: "#94A3B8" },
+  { name: "A fazer", color: "#64748B" },
+  { name: "Em produção", color: "#1D8AE6" },
+  { name: "Revisão interna", color: "#8B5CF6" },
+  { name: "Aprovação do cliente", color: "#F59E0B" },
+  { name: "Concluído", color: "#22C55E", is_done: true },
+];
+
+// Quadro livre: "Configurar quadros". Quadro do cliente: também quem distribui as demandas dele (a RLS confere).
+export const saveBoard = defineAction({ schema: boardSchema, permission: "tasks.read" }, async ({ id, name, sectorId, clientId }, { user }) => {
   const supabase = await createClient();
+  if (!clientId && !user.permissions["tasks.boards.configure"]) return fail("forbidden", "Você não configura quadros.");
   if (id) {
-    must(await supabase.from("boards").update({ name, sector_id: sectorId ?? null }).eq("id", id).select("id").single());
-    touch();
+    const row = must(await supabase.from("boards").update({ name, sector_id: sectorId ?? null }).eq("id", id).select("client_id").single()) as { client_id: string | null };
+    touch(null, row.client_id);
     return ok({ id }, "Quadro salvo.");
   }
-  const b = must(await supabase.from("boards").insert({ organization_id: user.organizationId, name, sector_id: sectorId ?? null, created_by: user.id }).select("id").single()) as { id: string };
-  must(
-    await supabase.from("board_columns").insert([
-      { board_id: b.id, name: "A fazer", position: 1, color: "#64748B" },
-      { board_id: b.id, name: "Fazendo", position: 2, color: "#1D8AE6" },
-      { board_id: b.id, name: "Feito", position: 3, color: "#22C55E", is_done: true },
-    ]),
-  );
-  touch();
-  return ok({ id: b.id }, "Quadro criado com as colunas A fazer, Fazendo e Feito.");
+  const { data: b, error } = await supabase
+    .from("boards")
+    .insert({ organization_id: user.organizationId, name, sector_id: sectorId ?? null, client_id: clientId ?? null, created_by: user.id })
+    .select("id")
+    .single();
+  if (error?.code === "42501") return fail("forbidden", "Você não cria quadros para este cliente.");
+  if (error || !b) throw error;
+  must(await supabase.from("board_columns").insert(PRESET_COLUMNS.map((c, i) => ({ board_id: b.id, position: i + 1, is_done: false, ...c }))));
+  touch(null, clientId);
+  return ok({ id: b.id }, "Quadro criado com as colunas prontas. Ajuste em Colunas.");
 });
 
-export const archiveBoard = defineAction({ schema: z.object({ id: uuid, archived: z.boolean() }), permission: "tasks.boards.configure" }, async ({ id, archived }) => {
+export const archiveBoard = defineAction({ schema: z.object({ id: uuid, archived: z.boolean() }), permission: "tasks.read" }, async ({ id, archived }) => {
   const supabase = await createClient();
   must(await supabase.from("boards").update({ archived_at: archived ? new Date().toISOString() : null }).eq("id", id).select("id").single());
   touch();
   return ok(null, archived ? "Quadro arquivado." : "Quadro restaurado.");
 });
 
-export const saveColumn = defineAction({ schema: columnSchema, permission: "tasks.boards.configure" }, async ({ id, boardId, name, color, isDone }) => {
+export const saveColumn = defineAction({ schema: columnSchema, permission: "tasks.read" }, async ({ id, boardId, name, color, isDone }) => {
   const supabase = await createClient();
   if (id) must(await supabase.from("board_columns").update({ name, color, is_done: isDone }).eq("id", id).select("id").single());
   else {
@@ -277,13 +289,29 @@ export const saveColumn = defineAction({ schema: columnSchema, permission: "task
   return ok(null, "Coluna salva.");
 });
 
-export const deleteColumn = defineAction({ schema: z.object({ id: uuid }), permission: "tasks.boards.configure" }, async ({ id }) => {
+export const deleteColumn = defineAction({ schema: z.object({ id: uuid }), permission: "tasks.read" }, async ({ id }) => {
   const supabase = await createClient();
   const { count } = await supabase.from("tasks").select("id", { count: "exact", head: true }).eq("board_column_id", id).is("deleted_at", null);
   if (count) return fail("business_rule", "Mova os cards desta coluna antes de excluí-la.");
   must(await supabase.from("board_columns").delete().eq("id", id));
   touch();
   return ok(null, "Coluna excluída.");
+});
+
+/** Leva a coluna uma casa para a esquerda ou a direita. */
+export const moveColumn = defineAction({ schema: z.object({ id: uuid, direction: z.enum(["left", "right"]) }), permission: "tasks.read" }, async ({ id, direction }) => {
+  const supabase = await createClient();
+  must(await supabase.rpc("move_board_column", { p_id: id, p_direction: direction }));
+  touch();
+  return ok(null);
+});
+
+/** Minhas tarefas em quadro: arrastar muda a situação (o banco leva para a etapa ou a coluna certa). */
+export const setTaskStatus = defineAction({ schema: taskStatusSchema, permission: "tasks.manage" }, async ({ id, status, position }) => {
+  const supabase = await createClient();
+  must(await supabase.rpc("set_task_status", { p_task: id, p_status: status, p_position: position as number }));
+  touch(id);
+  return ok(null);
 });
 
 // --- Fluxos -------------------------------------------------------------------------

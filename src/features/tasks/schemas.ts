@@ -43,7 +43,8 @@ export const linkSchema = z.object({
   url: z.url("Link inválido.").max(1000),
 });
 
-export const boardSchema = z.object({ id: uuid.optional(), name: z.string().trim().min(2, "Dê um nome ao quadro.").max(80), sectorId: uuid.nullable().optional() });
+export const boardSchema = z.object({ id: uuid.optional(), name: z.string().trim().min(2, "Dê um nome ao quadro.").max(80), sectorId: uuid.nullable().optional(), clientId: uuid.nullable().optional() });
+export const taskStatusSchema = z.object({ id: uuid, status: z.enum(["pendente", "em_andamento", "aguardando_aprovacao", "concluido"]), position: z.number().finite().nullable() });
 
 export const columnSchema = z.object({
   id: uuid.optional(),
