@@ -67,3 +67,11 @@ export async function getClientSocial(clientId: string): Promise<{ profile: Soci
     })),
   }));
 }
+
+/** Perfis ligados a clientes que a pessoa vê (estúdio de publicações). A RLS decide quais. */
+export async function listClientProfiles(): Promise<SocialProfileView[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("social_profiles").select(SELECT).not("client_id", "is", null).order("name").order("platform");
+  if (error) throw error;
+  return ((data ?? []) as unknown as Raw[]).map((r) => toView(r));
+}

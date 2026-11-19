@@ -32,7 +32,7 @@ export const syncAdsNow = defineAction({ schema: syncNowSchema, permission: "ads
   }
   if (!accountIds.length) return fail("business_rule", "Nenhuma conta ligada para sincronizar. Ligue as contas em Configurações › Integrações.");
   const r = await syncMetaAccounts({ trigger: "manual", accountIds, budgetMs: 50_000 });
-  revalidatePath("/trafego/painel");
+  revalidatePath("/anuncios", "layout");
   if (clientId) revalidatePath(`/clientes/${clientId}/anuncios`);
   if (r.total === 0) return fail("business_rule", "As contas ligadas estão sem conexão ativa com a Meta. Reconecte em Configurações › Integrações ou na aba Tráfego do cliente.");
   const failed = r.results.filter((x) => !x.ok);

@@ -77,9 +77,11 @@ export async function getAlerts(tab: AlertTab, user: CurrentUser) {
   let q = supabase.from("ad_alerts").select(SELECT).eq("status", status);
   q = status === "resolvido" ? q.order("resolved_at", { ascending: false }).limit(100) : q.order("opened_at", { ascending: false }).limit(300);
   const count = (s: AlertStatus) => supabase.from("ad_alerts").select("id", { count: "exact", head: true }).eq("status", s);
-  const [list, open, ack] = await Promise.all([q, count("aberto"), count("reconhecido")]);
+  const [list, open, ack, openByClient] = await Promise.all([q, count("aberto"), count("reconhecido"), supabase.from("ad_alerts").select("client_id").eq("status", "aberto").limit(2000)]);
   if (list.error) throw list.error;
-  return { rows: await withActions((list.data ?? []) as unknown as Raw[], user), counts: { abertos: open.count ?? 0, reconhecidos: ack.count ?? 0 } };
+  const byClient: Record<string, number> = {};
+  for (const r of openByClient.data ?? []) if (r.client_id) byClient[r.client_id] = (byClient[r.client_id] ?? 0) + 1;
+  return { rows: await withActions((list.data ?? []) as unknown as Raw[], user), counts: { abertos: open.count ?? 0, reconhecidos: ack.count ?? 0, byClient } };
 }
 
 /** Alertas em aberto (abertos e reconhecidos) de um cliente, para a aba Anúncios. */
@@ -114,4 +116,16 @@ export async function getAlertLimits(clientId: string | null) {
   const own = clientId ? rows.find((r) => r.client_id === clientId) : undefined;
   const agency = agencyRow ? toLimits(agencyRow) : SYSTEM_LIMITS;
   return { agency, effective: own ? toLimits(own) : agency, custom: Boolean(own) };
+}
+
+/** Limites que valem para cada cliente (os dele ou o padrão da agência), para a lista "Alertas por cliente". */
+export async function getClientsAlertLimits(clientIds: string[]) {
+  const supabase = await createClient();
+  const { data, error } = await supabase.from("ad_alert_settings").select("client_id, funds_days, funds_min_cents, daily_spend_max_cents, no_delivery, fatigue_enabled, fatigue_frequency, fatigue_ctr_drop");
+  if (error) throw error;
+  const rows = (data ?? []) as LimitsRaw[];
+  const agencyRow = rows.find((r) => r.client_id === null);
+  const agency = agencyRow ? toLimits(agencyRow) : SYSTEM_LIMITS;
+  const own = new Map(rows.filter((r) => r.client_id).map((r) => [r.client_id!, toLimits(r)]));
+  return { agency, byClient: new Map(clientIds.map((id) => [id, { effective: own.get(id) ?? agency, custom: own.has(id) }])) };
 }

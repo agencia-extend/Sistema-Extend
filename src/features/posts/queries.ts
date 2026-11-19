@@ -7,6 +7,7 @@ export type PostRow = {
   id: string;
   clientId: string;
   clientName: string | null;
+  profileId: string;
   platform: SocialPlatform;
   profileName: string;
   format: PostFormat;
@@ -22,13 +23,13 @@ export type PostRow = {
 };
 
 type Raw = {
-  id: string; client_id: string; format: string; caption: string; images: string[]; video_path: string | null; video_drive_id: string | null;
+  id: string; client_id: string; profile_id: string; format: string; caption: string; images: string[]; video_path: string | null; video_drive_id: string | null;
   scheduled_at: string; status: string; permalink: string | null; error: string | null;
   profile: { platform: string; name: string; username: string | null } | null; client: { name: string } | null; author: { full_name: string } | null;
 };
 
 const SELECT =
-  "id, client_id, format, caption, images, video_path, video_drive_id, scheduled_at, status, permalink, error, profile:social_profiles(platform, name, username), client:clients(name), author:profiles!post_schedules_created_by_fkey(full_name)";
+  "id, client_id, profile_id, format, caption, images, video_path, video_drive_id, scheduled_at, status, permalink, error, profile:social_profiles(platform, name, username), client:clients(name), author:profiles!post_schedules_created_by_fkey(full_name)";
 
 async function toRows(raw: Raw[]): Promise<PostRow[]> {
   const supabase = await createClient();
@@ -38,6 +39,7 @@ async function toRows(raw: Raw[]): Promise<PostRow[]> {
     id: r.id,
     clientId: r.client_id,
     clientName: r.client?.name ?? null,
+    profileId: r.profile_id,
     platform: (r.profile?.platform ?? "facebook") as SocialPlatform,
     profileName: r.profile?.username ? `@${r.profile.username}` : (r.profile?.name ?? "—"),
     format: r.format as PostFormat,

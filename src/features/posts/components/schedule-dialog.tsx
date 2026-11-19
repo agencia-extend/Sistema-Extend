@@ -22,11 +22,15 @@ const safe = (n: string) => n.normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/
 const tomorrow = () => new Date(Date.now() + 86_400_000 - 3 * 3_600_000).toISOString().slice(0, 10);
 
 /** Programar a publicação no Facebook e/ou Instagram do cliente (RF-CON-03). */
-export function ScheduleDialog({ clientId, targets, prefill, trigger, defaultOpen = false }: { clientId: string; targets: PublishTarget[]; prefill?: Prefill | null; trigger: ReactNode; defaultOpen?: boolean }) {
+export function ScheduleDialog({ clientId, targets, prefill, trigger, defaultOpen = false, initialFormat, initialProfile }: {
+  clientId: string; targets: PublishTarget[]; prefill?: Prefill | null; trigger: ReactNode; defaultOpen?: boolean;
+  /** Botões Post, Vídeo, Reels e Stories do estúdio: abre no formato e no perfil escolhidos. */
+  initialFormat?: PostFormat; initialProfile?: string;
+}) {
   const ready = targets.filter((t) => t.missing.length === 0);
   const init = () => ({
-    profiles: ready.map((t) => t.profileId),
-    format: prefill?.format ?? ("feed" as PostFormat),
+    profiles: initialProfile && ready.some((t) => t.profileId === initialProfile) ? [initialProfile] : ready.map((t) => t.profileId),
+    format: prefill?.format ?? initialFormat ?? ("feed" as PostFormat),
     caption: prefill?.caption ?? "",
     date: prefill?.date ?? tomorrow(),
     time: "09:00",

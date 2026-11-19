@@ -79,29 +79,45 @@ test.afterAll(async () => {
   for (const p of Object.values(people)) await admin.auth.admin.deleteUser(p.id);
 });
 
-test("1. painel: saldo, previsão, campanha com custo por conversa e troca de período", async ({ page }) => {
+test("1. módulo Anúncios: clientes, visão geral comparada, campanhas e troca de período", async ({ page }) => {
   await login(page, "Gil");
+  // O endereço antigo do painel leva ao módulo novo, mantendo o período.
   await page.goto("/trafego/painel?periodo=30d");
-  await expect(page.getByRole("heading", { name: "Painel do tráfego", level: 1 })).toBeVisible();
-  const box = page.getByRole("region", { name: `${clientName}: Conta Painel ${stamp}` });
-  await expect(box.getByText("Saldo R$ 50,00")).toBeVisible();
-  await expect(box.getByText(/~2 dias/)).toBeVisible(); // R$ 50 ÷ R$ 20 por dia
-  const row = box.getByRole("row", { name: /Mensagens Clareamento/ });
+  await page.waitForURL(/\/anuncios\/clientes\?periodo=30d/);
+  await expect(page.getByRole("heading", { name: "Anúncios", level: 1 })).toBeVisible();
+  const row = page.getByRole("table", { name: "Clientes" }).getByRole("row", { name: new RegExp(clientName) });
   await expect(row).toContainText("R$ 140,00");
-  await expect(row).toContainText("28 conversas");
   await expect(row).toContainText("R$ 5,00");
-  await expect(page.getByText("1 com saldo para até 3 dias")).toBeVisible();
+  await expect(row).toContainText("R$ 50,00 · ~2 d");
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 
-  await page.getByRole("link", { name: "Hoje" }).click();
+  await page.goto(`/anuncios?periodo=30d&cliente=${clientId}`);
+  const kpis = page.getByRole("definition").filter({ hasText: /^R\$\s140,00$/ });
+  await expect(kpis.first()).toBeVisible();
+  await expect(page.getByText("Sem base no período anterior").first()).toBeVisible();
+  await expect(page.getByRole("listitem").filter({ hasText: "saldo para cerca de 2 dias" })).toBeVisible();
+  await expect(page.getByRole("figure").getByText("Investimento por dia")).toBeVisible();
+  const top = page.getByRole("table", { name: "Campanhas com mais investimento" });
+  await expect(top.getByRole("row", { name: /Mensagens Clareamento/ })).toContainText("28 conversas");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+
+  // A aba leva os filtros junto.
+  await page.getByRole("navigation", { name: "Seções de anúncios" }).getByRole("link", { name: "Campanhas" }).click();
+  await page.waitForURL(new RegExp(`/anuncios/campanhas\\?.*cliente=${clientId}`));
+  const camp = page.getByRole("table", { name: "Campanhas" }).getByRole("row", { name: /Mensagens Clareamento/ });
+  await expect(camp).toContainText("R$ 140,00");
+  await expect(camp).toContainText("R$ 30,00");
+  await page.getByRole("group", { name: "Período" }).getByRole("button", { name: "Hoje" }).click();
   await expect(page).toHaveURL(/periodo=hoje/);
-  await expect(box.getByRole("row", { name: /Mensagens Clareamento/ })).toContainText("R$ 0,00"); // no ar, sem gasto hoje
+  await expect(page.getByRole("table", { name: "Campanhas" }).getByRole("row", { name: /Mensagens Clareamento/ })).toContainText("R$ 0,00"); // no ar, sem gasto hoje
+  await page.getByRole("navigation", { name: "Seções de anúncios" }).getByRole("link", { name: "Anúncios", exact: true }).click();
+  await expect(page.getByRole("table", { name: "Anúncios" }).getByRole("row", { name: /Vídeo antes e depois/ })).toBeVisible();
 });
 
 test("2. aba Anúncios do cliente e conta sem conexão ao sincronizar", async ({ page }) => {
   await login(page, "Gil");
   await page.goto(`/clientes/${clientId}/anuncios?periodo=30d`);
-  await expect(page.getByRole("link", { name: "Anúncios", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("main").getByRole("link", { name: "Anúncios", exact: true })).toHaveAttribute("aria-current", "page");
   const card = page.getByRole("listitem").filter({ hasText: "Vídeo antes e depois" });
   await expect(card).toContainText("Ativo");
   await expect(card).toContainText("R$ 140,00 · 28 conversas · R$ 5,00 cada");
@@ -141,6 +157,6 @@ test("2. aba Anúncios do cliente e conta sem conexão ao sincronizar", async ({
 
 test("3. gestor de fora do cliente não vê a conta", async ({ page }) => {
   await login(page, "Ivo");
-  await page.goto("/trafego/painel");
+  await page.goto("/anuncios/clientes");
   await expect(page.getByText(clientName)).toHaveCount(0);
 });

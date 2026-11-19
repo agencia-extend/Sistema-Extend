@@ -81,7 +81,7 @@ export default async function AnunciosPage({ params, searchParams }: { params: P
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h2 id="alertas-h" className="text-base font-semibold">Alertas em aberto</h2>
           <div className="flex flex-wrap items-center gap-3">
-            <Link href="/trafego/alertas" className="text-sm text-primary hover:underline">Ver todos os alertas</Link>
+            <Link href="/anuncios/alertas" className="text-sm text-primary hover:underline">Ver todos os alertas</Link>
             {user.permissions["ads.manage"] && (
               <LimitsDialog clientId={id} clientName={client.name} limits={limits.effective} custom={limits.custom}
                 trigger={<Button size="sm" variant="outline"><SlidersHorizontal aria-hidden="true" /> Limites dos alertas</Button>} />

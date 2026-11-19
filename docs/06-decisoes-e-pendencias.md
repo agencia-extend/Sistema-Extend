@@ -723,3 +723,17 @@ Pedido do Henrique: quadros do cliente com colunas prontas e editáveis, cards a
   - demanda solta só muda a situação.
   - Quem distribui demandas (`tasks.assign` ou "Configurar quadros") escolhe ver as próprias, as de uma pessoa ou as de todas.
 - **Testes:** `48_quadros_trello.test.sql` (13) e `e2e/43-quadros-trello.spec.ts`.
+
+## Anúncios, alertas e publicações no estilo do HubSystem (18/11/2026)
+Pedido do Henrique: anúncios, programação de posts/vídeos/stories/reels e alertas "no mesmo estilo do HubSystem, adaptado". Lido do HubSystem (só leitura): `app/(app)/anuncios`, `features/ads/components/{ads-tabs,ads-filter-bar,report,platform-compare}`, `components/app/charts*`, `features/content/components/studio.tsx`, `features/ads/components/reports-panel.tsx` (alertas por conta).
+- **Módulo Anúncios** (`/anuncios`, menu "Anúncios"; o antigo `/trafego/painel` redireciona):
+  - abas Visão geral, Clientes, Campanhas, Anúncios e Alertas; os filtros seguem de uma aba para outra (`src/domain/ads/filters.ts`);
+  - filtros: Hoje, Ontem, 7 dias, 30 dias, Este mês, Mês passado ou intervalo (até 1 ano), cliente, conta, status (ativas/pausadas) e agrupar por dia, semana ou mês;
+  - Visão geral: avisos de saldo acabando e erro de sincronização; indicadores comparados ao período anterior de mesma duração (investimento em cor neutra; impressões, cliques no link, leads, conversas e compras); eficiência (CTR, CPC, CPM, custo por resultado, ROAS); gráfico do investimento (Recharts 3.10.1, carregado sob demanda, com "Ver dados em tabela"); as 5 campanhas que mais gastaram;
+  - Clientes: investimento e variação, resultados, custo por resultado, saldo (vermelho quando acaba em até 3 dias), campanhas no ar e alertas abertos;
+  - Campanhas: tabela completa com orçamento, números e "Ajustar" (pausar/ativar, orçamento, renomear, duplicar) para quem cuida do tráfego do cliente;
+  - Anúncios: miniatura, situação, motivo da reprovação, cliente, campanha, números e "Pedir novo criativo".
+  - **Sem Google Ads ainda:** a sincronização do Google depende da conexão (2 fatores). Comparação Meta × Google e palavras-chave entram quando houver dados; nada aparece antes.
+  - **Conjuntos** (aba do HubSystem) não entrou: a sincronização da Extend guarda números por conta, campanha e anúncio, não por conjunto.
+- **Alertas** (`/anuncios/alertas`; `/trafego/alertas` redireciona, inclusive dos avisos já enviados): abertos, reconhecidos e resolvidos, e abaixo "Alertas por cliente" (como "Alertas por conta" do HubSystem): o que dispara aviso em cada cliente, se é o padrão da agência ou limites próprios, o saldo de cada conta e "Limites" para editar.
+- **Estúdio de publicações** (`/publicacoes`): perfis dos clientes à esquerda (foto, @, cliente); no perfil, agendadas e publicadas no mês, as que não publicaram em 30 dias, e os botões **Post, Vídeo, Reels e Stories** (abrem a programação já no formato e só com aquele perfil); planejador do mês (grade no computador, lista de dias no celular; tocar no dia mostra as publicações dele); "Não publicaram" e "Publicadas recentemente".

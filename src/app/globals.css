@@ -84,6 +84,10 @@
 
   --background: #f3f6fa;
   --surface: #ffffff;
+  --chart-1: #1d8ae6;
+  --chart-2: #ffb800;
+  --chart-grid: #e6ebf2;
+  --chart-axis: #c3cfdd;
   --foreground: #0e1726;
   --card: #ffffff;
   --card-foreground: #0e1726;
@@ -125,6 +129,10 @@
   color-scheme: dark;
   --background: #030406;
   --surface: #0d121e;
+  --chart-1: #4fa4f0;
+  --chart-2: #ffc933;
+  --chart-grid: rgb(255 255 255 / 0.07);
+  --chart-axis: rgb(255 255 255 / 0.16);
   --foreground: #f8fafc;
   --card: #0d121e;
   --card-foreground: #f8fafc;

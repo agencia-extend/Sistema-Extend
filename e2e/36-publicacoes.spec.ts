@@ -149,11 +149,30 @@ test("2. a fila roda, a Meta recusa e o motivo aparece; reagendar e cancelar", a
   await expect.poll(async () => (await admin.from("post_schedules").select("status").eq("client_id", clientId)).data!.map((r) => r.status).sort().join(",")).toBe("agendado,cancelado");
 });
 
-test("3. agenda geral mostra a programada do cliente", async ({ page }) => {
+test("3. estúdio: perfil, botões por formato e a programada no planejador do mês", async ({ page }) => {
   await login(page, "Sol");
   await page.goto("/publicacoes");
-  await expect(page.getByRole("heading", { name: "Publicações", level: 1 })).toBeVisible();
-  await expect(page.getByRole("list", { name: "Publicações programadas" }).first()).toContainText(clientName);
-  await page.getByRole("link", { name: "Com erro" }).click();
-  await expect(page.getByText("Nenhuma publicação com erro")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Estúdio de publicações", level: 1 })).toBeVisible();
+  await page.getByRole("navigation", { name: "Perfis" }).getByRole("link", { name: new RegExp(`@${handle}`) }).click();
+  await page.waitForURL(/perfil=/);
+  await expect(page.getByRole("heading", { name: `@${handle}`, level: 2 })).toBeVisible();
+
+  // Reels abre a programação já com o Instagram escolhido (e só ele).
+  const create = page.getByRole("group", { name: "Programar" });
+  await expect(create.getByRole("button", { name: "Post" })).toBeVisible();
+  await create.getByRole("button", { name: "Reels" }).click();
+  const dialog = page.getByRole("dialog");
+  await expect(dialog.getByRole("checkbox", { name: `Instagram · @${handle}` })).toBeChecked();
+  await expect(dialog.getByRole("checkbox", { name: `Facebook · ${clientName}` })).not.toBeChecked();
+  await page.keyboard.press("Escape");
+
+  // A programada aparece no planejador do mês dela; tocar no dia mostra a publicação.
+  const { data: row } = await admin.from("post_schedules").select("scheduled_at, profile_id").eq("client_id", clientId).eq("status", "agendado").limit(1).single();
+  const day = new Date(new Date(row!.scheduled_at).getTime() - 3 * 3_600_000).toISOString().slice(0, 10);
+  await page.goto(`/publicacoes?${new URLSearchParams({ perfil: row!.profile_id, mes: day.slice(0, 7) })}`);
+  const month = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"][Number(day.slice(5, 7)) - 1];
+  await page.getByRole("link", { name: new RegExp(`^${Number(day.slice(8))} de ${month}: 1 publicação`) }).or(page.getByRole("list", { name: /Dias com publicação/ }).getByRole("link")).first().click();
+  await page.waitForURL(new RegExp(`dia=${day}`));
+  await expect(page.getByRole("list", { name: "Publicações programadas" }).first()).toContainText("Agendado");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });

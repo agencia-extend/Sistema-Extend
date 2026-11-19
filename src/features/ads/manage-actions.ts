@@ -53,7 +53,7 @@ async function apply(t: Target, change: AdChange, why: string | undefined, call:
   const entry = changeEntry(change);
   const supabase = await createClient();
   must(await supabase.rpc("record_ad_change", { p_account: t.accountId, p_category: entry.category, p_what: entry.what, p_why: why ?? "" }));
-  revalidatePath("/trafego/painel");
+  revalidatePath("/anuncios", "layout");
   revalidatePath(`/clientes/${t.clientId}/anuncios`);
   revalidatePath(`/clientes/${t.clientId}/trafego`);
   return ok(null, entry.what.replace(" pelo sistema.", "."));

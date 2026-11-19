@@ -93,9 +93,11 @@ test.afterAll(async () => {
 
 test("1. reconhecer e resolver um alerta, com quem e como", async ({ page }) => {
   await login(page, "Lia");
-  await page.goto("/trafego/alertas");
-  await expect(page.getByRole("heading", { name: "Alertas", level: 1 })).toBeVisible();
+  await page.goto("/anuncios/alertas");
+  await expect(page.getByRole("navigation", { name: "Seções de anúncios" }).getByRole("link", { name: "Alertas" })).toHaveAttribute("aria-current", "page");
   await expect(page.getByRole("link", { name: /^Abertos/ })).toHaveAttribute("aria-current", "page");
+  // Abaixo, o que dispara aviso no cliente (padrão da agência), como no HubSystem.
+  await expect(page.getByRole("list", { name: "Limites por cliente" }).getByRole("listitem").filter({ hasText: clientName })).toContainText("Padrão da agência");
   const list = page.getByRole("list", { name: "Alertas" });
   const row = list.getByRole("listitem").filter({ hasText: saldo });
   await expect(row).toContainText("Saldo acabando");
@@ -141,16 +143,16 @@ test("2. aba Anúncios mostra os alertas em aberto do cliente", async ({ page })
 
 test("3. gestor de fora do cliente não vê os alertas dele", async ({ page }) => {
   await login(page, "Teo");
-  await page.goto("/trafego/alertas");
-  await expect(page.getByRole("heading", { name: "Alertas", level: 1 })).toBeVisible();
+  await page.goto("/anuncios/alertas");
+  await expect(page.getByRole("navigation", { name: "Seções de anúncios" }).getByRole("link", { name: "Alertas" })).toHaveAttribute("aria-current", "page");
   await expect(page.getByText(clientName)).toHaveCount(0);
-  await page.goto("/trafego/alertas?situacao=resolvidos");
+  await page.goto("/anuncios/alertas?situacao=resolvidos");
   await expect(page.getByText(saldo)).toHaveCount(0);
 });
 
 test("4. limites dos alertas do cliente: definir e voltar ao padrão da agência", async ({ page }) => {
   await login(page, "Lia");
-  await page.goto("/trafego/alertas");
+  await page.goto("/anuncios/alertas");
   await expect(page.getByText(/^Padrão da agência:/)).toBeVisible();
   await expect(page.getByRole("button", { name: "Limites padrão" })).toHaveCount(0); // só quem conecta as integrações
 
@@ -179,7 +181,7 @@ test("4. limites dos alertas do cliente: definir e voltar ao padrão da agência
 
 test("5. gerente de tráfego muda o padrão da agência", async ({ page }) => {
   await login(page, "Gal");
-  await page.goto("/trafego/alertas");
+  await page.goto("/anuncios/alertas");
   await page.getByRole("button", { name: "Limites padrão" }).click();
   const dialog = page.getByRole("dialog");
   await dialog.getByLabel("Frequência em 7 dias a partir de").fill("25");

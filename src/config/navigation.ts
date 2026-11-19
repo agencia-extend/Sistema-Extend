@@ -51,8 +51,8 @@ export const NAV_GROUPS: NavGroup[] = [
     items: [
       { href: "/setores", label: "Visão do setor", icon: "dashboard", anyOf: ["sector.dashboard.read"] },
       { href: "/quadros", label: "Quadros", icon: "boards", anyOf: ["tasks.read"] },
-      { href: "/trafego/painel", label: "Painel do tráfego", icon: "ads", anyOf: ["ads.read"] },
-      { href: "/trafego/alertas", label: "Alertas", icon: "alerts", anyOf: ["ads.read"] },
+      { href: "/anuncios", label: "Anúncios", icon: "ads", anyOf: ["ads.read"] },
+      { href: "/anuncios/alertas", label: "Alertas", icon: "alerts", anyOf: ["ads.read"] },
       { href: "/trafego", label: "Rotina do tráfego", icon: "ads", anyOf: ["optimization.manage"] },
       { href: "/relatorios", label: "Relatórios da semana", icon: "weekly", anyOf: ["reports.manage", "content.publish"] },
       { href: "/cronogramas", label: "Cronogramas do mês", icon: "schedule", anyOf: ["content.publish", "dashboards.read"] },
