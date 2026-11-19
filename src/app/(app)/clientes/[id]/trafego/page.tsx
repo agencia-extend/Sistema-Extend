@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Ban, History, Link2, Plus, Wallet } from "lucide-react";
+import { Ban, ClipboardList, History, Link2, Plus, Wallet } from "lucide-react";
 import { notFound } from "next/navigation";
 import { requirePermission } from "@/lib/auth/dal";
 import { Button } from "@/components/ui/button";
@@ -20,6 +20,9 @@ import { UtmDialog } from "@/features/traffic/components/utm-dialog";
 import { UtmList } from "@/features/traffic/components/utm-list";
 import { getClientFacebook } from "@/features/integrations/queries";
 import { ClientFacebook } from "@/features/integrations/components/client-facebook";
+import { listPlanClients, listPlans } from "@/features/ads/plan-queries";
+import { PlanDialog } from "@/features/ads/components/plans/plan-dialog";
+import { PlanList } from "@/features/ads/components/plans/plan-list";
 
 export const metadata: Metadata = { title: "Tráfego do cliente" };
 
@@ -29,7 +32,8 @@ export default async function TrafegoPage({ params }: { params: Promise<{ id: st
   const { id } = await params;
   const canManage = Boolean(user.permissions["optimization.manage"]);
   const seesAds = Boolean(user.permissions["ads.read"] || user.permissions["ads.manage"]);
-  const [client, changes, budgets, checks, rejections, library, utms, facebook] = await Promise.all([
+  const today = todayKey(new Date());
+  const [client, changes, budgets, checks, rejections, library, utms, facebook, plans, planClients] = await Promise.all([
     getClient(id),
     listChanges(id),
     listBudgets(id),
@@ -38,9 +42,12 @@ export default async function TrafegoPage({ params }: { params: Promise<{ id: st
     canManage ? listLibraryOptions(id) : Promise.resolve([]),
     listUtmLinks(id),
     seesAds ? getClientFacebook(id) : Promise.resolve(null),
+    listPlans({ clientId: id }, today),
+    canManage ? listPlanClients() : Promise.resolve([]),
   ]);
   if (!client) notFound();
-  const today = todayKey(new Date());
+  const planClient = planClients.filter((c) => c.id === id);
+  const manageable = new Set(planClient.map((c) => c.id));
 
   return (
     <div className="grid max-w-5xl gap-10">
@@ -65,6 +72,22 @@ export default async function TrafegoPage({ params }: { params: Promise<{ id: st
             icon={Wallet}
             title="Nenhuma verba registrada"
             description={canManage ? "Quando o cliente aprovar um valor para anúncios, registre aqui com o período, quem aprovou e o print ou áudio da aprovação." : "A equipe de tráfego registra aqui as verbas aprovadas pelo cliente."}
+          />
+        )}
+      </Section>
+
+      <Section
+        id="planos"
+        title="Planos de campanha"
+        action={planClient.length > 0 && <PlanDialog today={today} clients={planClient} trigger={<Button size="sm" variant="outline"><Plus aria-hidden="true" /> Novo plano</Button>} />}
+      >
+        {plans.length ? (
+          <PlanList rows={plans} today={today} showClient={false} manageable={manageable} />
+        ) : (
+          <EmptyState
+            icon={ClipboardList}
+            title="Nenhum plano de campanha"
+            description={planClient.length ? "Monte o plano antes de subir a campanha: objetivo, orçamento, público, período e criativos. Com o nome padrão, ele se liga sozinho à campanha quando ela aparecer na conta." : "A equipe de tráfego monta aqui os planos de campanha deste cliente."}
           />
         )}
       </Section>

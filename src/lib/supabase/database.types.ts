@@ -687,6 +687,76 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"campaign_plan_creatives": {
+                  Row: {
+                    "id": string,"library_id": string | null,"plan_id": string,"request_task_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "id"?: string,"library_id"?: string | null,"plan_id": string,"request_task_id"?: string | null
+                  }
+                  Update: {
+                    "id"?: string,"library_id"?: string | null,"plan_id"?: string,"request_task_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "campaign_plan_creatives_library_id_fkey"
+      columns: ["library_id"]
+isOneToOne: false
+      referencedRelation: "creative_library"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "campaign_plan_creatives_plan_id_fkey"
+      columns: ["plan_id"]
+isOneToOne: false
+      referencedRelation: "campaign_plans"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "campaign_plan_creatives_request_task_id_fkey"
+      columns: ["request_task_id"]
+isOneToOne: false
+      referencedRelation: "creative_requests"
+      referencedColumns: ["task_id"]
+    }
+                  ]
+                },"campaign_plans": {
+                  Row: {
+                    "approved_by": string | null,"approved_on": string | null,"audience": string,"budget_cents": number,"budget_type": string,"campaign_id": string | null,"client_id": string,"created_at": string,"created_by": string | null,"end_date": string | null,"id": string,"link_source": string | null,"name": string,"notes": string | null,"objective": string,"organization_id": string,"platform": string,"start_date": string,"status": string,"updated_at": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "approved_by"?: string | null,"approved_on"?: string | null,"audience": string,"budget_cents": number,"budget_type": string,"campaign_id"?: string | null,"client_id": string,"created_at"?: string,"created_by"?: string | null,"end_date"?: string | null,"id"?: string,"link_source"?: string | null,"name": string,"notes"?: string | null,"objective": string,"organization_id"?: string,"platform": string,"start_date": string,"status"?: string,"updated_at"?: string
+                  }
+                  Update: {
+                    "approved_by"?: string | null,"approved_on"?: string | null,"audience"?: string,"budget_cents"?: number,"budget_type"?: string,"campaign_id"?: string | null,"client_id"?: string,"created_at"?: string,"created_by"?: string | null,"end_date"?: string | null,"id"?: string,"link_source"?: string | null,"name"?: string,"notes"?: string | null,"objective"?: string,"organization_id"?: string,"platform"?: string,"start_date"?: string,"status"?: string,"updated_at"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "campaign_plans_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "ad_campaigns"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "campaign_plans_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "campaign_plans_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "campaign_plans_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"change_logs": {
                   Row: {
                     "ad_account_id": string | null,"category": string,"client_id": string,"created_at": string,"created_by": string | null,"happened_on": string,"id": string,"organization_id": string,"platform": string | null,"source": string,"updated_at": string,"what": string,"why": string
@@ -3764,6 +3834,11 @@ isOneToOne: false
 "cadence_due_messages":
 { Args: { "p_limit": number }; Returns: {
               "activity_id": string,"lead_id": string,"message": string,"organization_id": string,"phone": string
+            }[]
+                           },
+"campaign_plan_clients":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "id": string,"name": string
             }[]
                            },
 "can_manage_client_ads":
