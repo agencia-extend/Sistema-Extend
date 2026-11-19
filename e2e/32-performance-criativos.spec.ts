@@ -166,3 +166,42 @@ test("3. social media vê os números, mas não liga nem desliga", async ({ page
   await expect(sec.getByRole("button", { name: "Ligar anúncio" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
 });
+
+test("4. período dos números, top criativos e relatório exportado com os números (RF-BIB-04/05)", async ({ page }) => {
+  await login(page, "Ana");
+  await page.goto(`/criativos/biblioteca?cliente=${clientId}`);
+  // Depois do teste 1, só o anúncio ligado à mão conta: 1 lead a R$ 20,00.
+  const top = page.getByRole("region", { name: /^Top criativos/ });
+  await expect(top).toContainText("Top criativos · Todo o período");
+  await expect(top).toContainText(angle);
+  await expect(top).toContainText("1 lead · R$ 20,00 cada");
+
+  await page.getByRole("combobox", { name: "Período dos números" }).click();
+  await page.getByRole("option", { name: "Últimos 30 dias" }).click();
+  await expect(page).toHaveURL(/periodo=30d/);
+  await expect(top).toContainText("Top criativos · Últimos 30 dias");
+
+  // Um mês sem anúncio no ar: sem números e sem top.
+  const months = ["janeiro", "fevereiro", "março", "abril", "maio", "junho", "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"];
+  const old = new Date();
+  old.setUTCDate(1);
+  old.setUTCMonth(old.getUTCMonth() - 4);
+  const oldKey = old.toISOString().slice(0, 7);
+  await page.getByRole("combobox", { name: "Período dos números" }).click();
+  await page.getByRole("option", { name: `${months[old.getUTCMonth()]} de ${old.getUTCFullYear()}` }).click();
+  await expect(page).toHaveURL(new RegExp(`periodo=${oldKey}`));
+  await expect(page.getByRole("region", { name: /^Top criativos/ })).toHaveCount(0);
+  await expect(page.getByRole("list", { name: "Biblioteca de criativos" }).getByRole("listitem").filter({ hasText: angle })).not.toContainText("R$ 20,00");
+  await expect(page.getByRole("link", { name: "CSV" })).toHaveAttribute("href", new RegExp(`mes=${oldKey}`));
+
+  // Relatório do mês do anúncio: o criativo entra pelo gasto, com os números.
+  const month = day(1).slice(0, 7);
+  const csv = await (await page.request.get(`/criativos/biblioteca/exportar?formato=csv&mes=${month}`)).text();
+  expect(csv).toContain('"Investimento (R$)";"Impressões";"CTR (%)";"Resultados";"Custo por resultado (R$)"');
+  const line = csv.split("\r\n").find((l) => l.includes(angle))!;
+  expect(line).toContain('"20,00";"1000";"1,00";"1";"20,00"');
+  const pdf = await page.request.get(`/criativos/biblioteca/exportar?formato=pdf&mes=${month}`);
+  expect(pdf.status()).toBe(200);
+  expect((await pdf.body()).subarray(0, 5).toString()).toBe("%PDF-");
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);
+});

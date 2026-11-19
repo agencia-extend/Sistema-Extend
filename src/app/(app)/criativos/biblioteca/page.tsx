@@ -14,11 +14,12 @@ import { LibraryFilters } from "./library-filters";
 import { getPerformance } from "@/features/creatives/performance";
 import { PerformanceLine } from "@/features/creatives/components/performance-summary";
 import { FatigueSuggestion } from "@/features/creatives/components/fatigue-suggestion";
-import { PERFORMANCE_SORT_LABEL, costPerResult, creativeCode, creativeKpis, parseSort, suggestedStatus, type PerformanceSort } from "@/domain/creatives/performance";
+import { PERFORMANCE_SORT_LABEL, costPerResult, creativeCode, creativeKpis, monthLabel, parsePerfPeriod, parseSort, perfPeriodLabel, perfRange, recentMonths, suggestedStatus, topCreatives, type PerformanceSort } from "@/domain/creatives/performance";
+import { TopCreatives } from "@/features/creatives/components/top-creatives";
 
 export const metadata: Metadata = { title: "Biblioteca de criativos" };
 
-type Search = { q?: string; cliente?: string; situacao?: string; formato?: string; mes?: string; ordem?: string };
+type Search = { q?: string; cliente?: string; situacao?: string; formato?: string; mes?: string; ordem?: string; periodo?: string };
 
 /** Biblioteca: todo criativo aprovado, com a copy, a peça e a situação (em teste, vencedor…). */
 export default async function BibliotecaPage({ searchParams }: { searchParams: Promise<Search> }) {
@@ -26,7 +27,10 @@ export default async function BibliotecaPage({ searchParams }: { searchParams: P
   const all = await listLibrary();
   const canEdit = Boolean(user?.permissions["creatives.library.manage"] || user?.permissions["creatives.review"]);
   const term = (sp.q ?? "").trim().toLowerCase();
-  const month = sp.mes && /^\d{4}-\d{2}$/.test(sp.mes) ? sp.mes : todayKey(new Date()).slice(0, 7);
+  const today = todayKey(new Date());
+  const period = parsePerfPeriod(sp.periodo, today);
+  // O relatório exportado segue o mês escolhido no período (senão, o mês atual).
+  const month = period !== "tudo" && period !== "30d" ? period : sp.mes && /^\d{4}-\d{2}$/.test(sp.mes) ? sp.mes : today.slice(0, 7);
   const items = all.filter(
     (i) =>
       (!term || [i.angle, i.campaign, i.primaryText, i.headline, i.clientName].some((x) => x?.toLowerCase().includes(term))) &&
@@ -36,7 +40,8 @@ export default async function BibliotecaPage({ searchParams }: { searchParams: P
   );
   // Números dos anúncios ligados (RF-BIB-03): só para quem tem "Ver performance dos criativos" no cliente.
   const canPerf = Boolean(user?.permissions["creatives.performance.read"]);
-  const perf = canPerf ? await getPerformance(items.map((i) => i.id)) : new Map();
+  const perf = canPerf ? await getPerformance(items.map((i) => i.id), perfRange(period, today)) : new Map();
+  const top = canPerf ? topCreatives(items, perf) : [];
   const sort = canPerf ? parseSort(sp.ordem) : "recentes";
   if (sort !== "recentes") {
     // Sem números vai para o fim; no custo, menor primeiro.
@@ -57,9 +62,10 @@ export default async function BibliotecaPage({ searchParams }: { searchParams: P
     <div className="grid grid-cols-[minmax(0,1fr)] gap-4">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <LibraryFilters clients={clients} statuses={LIBRARY_STATUSES.map((s) => [s, LIBRARY_STATUS_LABEL[s]])}
-          sorts={canPerf ? (Object.keys(PERFORMANCE_SORT_LABEL) as PerformanceSort[]).filter((k) => k !== "recentes").map((k) => [k, PERFORMANCE_SORT_LABEL[k]]) : undefined} />
+          sorts={canPerf ? (Object.keys(PERFORMANCE_SORT_LABEL) as PerformanceSort[]).filter((k) => k !== "recentes").map((k) => [k, PERFORMANCE_SORT_LABEL[k]]) : undefined}
+          periods={canPerf ? [["30d", "Últimos 30 dias"], ...recentMonths(today).map((m): [string, string] => [m, monthLabel(m)])] : undefined} />
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-sm text-muted-foreground">Exportar {month.slice(5)}/{month.slice(0, 4)}:</span>
+          <span className="text-sm text-muted-foreground">Relatório de {monthLabel(month)}:</span>
           <a href={`/criativos/biblioteca/exportar?formato=csv&mes=${month}`} download className={buttonVariants({ variant: "outline", size: "sm" })}><Download aria-hidden="true" /> CSV</a>
           <a href={`/criativos/biblioteca/exportar?formato=pdf&mes=${month}`} download className={buttonVariants({ variant: "outline", size: "sm" })}><Download aria-hidden="true" /> PDF</a>
         </div>
@@ -67,6 +73,7 @@ export default async function BibliotecaPage({ searchParams }: { searchParams: P
       {canPerf && all.length > 0 && (
         <p className="text-sm text-muted-foreground">Os números vêm dos anúncios da Meta ligados a cada criativo: ponha o código do criativo (ex.: {creativeCode(all[0].ref)}) no nome do anúncio e ele se liga na sincronização, ou ligue à mão na página do criativo.</p>
       )}
+      {top.length > 0 && <TopCreatives items={top} periodLabel={perfPeriodLabel(period)} />}
       {all.length === 0 ? (
         <EmptyState icon={Library} title="A biblioteca está vazia" description="Todo criativo aprovado (internamente ou pelo cliente) entra aqui com a copy e a peça." />
       ) : items.length === 0 ? (

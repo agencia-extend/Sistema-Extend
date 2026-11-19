@@ -494,7 +494,7 @@ Fecha o RF-BIB-03 e a sugestão de "fadigado" do RF-BIB-02.
   - página do criativo: seção "Desempenho nos anúncios" com a tabela completa, os anúncios ligados (miniatura, situação, conta e campanha, como foi ligado, frequência) e o "Ligar anúncio".
 - **Fadigado (RF-BIB-02):** com alerta "Criativo cansado" em aberto num anúncio ligado, o criativo em teste ou vencedor mostra "Sugestão: fadigado" e o botão "Marcar como fadigado" para quem edita a biblioteca. "Vencedor" sugerido pelo sistema fica para quando houver regra definida (o RF-ALE-01 só define a fadiga).
 - **Regras no banco:** `link_creative_ad`, `unlink_creative_ad`, `creative_linked_ads`, `creative_linkable_ads`, `creative_performance` e `sync_link_creatives` (só a sincronização). Testes em `38_performance_criativos.test.sql` e `e2e/32-performance-criativos.spec.ts`.
-- **Ainda não feito:** filtro por período e "top criativos do mês" (RF-BIB-04) e os números no relatório de criativos exportado (RF-BIB-05).
+- ~~Filtro por período e "top criativos do mês" (RF-BIB-04) e os números no relatório exportado (RF-BIB-05)~~ (feitos em 18/11/2026, ver "Período, top criativos e relatório com números").
 
 ## Checklist diário já preenchido (17/11/2026)
 Fecha o "pré-preenche com os dados da API" do RF-OTI-01.
@@ -703,3 +703,10 @@ RF-WPP-03 (busca, etiquetas, respostas rápidas, apagar), RF-WPP-06 (origem do a
 **Testes:** `47_atendimento_completo.test.sql` (19); Vitest de `domain/inbox` e `domain/whatsapp/events`; `e2e/42-atendimento-completo.spec.ts` (ajustes, anúncio vira lead, @lid, radar, busca, etiqueta, resposta rápida, leitura confirmada ao vivo, apagar e restaurar, endereço antigo, voltar no celular); `e2e/37`, `38` e `39` atualizados para a tela nova.
 
 **Túnel**: o WAHA da Extend (`extend-waha`, porta 3032) já roda; falta ligar o túnel (`docker compose --profile tunnel up -d` em `infra/waha`) para o site publicado falar com ele. Diferente do HubSystem (ngrok com endereço fixo numa conta), a Extend usa o túnel da Cloudflare sem conta, que avisa o sistema sozinho quando o endereço muda.
+
+## Período, top criativos e relatório com números (18/11/2026)
+RF-BIB-04 e RF-BIB-05, para quem vê a performance dos criativos (`creatives.performance.read`).
+- **Período dos números** na biblioteca: todo o período, últimos 30 dias (até ontem) ou um dos 6 meses mais recentes (`?periodo=`). Os números dos cartões, a ordenação e o top seguem o período.
+- **Top criativos** do período: os 3 com mais resultados (leads + conversas + compras); no empate, o menor custo por resultado. Criativo sem resultado não entra (`topCreatives` em `src/domain/creatives/performance.ts`).
+- **Relatório de criativos** (CSV e PDF, `/criativos/biblioteca/exportar?mes=`): segue o mês escolhido no período (senão, o mês atual). Entram os aprovados no mês e os que tiveram gasto nele; quem vê a performance recebe as colunas investimento, impressões, CTR, resultados, custo por resultado, hook rate e ROAS, e o PDF abre com o top do mês. Os demais recebem o relatório sem números, como antes.
+- **Testes:** Vitest de `domain/creatives/performance` (período, top, CSV) e `e2e/32` (passo 4).
