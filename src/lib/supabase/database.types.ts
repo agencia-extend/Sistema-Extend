@@ -3385,6 +3385,50 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"trello_imports": {
+                  Row: {
+                    "board_id": string,"cards": number,"client_id": string,"comments": number,"created_at": string,"id": string,"imported_by": string | null,"organization_id": string,"source_id": string,"source_name": string,"undone_at": string | null,"undone_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "board_id": string,"cards": number,"client_id": string,"comments": number,"created_at"?: string,"id"?: string,"imported_by"?: string | null,"organization_id": string,"source_id": string,"source_name": string,"undone_at"?: string | null,"undone_by"?: string | null
+                  }
+                  Update: {
+                    "board_id"?: string,"cards"?: number,"client_id"?: string,"comments"?: number,"created_at"?: string,"id"?: string,"imported_by"?: string | null,"organization_id"?: string,"source_id"?: string,"source_name"?: string,"undone_at"?: string | null,"undone_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "trello_imports_board_id_fkey"
+      columns: ["board_id"]
+isOneToOne: false
+      referencedRelation: "boards"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "trello_imports_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "trello_imports_imported_by_fkey"
+      columns: ["imported_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "trello_imports_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "trello_imports_undone_by_fkey"
+      columns: ["undone_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"user_permission_overrides": {
                   Row: {
                     "created_at": string,"created_by": string | null,"effect": Database["public"]['Enums']["override_effect"],"permission_key": string,"scope": Database["public"]['Enums']["permission_scope"],"user_id": string
@@ -3953,6 +3997,9 @@ isOneToOne: false
 "import_leads":
 { Args: { "p_file": string,"p_pipeline": string,"p_rows": Json }; Returns: Json
                            },
+"import_trello_board":
+{ Args: { "p_board": Json,"p_client": string }; Returns: string
+                           },
 "inbox_agents":
 { Args: Record<PropertyKey, never>; Returns: {
               "full_name": string,"id": string
@@ -4206,6 +4253,9 @@ isOneToOne: false
                            },
 "undo_lead_import":
 { Args: { "p_import": string }; Returns: number
+                           },
+"undo_trello_import":
+{ Args: { "p_id": string }; Returns: undefined
                            },
 "unlink_creative_ad":
 { Args: { "p_ad": string,"p_library": string }; Returns: undefined

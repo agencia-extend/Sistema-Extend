@@ -233,3 +233,17 @@ export async function listTemplates(activeOnly = true) {
     isActive: t.is_active,
   }));
 }
+
+/** Importação do Trello que criou o quadro (ainda não desfeita), para mostrar a origem e o "desfazer". */
+export async function getTrelloImport(boardId: string) {
+  const supabase = await createClient();
+  const { data } = await supabase
+    .from("trello_imports")
+    .select("id, source_name, cards, comments, created_at, importer:profiles!trello_imports_imported_by_fkey(full_name)")
+    .eq("board_id", boardId)
+    .is("undone_at", null)
+    .maybeSingle();
+  if (!data) return null;
+  const who = Array.isArray(data.importer) ? data.importer[0] : data.importer;
+  return { id: data.id, sourceName: data.source_name, cards: data.cards, comments: data.comments, createdAt: data.created_at, importer: who?.full_name ?? null };
+}

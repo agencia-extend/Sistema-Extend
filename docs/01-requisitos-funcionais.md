@@ -62,7 +62,7 @@ Cada requisito tem um código (`RF-XXX-nn`), a etapa em que é construído e cri
 - **RF-TAR-08 Demanda do mês do cliente** (substitui a planilha de controle de mídias): contratado × produzido × aprovado × publicado por tipo, quem está entregando, status de cada item.
 - **RF-TAR-09 Atrasos.** Card vencido fica vermelho, notifica responsável e coordenação; contadores de atraso por setor e pessoa.
 - **RF-TAR-10 Dependências simples:** "aguardando" outro card/pessoa.
-- **RF-TAR-11 Importação do Trello** (JSON exportado): quadros, colunas, cards, checklists, comentários, anexos como links. **[CONFIRMAR se a Extend quer migrar o histórico]**
+- **RF-TAR-11 Importação do Trello** (JSON exportado): quadros, colunas, cards, checklists, comentários, anexos como links. Feito em 19/11/2026, só com o que está ativo (D7; ver docs/06).
 
 ## AGE — Agenda (etapa 03)
 - **RF-AGE-01** Agenda pessoal: tarefas com prazo/horário, blocos de tempo realizados, reuniões, gravações.

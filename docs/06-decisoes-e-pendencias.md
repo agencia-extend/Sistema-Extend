@@ -40,7 +40,7 @@
 | D4 | WhatsApp | WAHA (grupos, risco) × Cloud API (oficial, sem grupos) × ambos | WAHA para relatórios/alertas em grupo; Cloud API para atendimento comercial se houver volume | 06/07 |
 | D5 | Nomenclatura de campanhas | Sugestão em `docs/02` | **Decidido (14/11/2026): usar a sugestão do `docs/02`, editável em Configurações** | 05 |
 | D6 | Limites de fadiga e alertas | Sugestão em `docs/02` | Validar com o Luiz | 06 |
-| D7 | Migrar histórico do Trello | Sim × só clientes ativos × não | Só quadros ativos | 03 |
+| D7 | Migrar histórico do Trello | Sim × só clientes ativos × não | **Feito (19/11/2026): importação por quadro, só listas e cards ativos** | 03 |
 | D8 | Prospectador | Google Places (pago por uso) × outra fonte | Google Places com teto mensal | 08 |
 | D9 | TikTok, Canva, Gamma | Depende das APIs | Fora do MVP; avaliar depois | 10+ |
 | D10 | IA no sistema ("Mega Brain") | Resumo de performance, copy, pautas | Fora do MVP; escopo e custo a definir | futuro |
@@ -49,7 +49,7 @@
 ## O que pedir à Extend (checklist)
 - [ ] Organograma: funcionários, e-mail, setor, função, quem é admin (Henrique vai receber).
 - [ ] Planilha "Controle de clientes" e planilha de controle de mídias (Jacque).
-- [ ] Exportação JSON dos quadros do Trello (cliente ativo + setores de edição e conteúdo).
+- [ ] Exportação JSON dos quadros do Trello (cliente ativo + setores de edição e conteúdo). A importação já está pronta (19/11/2026): aba Quadros do cliente › Importar do Trello.
 - [ ] Briefing de mídias da Jacque (ainda não enviado) e perguntas atuais do onboarding.
 - [ ] Lista definitiva de serviços vendidos e unidades mensais.
 - [ ] Modelo atual de proposta comercial (Jorge) e o que mais muda nele. O modelo inicial do sistema segue os blocos do RF-PRO-01 e é editável em Configurações › Propostas; com o modelo do Jorge em mãos, ajustar o texto e a ordem lá (sem código).
@@ -767,3 +767,15 @@ RF-PLA-01/02. Migrations `20261119000400_planos_campanha.sql` (`campaign_plans`,
 - **Avisos** (tipo "Alertas de anúncios"): plano novo, mudança de situação e campanha ligada avisam a equipe de tráfego do cliente e quem criou o plano (nunca quem fez a ação); tudo entra na linha do tempo do cliente.
 - **Google Ads:** o plano pode ser do Google, mas o vínculo só acontece quando a sincronização do Google estiver ligada (depende da conexão com 2 fatores).
 - **Testes:** `51_planos_campanha.test.sql` (14), Vitest de `domain/ads/plans` e `e2e/46-planos-campanha.spec.ts`.
+
+## Importação do Trello (19/11/2026)
+RF-TAR-11, com a recomendação da D7 (só quadros ativos). Migration `20261119000600_importar_trello.sql`.
+- **Onde:** aba Quadros do cliente › "Importar do Trello". No Trello: Menu do quadro › Imprimir, exportar e compartilhar › Exportar como JSON.
+- **O que entra:** listas abertas viram colunas (a pessoa marca quais são de concluído; o sistema já sugere pelo nome ou usa a última), cards não arquivados com descrição, prazo, início, etiquetas (viram etiquetas do sistema), checklists (com o que já estava feito), comentários (com autor e data do Trello no texto) e anexos como links. Ficam de fora o que está arquivado no Trello. A data de criação do card e a de conclusão (última atividade) são mantidas, para não distorcer os números do período.
+- **Membros:** cada membro do Trello é associado a uma pessoa da equipe (já vem associado quando o nome é igual, sem acento e maiúsculas). O primeiro membro do card fica responsável e os outros participam. Sem pessoa, o card entra sem responsável.
+- **Avisos:** durante a importação os avisos por card e por comentário ficam em silêncio (`extend.quiet`, só dentro da transação); no fim vai um aviso por pessoa ("N cards do Trello estão com você"). Entra na linha do tempo do cliente.
+- **Regras:** só quem distribui as demandas do cliente (ou "Configurar quadros") importa e desfaz. O mesmo quadro do Trello não entra duas vezes no mesmo cliente. Até 50 listas e 1.000 cards por quadro. O arquivo é lido no navegador (até 40 MB) e só o resumo vai ao servidor.
+- **Desfazer:** a nota "Importado do Trello…" no topo do quadro tem "Desfazer importação": os cards saem (exclusão lógica) e o quadro é arquivado. Depois dá para importar de novo.
+- **Limite do Trello:** a exportação traz só as 1.000 ações mais recentes do quadro; em quadros muito antigos, comentários antigos podem faltar (a tela avisa).
+- **Testes:** `52_importar_trello.test.sql` (16), `src/domain/tasks/trello.test.ts` (6) e `e2e/47-importar-trello.spec.ts`.
+- **Pendente com a Extend:** exportar os JSON dos quadros ativos e importar cada um no cliente certo.

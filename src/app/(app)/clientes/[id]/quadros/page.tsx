@@ -2,13 +2,15 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { requirePermission } from "@/lib/auth/dal";
 import { currentServices, getClient, listTeam } from "@/features/clients/queries";
-import { getBoard, listClientBoards, listTasks, listWorkflows, listTemplates } from "@/features/tasks/queries";
+import { getBoard, getTrelloImport, listClientBoards, listTasks, listWorkflows, listTemplates } from "@/features/tasks/queries";
 import { listSectors } from "@/features/admin/queries";
 import { TASK_TYPE_LABEL } from "@/domain/tasks";
 import { Kanban } from "@/features/tasks/components/kanban";
 import { NewTaskDialog } from "@/features/tasks/components/new-task-dialog";
 import { BoardDialog } from "@/features/tasks/components/board-dialog";
 import { ColumnsEditor } from "@/features/tasks/components/columns-editor";
+import { TrelloImportDialog } from "@/features/tasks/components/trello-import-dialog";
+import { TrelloImportNote } from "@/features/tasks/components/trello-import-note";
 import { StepDefaults } from "./step-defaults";
 import { cn } from "@/lib/utils";
 
@@ -32,12 +34,13 @@ export default async function QuadrosClientePage({ params, searchParams }: { par
   const canManage = Boolean(user.permissions["tasks.manage"]);
   // Quem distribui as demandas do cliente cria e edita os quadros dele (a RLS confere no banco).
   const canBoards = Boolean(user.permissions["tasks.boards.configure"] || user.permissions["tasks.assign"]);
-  const [team, templates, sectors, board, tasks] = await Promise.all([
+  const [team, templates, sectors, board, tasks, imported] = await Promise.all([
     listTeam(),
     listTemplates(),
     canBoards ? listSectors() : Promise.resolve([]),
     boardId ? getBoard(boardId) : Promise.resolve(null),
     boardId ? listTasks({ boardId }) : listTasks({ clientId: id, type: type ?? undefined, withoutBoard: true }),
+    boardId ? getTrelloImport(boardId) : Promise.resolve(null),
   ]);
   const wf = type ? workflows.find((w) => w.taskType === type) : null;
   const teamOpts = team.map((t) => ({ id: t.id, name: t.name }));
@@ -58,6 +61,7 @@ export default async function QuadrosClientePage({ params, searchParams }: { par
           ))}
         </nav>
         <div className="flex flex-wrap gap-2">
+          {canBoards && !board && <TrelloImportDialog clientId={id} team={teamOpts} />}
           {canBoards && !board && <BoardDialog sectors={sectorOpts} clientId={id} />}
           {board && canBoards && <ColumnsEditor boardId={board.id} columns={board.columns} archived={Boolean(board.archived_at)} />}
           {board && canBoards && <BoardDialog sectors={sectorOpts} clientId={id} board={{ id: board.id, name: board.name, sectorId: board.sector_id }} />}
@@ -70,6 +74,7 @@ export default async function QuadrosClientePage({ params, searchParams }: { par
           )}
         </div>
       </div>
+      {imported && <TrelloImportNote imp={imported} clientId={id} canUndo={canBoards} />}
       {board ? (
         board.columns.length === 0 ? (
           <p className="rounded-xl border border-dashed px-4 py-6 text-sm text-muted-foreground">Este quadro está sem colunas. {canBoards ? "Crie as colunas em Colunas." : "Peça para quem distribui as demandas do cliente criar."}</p>
