@@ -17,13 +17,14 @@ export type StageKind = (typeof STAGE_KINDS)[number];
 
 export const ACTIVITY_KINDS = ["ligacao", "mensagem", "reuniao", "nota"] as const;
 export type ActivityKind = (typeof ACTIVITY_KINDS)[number];
-export const ACTIVITY_LABEL: Record<ActivityKind | "etapa" | "sistema", string> = {
+export const ACTIVITY_LABEL: Record<ActivityKind | "etapa" | "sistema" | "tarefa", string> = {
   ligacao: "Ligação",
   mensagem: "Mensagem",
   reuniao: "Reunião",
   nota: "Anotação",
   etapa: "Mudança de etapa",
   sistema: "Sistema",
+  tarefa: "Tarefa",
 };
 
 /** Mesmo cálculo do banco (private.normalize_phone): só dígitos e DDI 55 quando vier com DDD. */

@@ -136,7 +136,11 @@ export async function listLeadsForPanel() {
   }));
 }
 
-export type Activity = { id: string; kind: ActivityKind | "etapa" | "sistema"; body: string; dueAt: string | null; doneAt: string | null; createdAt: string; author: string | null };
+export type Activity = {
+  id: string; kind: ActivityKind | "etapa" | "sistema" | "tarefa"; body: string; dueAt: string | null; doneAt: string | null; createdAt: string; author: string | null;
+  /** Passo de cadência (RF-CRM-06): prazo guardado enquanto pausada, mensagem que sai sozinha, envio e erro. */
+  fromCadence: boolean; heldDueAt: string | null; autoMessage: string | null; sentAt: string | null; sendError: string | null;
+};
 
 export type LeadDetail = LeadRow & {
   notes: string | null;
@@ -144,15 +148,17 @@ export type LeadDetail = LeadRow & {
   createdBy: string | null;
   importId: string | null;
   activities: Activity[];
+  /** "Não quer mais contato" (RF-CRM-06). */
+  optOut: { at: string; note: string | null } | null;
 };
 
 export async function getLead(id: string): Promise<LeadDetail | null> {
   const supabase = await createClient();
   const [{ data, error }, { data: acts, error: e2 }] = await Promise.all([
-    supabase.from("leads").select(`${LEAD_SELECT}, notes, utm_source, utm_medium, utm_campaign, utm_content, utm_term, created_by, import_id`).eq("id", id).maybeSingle(),
+    supabase.from("leads").select(`${LEAD_SELECT}, notes, utm_source, utm_medium, utm_campaign, utm_content, utm_term, created_by, import_id, opt_out_at, opt_out_note`).eq("id", id).maybeSingle(),
     supabase
       .from("lead_activities")
-      .select("id, kind, body, due_at, done_at, created_at, author:profiles!lead_activities_created_by_fkey(full_name, email)")
+      .select("id, kind, body, due_at, done_at, created_at, enrollment_id, held_due_at, auto_message, sent_at, send_error, author:profiles!lead_activities_created_by_fkey(full_name, email)")
       .eq("lead_id", id)
       .order("created_at", { ascending: false })
       .limit(300),
@@ -162,7 +168,10 @@ export async function getLead(id: string): Promise<LeadDetail | null> {
   if (!data) return null;
   const activities: Activity[] = (acts ?? []).map((a) => {
     const au = one(a.author as { full_name: string; email: string } | null);
-    return { id: a.id, kind: a.kind as Activity["kind"], body: a.body, dueAt: a.due_at, doneAt: a.done_at, createdAt: a.created_at, author: au ? au.full_name || au.email : null };
+    return {
+      id: a.id, kind: a.kind as Activity["kind"], body: a.body, dueAt: a.due_at, doneAt: a.done_at, createdAt: a.created_at, author: au ? au.full_name || au.email : null,
+      fromCadence: Boolean(a.enrollment_id), heldDueAt: a.held_due_at, autoMessage: a.auto_message, sentAt: a.sent_at, sendError: a.send_error,
+    };
   });
   const open = activities.filter((a) => a.dueAt && !a.doneAt).sort((a, b) => a.dueAt!.localeCompare(b.dueAt!))[0];
   return {
@@ -173,6 +182,7 @@ export async function getLead(id: string): Promise<LeadDetail | null> {
     createdBy: data.created_by,
     importId: data.import_id,
     activities,
+    optOut: data.opt_out_at ? { at: data.opt_out_at, note: data.opt_out_note } : null,
   };
 }
 

@@ -507,6 +507,90 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"cadence_enrollments": {
+                  Row: {
+                    "created_by": string | null,"ended_at": string | null,"id": string,"lead_id": string,"organization_id": string,"paused_at": string | null,"reason": string | null,"started_at": string,"status": string,"template_id": string | null,"template_name": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_by"?: string | null,"ended_at"?: string | null,"id"?: string,"lead_id": string,"organization_id": string,"paused_at"?: string | null,"reason"?: string | null,"started_at"?: string,"status"?: string,"template_id"?: string | null,"template_name": string
+                  }
+                  Update: {
+                    "created_by"?: string | null,"ended_at"?: string | null,"id"?: string,"lead_id"?: string,"organization_id"?: string,"paused_at"?: string | null,"reason"?: string | null,"started_at"?: string,"status"?: string,"template_id"?: string | null,"template_name"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "cadence_enrollments_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "cadence_enrollments_lead_id_fkey"
+      columns: ["lead_id"]
+isOneToOne: false
+      referencedRelation: "leads"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "cadence_enrollments_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "cadence_enrollments_template_id_fkey"
+      columns: ["template_id"]
+isOneToOne: false
+      referencedRelation: "cadence_templates"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"cadence_steps": {
+                  Row: {
+                    "auto_send": boolean,"day_offset": number,"id": string,"kind": string,"message": string,"position": number,"template_id": string,"time_of_day": string,"title": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "auto_send"?: boolean,"day_offset": number,"id"?: string,"kind": string,"message"?: string,"position": number,"template_id": string,"time_of_day"?: string,"title": string
+                  }
+                  Update: {
+                    "auto_send"?: boolean,"day_offset"?: number,"id"?: string,"kind"?: string,"message"?: string,"position"?: number,"template_id"?: string,"time_of_day"?: string,"title"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "cadence_steps_template_id_fkey"
+      columns: ["template_id"]
+isOneToOne: false
+      referencedRelation: "cadence_templates"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"cadence_templates": {
+                  Row: {
+                    "description": string,"id": string,"is_active": boolean,"name": string,"organization_id": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "description"?: string,"id"?: string,"is_active"?: boolean,"name": string,"organization_id"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "description"?: string,"id"?: string,"is_active"?: boolean,"name"?: string,"organization_id"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "cadence_templates_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "cadence_templates_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"calendar_attendees": {
                   Row: {
                     "event_id": string,"profile_id": string
@@ -1517,14 +1601,14 @@ isOneToOne: false
                   ]
                 },"lead_activities": {
                   Row: {
-                    "body": string,"created_at": string,"created_by": string | null,"done_at": string | null,"due_at": string | null,"id": string,"kind": string,"lead_id": string
+                    "auto_message": string | null,"body": string,"created_at": string,"created_by": string | null,"done_at": string | null,"due_at": string | null,"enrollment_id": string | null,"held_due_at": string | null,"id": string,"kind": string,"lead_id": string,"send_error": string | null,"sent_at": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "body": string,"created_at"?: string,"created_by"?: string | null,"done_at"?: string | null,"due_at"?: string | null,"id"?: string,"kind": string,"lead_id": string
+                    "auto_message"?: string | null,"body": string,"created_at"?: string,"created_by"?: string | null,"done_at"?: string | null,"due_at"?: string | null,"enrollment_id"?: string | null,"held_due_at"?: string | null,"id"?: string,"kind": string,"lead_id": string,"send_error"?: string | null,"sent_at"?: string | null
                   }
                   Update: {
-                    "body"?: string,"created_at"?: string,"created_by"?: string | null,"done_at"?: string | null,"due_at"?: string | null,"id"?: string,"kind"?: string,"lead_id"?: string
+                    "auto_message"?: string | null,"body"?: string,"created_at"?: string,"created_by"?: string | null,"done_at"?: string | null,"due_at"?: string | null,"enrollment_id"?: string | null,"held_due_at"?: string | null,"id"?: string,"kind"?: string,"lead_id"?: string,"send_error"?: string | null,"sent_at"?: string | null
                   }
                   Relationships: [
                     {
@@ -1532,6 +1616,12 @@ isOneToOne: false
       columns: ["created_by"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "lead_activities_enrollment_id_fkey"
+      columns: ["enrollment_id"]
+isOneToOne: false
+      referencedRelation: "cadence_enrollments"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "lead_activities_lead_id_fkey"
@@ -1569,14 +1659,14 @@ isOneToOne: false
                   ]
                 },"leads": {
                   Row: {
-                    "company": string | null,"created_at": string,"created_by": string | null,"email": string | null,"id": string,"import_id": string | null,"lost_at": string | null,"lost_reason": string | null,"name": string,"notes": string | null,"organization_id": string,"owner_id": string | null,"phone": string | null,"pipeline_id": string,"source": string,"stage_changed_at": string,"stage_id": string,"updated_at": string,"utm_campaign": string | null,"utm_content": string | null,"utm_medium": string | null,"utm_source": string | null,"utm_term": string | null,"value_cents": number | null,"won_at": string | null,"won_client_id": string | null
+                    "company": string | null,"created_at": string,"created_by": string | null,"email": string | null,"id": string,"import_id": string | null,"lost_at": string | null,"lost_reason": string | null,"name": string,"notes": string | null,"opt_out_at": string | null,"opt_out_note": string | null,"organization_id": string,"owner_id": string | null,"phone": string | null,"pipeline_id": string,"source": string,"stage_changed_at": string,"stage_id": string,"updated_at": string,"utm_campaign": string | null,"utm_content": string | null,"utm_medium": string | null,"utm_source": string | null,"utm_term": string | null,"value_cents": number | null,"won_at": string | null,"won_client_id": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "company"?: string | null,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"id"?: string,"import_id"?: string | null,"lost_at"?: string | null,"lost_reason"?: string | null,"name": string,"notes"?: string | null,"organization_id"?: string,"owner_id"?: string | null,"phone"?: string | null,"pipeline_id": string,"source"?: string,"stage_changed_at"?: string,"stage_id": string,"updated_at"?: string,"utm_campaign"?: string | null,"utm_content"?: string | null,"utm_medium"?: string | null,"utm_source"?: string | null,"utm_term"?: string | null,"value_cents"?: number | null,"won_at"?: string | null,"won_client_id"?: string | null
+                    "company"?: string | null,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"id"?: string,"import_id"?: string | null,"lost_at"?: string | null,"lost_reason"?: string | null,"name": string,"notes"?: string | null,"opt_out_at"?: string | null,"opt_out_note"?: string | null,"organization_id"?: string,"owner_id"?: string | null,"phone"?: string | null,"pipeline_id": string,"source"?: string,"stage_changed_at"?: string,"stage_id": string,"updated_at"?: string,"utm_campaign"?: string | null,"utm_content"?: string | null,"utm_medium"?: string | null,"utm_source"?: string | null,"utm_term"?: string | null,"value_cents"?: number | null,"won_at"?: string | null,"won_client_id"?: string | null
                   }
                   Update: {
-                    "company"?: string | null,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"id"?: string,"import_id"?: string | null,"lost_at"?: string | null,"lost_reason"?: string | null,"name"?: string,"notes"?: string | null,"organization_id"?: string,"owner_id"?: string | null,"phone"?: string | null,"pipeline_id"?: string,"source"?: string,"stage_changed_at"?: string,"stage_id"?: string,"updated_at"?: string,"utm_campaign"?: string | null,"utm_content"?: string | null,"utm_medium"?: string | null,"utm_source"?: string | null,"utm_term"?: string | null,"value_cents"?: number | null,"won_at"?: string | null,"won_client_id"?: string | null
+                    "company"?: string | null,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"id"?: string,"import_id"?: string | null,"lost_at"?: string | null,"lost_reason"?: string | null,"name"?: string,"notes"?: string | null,"opt_out_at"?: string | null,"opt_out_note"?: string | null,"organization_id"?: string,"owner_id"?: string | null,"phone"?: string | null,"pipeline_id"?: string,"source"?: string,"stage_changed_at"?: string,"stage_id"?: string,"updated_at"?: string,"utm_campaign"?: string | null,"utm_content"?: string | null,"utm_medium"?: string | null,"utm_source"?: string | null,"utm_term"?: string | null,"value_cents"?: number | null,"won_at"?: string | null,"won_client_id"?: string | null
                   }
                   Relationships: [
                     {
@@ -3671,6 +3761,11 @@ isOneToOne: false
 "assign_conversation":
 { Args: { "p_id": string,"p_user": string }; Returns: undefined
                            },
+"cadence_due_messages":
+{ Args: { "p_limit": number }; Returns: {
+              "activity_id": string,"lead_id": string,"message": string,"organization_id": string,"phone": string
+            }[]
+                           },
 "can_manage_client_ads":
 { Args: { "p_client": string }; Returns: boolean
                            },
@@ -3682,6 +3777,9 @@ isOneToOne: false
                            },
 "cancel_post":
 { Args: { "p_id": string }; Returns: undefined
+                           },
+"change_cadence":
+{ Args: { "p_action": string,"p_id": string }; Returns: undefined
                            },
 "claim_due_posts":
 { Args: { "p_limit": number }; Returns: {
@@ -3761,6 +3859,9 @@ isOneToOne: false
                            },
 "duplicate_role":
 { Args: { "p_name": string,"p_role": string }; Returns: string
+                           },
+"enroll_lead":
+{ Args: { "p_lead": string,"p_start": string,"p_template": string }; Returns: string
                            },
 "finalize_invitation":
 { Args: { "p_full_name": string,"p_invitation": string }; Returns: string
@@ -3916,6 +4017,9 @@ isOneToOne: false
 "save_alert_limits":
 { Args: { "p_client": string,"p_daily_spend_max_cents": number,"p_fatigue_ctr_drop": number,"p_fatigue_enabled": boolean,"p_fatigue_frequency": number,"p_funds_days": number,"p_funds_min_cents": number,"p_no_delivery": boolean }; Returns: undefined
                            },
+"save_cadence":
+{ Args: { "p_description": string,"p_id": string,"p_name": string,"p_steps": Json }; Returns: string
+                           },
 "save_client_strategy":
 { Args: { "p_body": string,"p_client": string,"p_publish": boolean }; Returns: string
                            },
@@ -3966,6 +4070,9 @@ isOneToOne: false
 "set_ad_frequency":
 { Args: { "p_account": string,"p_rows": Json }; Returns: undefined
                            },
+"set_cadence_active":
+{ Args: { "p_active": boolean,"p_id": string }; Returns: undefined
+                           },
 "set_client_report_schedule":
 { Args: { "p_client": string,"p_frequency": string,"p_hour": number,"p_month_day": number }; Returns: undefined
                            },
@@ -3989,6 +4096,9 @@ isOneToOne: false
                            },
 "set_inbox_settings":
 { Args: { "p_radar_minutes": number }; Returns: undefined
+                           },
+"set_lead_opt_out":
+{ Args: { "p_lead": string,"p_note": string,"p_out": boolean }; Returns: undefined
                            },
 "set_onboarding_recipients":
 { Args: { "p_ids": (string)[] }; Returns: undefined

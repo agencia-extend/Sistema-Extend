@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
-import { ArrowRightLeft, CalendarClock, Info, LoaderCircle, MessageCircle, NotebookPen, Phone, Users } from "lucide-react";
+import { ArrowRightLeft, CalendarClock, CircleAlert, Info, ListChecks, LoaderCircle, MessageCircle, NotebookPen, PauseCircle, Phone, Send, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,7 @@ import type { Activity } from "@/features/crm/queries";
 import { handleResult } from "@/lib/action-feedback";
 import { cn } from "@/lib/utils";
 
-const ICON = { ligacao: Phone, mensagem: MessageCircle, reuniao: Users, nota: NotebookPen, etapa: ArrowRightLeft, sistema: Info } as const;
+const ICON = { ligacao: Phone, mensagem: MessageCircle, reuniao: Users, nota: NotebookPen, etapa: ArrowRightLeft, sistema: Info, tarefa: ListChecks } as const;
 
 /** Histórico do lead e próximas ações com lembrete (RF-CRM-01). */
 export function ActivityPanel({ leadId, activities, canEdit, now }: { leadId: string; activities: Activity[]; canEdit: boolean; now: number }) {
@@ -28,8 +28,10 @@ export function ActivityPanel({ leadId, activities, canEdit, now }: { leadId: st
   const [error, setError] = useState<string | null>(null);
   const [pending, start] = useTransition();
 
-  const pendingActions = activities.filter((a) => a.dueAt && !a.doneAt).sort((a, b) => a.dueAt!.localeCompare(b.dueAt!));
-  const history = activities.filter((a) => !(a.dueAt && !a.doneAt));
+  // Passo de cadência pausada fica nas próximas ações, sem prazo (guardado até retomar).
+  const isPending = (a: Activity) => !a.doneAt && Boolean(a.dueAt || a.heldDueAt);
+  const pendingActions = activities.filter(isPending).sort((a, b) => (a.dueAt ?? a.heldDueAt!).localeCompare(b.dueAt ?? b.heldDueAt!));
+  const history = activities.filter((a) => !isPending(a));
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -86,15 +88,21 @@ export function ActivityPanel({ leadId, activities, canEdit, now }: { leadId: st
         ) : (
           <ul className="divide-y rounded-xl border bg-card">
             {pendingActions.map((a) => {
-              const late = new Date(a.dueAt!).getTime() < now;
+              const late = a.dueAt ? new Date(a.dueAt).getTime() < now : false;
               return (
                 <li key={a.id} className="flex items-start gap-3 px-4 py-3">
                   <Checkbox id={`a-${a.id}`} className="mt-0.5" checked={false} disabled={!canEdit || pending} onCheckedChange={() => toggle(a.id, true)} aria-label={`Concluir: ${a.body}`} />
                   <label htmlFor={`a-${a.id}`} className="grid min-w-0 gap-0.5 text-sm">
                     <span className="break-words whitespace-pre-wrap">{a.body}</span>
-                    <span className={cn("flex items-center gap-1 text-xs tabular", late ? "font-medium text-danger" : "text-muted-foreground")}>
-                      <CalendarClock className="size-3.5" aria-hidden="true" /> {ACTIVITY_LABEL[a.kind]} · {formatDateTime(a.dueAt!)}{late ? " · atrasada" : ""}
-                    </span>
+                    {a.autoMessage && <span className="rounded-md border-l-2 border-primary/50 bg-muted/50 px-2 py-1 text-xs break-words whitespace-pre-wrap">Sai sozinha pelo WhatsApp: {a.autoMessage}</span>}
+                    {a.sendError && <span className="flex items-start gap-1 text-xs text-danger"><CircleAlert className="mt-0.5 size-3.5 shrink-0" aria-hidden="true" /> {a.sendError}</span>}
+                    {a.dueAt ? (
+                      <span className={cn("flex items-center gap-1 text-xs tabular", late ? "font-medium text-danger" : "text-muted-foreground")}>
+                        <CalendarClock className="size-3.5" aria-hidden="true" /> {ACTIVITY_LABEL[a.kind]}{a.fromCadence ? " da cadência" : ""} · {formatDateTime(a.dueAt)}{late ? " · atrasada" : ""}
+                      </span>
+                    ) : (
+                      <span className="flex items-center gap-1 text-xs text-warning"><PauseCircle className="size-3.5" aria-hidden="true" /> Cadência pausada: era para {formatDateTime(a.heldDueAt!)}</span>
+                    )}
                   </label>
                 </li>
               );
@@ -116,6 +124,7 @@ export function ActivityPanel({ leadId, activities, canEdit, now }: { leadId: st
                   <span className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-full border bg-card" aria-hidden="true"><Icon className="size-3.5 text-muted-foreground" /></span>
                   <div className="grid min-w-0 gap-0.5 text-sm">
                     <span className="break-words whitespace-pre-wrap">{a.body}</span>
+                    {a.sentAt && <span className="flex items-center gap-1 text-xs text-success"><Send className="size-3" aria-hidden="true" /> Enviada sozinha pelo WhatsApp em {formatDateTime(a.sentAt)}</span>}
                     <span className="text-xs text-muted-foreground">
                       {ACTIVITY_LABEL[a.kind]} · {formatDateTime(a.createdAt)}{a.author ? ` · ${a.author}` : ""}
                       {a.doneAt && a.dueAt ? ` · feita em ${formatDateTime(a.doneAt)}` : ""}

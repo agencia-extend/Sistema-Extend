@@ -68,3 +68,22 @@ export const stageSchema = z.object({
 });
 
 export const moveStageSchema = z.object({ id: uuid, pipelineId: uuid, direction: z.enum(["up", "down"]) });
+
+const cadenceStep = z.object({
+  day: z.number().int().min(0, "Dia de 0 a 90.").max(90, "Dia de 0 a 90."),
+  time: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, "Horário inválido."),
+  kind: z.enum(["mensagem", "ligacao", "tarefa"]),
+  title: z.string().trim().min(2, "Dê um título ao passo.").max(120, "Até 120 caracteres."),
+  message: z.string().trim().max(1000, "Mensagem de até 1.000 caracteres.").default(""),
+  auto: z.boolean().default(false),
+}).refine((s) => !s.auto || (s.kind === "mensagem" && s.message.length > 0), { message: "Para sair sozinha, o passo precisa ser mensagem e ter o texto.", path: ["auto"] });
+
+/** Modelo de cadência (RF-CRM-06). */
+export const cadenceSchema = z.object({
+  id: z.uuid().nullable().optional(),
+  name: z.string().trim().min(2, "Dê um nome à cadência.").max(80, "Até 80 caracteres."),
+  description: z.string().trim().max(300, "Até 300 caracteres.").default(""),
+  steps: z.array(cadenceStep).min(1, "A cadência precisa de pelo menos um passo.").max(15, "No máximo 15 passos."),
+});
+export const enrollSchema = z.object({ leadId: z.uuid(), templateId: z.uuid("Escolha a cadência."), start: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Escolha o dia de início.") });
+export const optOutSchema = z.object({ leadId: z.uuid(), out: z.boolean(), note: z.string().trim().max(300, "Até 300 caracteres.").default("") });

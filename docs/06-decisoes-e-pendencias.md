@@ -745,3 +745,14 @@ RF-PLA-03. Migration `20261119000100_nomenclatura.sql` (`naming_conventions`, um
 - **Gerador** (Anúncios › Nomenclatura › Gerar nome): escolhe o nível, preenche as peças (listas para objetivo e formato; o texto livre vira maiúsculas sem acento com hífen), confere o padrão e copia.
 - **Verificador** (Anúncios › Nomenclatura): campanhas, conjuntos e anúncios das contas que a pessoa vê (padrão: só os ativos), quantos estão no padrão por nível e a lista do que está fora com o motivo (a primeira peça que não bate).
 - **Testes:** `49_nomenclatura.test.sql` (6), Vitest de `domain/ads/naming` e `e2e/44-nomenclatura.spec.ts`.
+
+## Cadências de follow-up (19/11/2026)
+RF-CRM-06, adaptado do HubSystem (`cadence_templates`, `cadence_steps`, `cadence_enrollments`, `lib/cadence-runner.ts`). Migration `20261119000200_cadencias.sql`.
+- **Modelos** (Configurações › Cadências, quem configura o funil: admin e comercial): nome, para que serve e de 1 a 15 passos com dia (D+0 a D+90), horário, tipo (mensagem, ligação ou tarefa), o que fazer e a mensagem (`{nome}` = primeiro nome, `{empresa}`), com "enviar sozinha pelo WhatsApp". Ativar e desativar. Nascem dois modelos editáveis: "Lead novo de anúncio" e "Follow-up de proposta" (nenhum envio automático ligado).
+- **No lead** (cartão "Cadência"): escolhe a cadência e o dia de início (vê os passos com as datas) e inicia. Cada passo vira uma próxima ação com o lembrete que o Comercial já tinha. Uma cadência por lead.
+  - Pausar guarda os prazos; retomar empurra os prazos pelo tempo que ficou parada; cancelar tira os passos que faltavam (o feito fica no histórico). Terminar o último passo conclui.
+  - **Respondeu no WhatsApp** (conversa ligada ao lead): a cadência pausa sozinha e o responsável recebe "Respondeu: …".
+  - **Não quer mais contato** (com motivo): encerra a cadência, bloqueia outra e o envio automático.
+- **Envio automático** (job `extend-cadencias`, de 15 em 15 minutos das 8h às 20h, `cadence-send`): a mensagem marcada sai pelo WhatsApp da Extend no horário e fica "Enviada sozinha". Sem WhatsApp conectado (ou com erro), a ação fica com o motivo e o lembrete avisa o responsável para mandar à mão. O lembrete não avisa das mensagens automáticas que estão dando certo.
+- **Testes:** `50_cadencias.test.sql` (16) e `e2e/45-cadencias.spec.ts` (inclui o envio por um servidor de teste no formato do WAHA).
+- **Para o envio automático valer de verdade**, o WhatsApp precisa estar conectado (túnel em `infra/waha`).

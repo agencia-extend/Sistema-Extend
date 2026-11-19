@@ -12,6 +12,9 @@ import { formatDateTime } from "@/domain/shared/dates";
 import { getLead, listCrmPeople, listPipelines } from "@/features/crm/queries";
 import { leadToForm } from "@/features/crm/defaults";
 import { ActivityPanel } from "@/features/crm/components/activity-panel";
+import { LeadCadenceCard } from "@/features/crm/components/lead-cadence";
+import { getLeadCadence, listCadences } from "@/features/crm/cadence-queries";
+import { todayKey } from "@/domain/media";
 import { DeleteLead } from "@/features/crm/components/delete-lead";
 import { LeadDialog } from "@/features/crm/components/lead-dialog";
 import { StagePicker } from "@/features/crm/components/stage-picker";
@@ -28,7 +31,10 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
   const canHandoff = Boolean(user.permissions["commercial.handoff.create"]);
   const canProposals = Boolean(user.permissions["proposals.read"]);
   const canCreateProposal = Boolean(user.permissions["proposals.manage"]);
-  const [lead, pipelines, people, proposals] = await Promise.all([getLead(id), listPipelines(), canManage ? listCrmPeople() : Promise.resolve([]), canProposals ? listProposals(id) : Promise.resolve([])]);
+  const [lead, pipelines, people, proposals, cadences, cadence] = await Promise.all([
+    getLead(id), listPipelines(), canManage ? listCrmPeople() : Promise.resolve([]), canProposals ? listProposals(id) : Promise.resolve([]),
+    listCadences(true), getLeadCadence(id),
+  ]);
   if (!lead) notFound();
   const pipeline = pipelines.find((p) => p.id === lead.pipelineId);
   const stage = pipeline?.stages.find((s) => s.id === lead.stageId);
@@ -60,6 +66,7 @@ export default async function LeadPage({ params }: { params: Promise<{ id: strin
         <ActivityPanel leadId={lead.id} activities={lead.activities} canEdit={canManage} now={now} />
 
         <aside className="grid content-start gap-4 lg:order-last">
+          <LeadCadenceCard leadId={lead.id} templates={cadences} current={cadence} optOut={lead.optOut} canEdit={canManage} today={todayKey(new Date())} />
           <section aria-labelledby="etapa" className="grid gap-2 rounded-xl border bg-card p-4">
             <h2 id="etapa" className="text-sm font-semibold">Etapa</h2>
             {canManage && pipeline ? (
