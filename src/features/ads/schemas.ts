@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { parseNaming } from "@/domain/ads/naming";
 import { parseBRL } from "@/domain/shared/money";
 import { unknownVariables } from "@/domain/ads/report";
 
@@ -100,3 +101,10 @@ export const clientScheduleSchema = z.object({
   hour: z.number().int().min(6, "O horário vai das 6h às 22h.").max(22, "O horário vai das 6h às 22h."),
 });
 export const reportPreviewSchema = z.object({ clientId: z.uuid("Cliente inválido."), period: reportNowSchema.shape.period, templateId: z.uuid().nullable().optional() });
+
+const namingField = z.string().trim().max(120, "Padrão de até 120 caracteres.").superRefine((v, ctx) => {
+  const r = parseNaming(v);
+  if ("error" in r) ctx.addIssue({ code: "custom", message: r.error });
+});
+/** Nomenclatura padrão (RF-PLA-03): as peças são conferidas no navegador e no servidor. */
+export const namingSchema = z.object({ campaign: namingField, adset: namingField, ad: namingField });

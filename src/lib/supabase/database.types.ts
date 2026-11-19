@@ -1661,6 +1661,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"naming_conventions": {
+                  Row: {
+                    "ad": string,"adset": string,"campaign": string,"organization_id": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad"?: string,"adset"?: string,"campaign"?: string,"organization_id": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "ad"?: string,"adset"?: string,"campaign"?: string,"organization_id"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "naming_conventions_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: true
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "naming_conventions_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"notification_preferences": {
                   Row: {
                     "in_app": boolean,"kind": string,"push": boolean,"updated_at": string,"user_id": string
@@ -3898,6 +3924,9 @@ isOneToOne: false
                            },
 "save_marketing_date":
 { Args: { "p": Json }; Returns: string
+                           },
+"save_naming_convention":
+{ Args: { "p_ad": string,"p_adset": string,"p_campaign": string }; Returns: undefined
                            },
 "save_proposal":
 { Args: { "p": Json }; Returns: string

@@ -100,6 +100,7 @@ export const SETTINGS_PAGES: SettingsPage[] = [
   { href: "/configuracoes/propostas", label: "Propostas", description: "Modelos de proposta e preço padrão de cada serviço", perm: "proposals.templates.manage" },
   { href: "/configuracoes/setores", label: "Setores", description: "Setores da agência e quem faz parte", perm: "settings.manage" },
   { href: "/configuracoes/integracoes", label: "Integrações", description: "Meta, Google Ads e as contas de anúncio de cada cliente", perm: "ads.connect" },
+  { href: "/configuracoes/nomenclatura", label: "Nomenclatura", description: "Padrão de nome de campanha, conjunto e anúncio", perm: "ads.connect" },
   { href: "/configuracoes/relatorios", label: "Relatórios", description: "Modelos do relatório de anúncios com variáveis (investimento, CPL, saldo…)", perm: "reports.manage" },
   { href: "/configuracoes/whatsapp", label: "WhatsApp", description: "Número da Extend por QR Code, grupos dos clientes e alertas internos", perm: "integrations.manage" },
   { href: "/configuracoes/auditoria", label: "Auditoria", description: "Quem alterou o quê, com antes e depois", perm: "audit.read" },

@@ -8,7 +8,7 @@ import { fail, ok } from "@/domain/shared/result";
 import { defineAction, must } from "@/lib/actions";
 import { createClient } from "@/lib/supabase/server";
 import { clientReportData } from "@/lib/whatsapp/reports";
-import { clientScheduleSchema, clientTemplateSchema, reportPreviewSchema, reportTemplateIdSchema, reportTemplateSchema } from "./schemas";
+import { clientScheduleSchema, clientTemplateSchema, namingSchema, reportPreviewSchema, reportTemplateIdSchema, reportTemplateSchema } from "./schemas";
 
 // Modelos de relatório (RF-REL-02) e prévia com os números reais (RF-REL-03). O banco confere quem pode o quê.
 
@@ -62,4 +62,13 @@ export const previewClientReport = defineAction({ schema: reportPreviewSchema, p
   if (!data.accounts.length) return fail("forbidden", "Você não vê as contas de anúncio deste cliente.");
   const text = buildAdsReport(data, body);
   return ok({ text, range });
+});
+
+/** Nomenclatura padrão da agência (RF-PLA-03). O banco confere quem pode. */
+export const saveNaming = defineAction({ schema: namingSchema, permission: "ads.connect" }, async ({ campaign, adset, ad }) => {
+  const supabase = await createClient();
+  must(await supabase.rpc("save_naming_convention", { p_campaign: campaign, p_adset: adset, p_ad: ad }));
+  revalidatePath("/configuracoes/nomenclatura");
+  revalidatePath("/anuncios", "layout");
+  return ok(null, "Nomenclatura salva. O verificador já usa o padrão novo.");
 });

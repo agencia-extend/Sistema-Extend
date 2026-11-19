@@ -10,6 +10,7 @@ const TABS = [
   { href: "/anuncios/campanhas", label: "Campanhas" },
   { href: "/anuncios/anuncios", label: "Anúncios" },
   { href: "/anuncios/alertas", label: "Alertas" },
+  { href: "/anuncios/nomenclatura", label: "Nomenclatura" },
 ];
 
 // Filtros que acompanham a troca de aba.
