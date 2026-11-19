@@ -5,6 +5,9 @@ import { FileText, LoaderCircle, SendHorizontal, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { checkOutgoingMedia, extensionOf } from "@/domain/whatsapp/media";
+import { fillQuickReply, matchQuickReplies, shortcutQuery } from "@/domain/inbox";
+import type { QuickReply } from "@/features/inbox/queries";
+import { cn } from "@/lib/utils";
 import { markConversationRead, prepareMediaUpload, replyConversation, sendMediaMessage } from "@/features/inbox/actions";
 import { replySchema } from "@/features/inbox/schemas";
 import { createClient } from "@/lib/supabase/client";
@@ -14,15 +17,26 @@ const kb = (n: number) => (n >= 1024 * 1024 ? `${(n / 1024 / 1024).toLocaleStrin
 
 /**
  * Caixa de resposta: Enter envia, Shift+Enter quebra a linha. Clipe anexa foto, vídeo ou documento (o texto vira a
- * legenda); o microfone grava um áudio e envia ao parar. Abre marcando a conversa como lida.
+ * legenda); o microfone grava um áudio e envia ao parar. "/" abre as respostas rápidas. Abre marcando a conversa como lida.
  */
-export function Composer({ conversationId, unread, disabledReason }: { conversationId: string; unread: number; disabledReason: string | null }) {
+export function Composer({ conversationId, unread, disabledReason, quickReplies = [], contactName = "" }: {
+  conversationId: string; unread: number; disabledReason: string | null; quickReplies?: QuickReply[]; contactName?: string;
+}) {
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
   const [recording, setRecording] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, run] = useTransition();
   const ref = useRef<HTMLTextAreaElement>(null);
+  const [active, setActive] = useState(0);
+  const [closed, setClosed] = useState(false);
+  const query = shortcutQuery(text);
+  const matches = query !== null && !closed ? matchQuickReplies(quickReplies, query) : [];
+  const pickReply = (r: QuickReply) => {
+    setText(fillQuickReply(r.body, contactName));
+    setActive(0);
+    ref.current?.focus();
+  };
 
   useEffect(() => {
     if (unread > 0) void markConversationRead({ id: conversationId });
@@ -84,7 +98,19 @@ export function Composer({ conversationId, unread, disabledReason }: { conversat
 
   if (disabledReason) return <p role="status" className="border-t bg-muted/40 px-4 py-3 text-sm text-muted-foreground">{disabledReason}</p>;
   return (
-    <div className="grid gap-1.5 border-t bg-card p-3">
+    <div className="relative grid gap-1.5 border-t bg-card p-2 sm:p-3">
+      {matches.length > 0 && (
+        <ul id="respostas-rapidas" role="listbox" aria-label="Respostas rápidas" className="absolute inset-x-2 bottom-full z-20 mb-1 max-h-64 overflow-y-auto rounded-lg border bg-popover p-1 shadow-lg sm:inset-x-3">
+          {matches.map((r, i) => (
+            <li key={r.id} id={`rr-${r.id}`} role="option" aria-selected={i === active}
+              onMouseDown={(e) => { e.preventDefault(); pickReply(r); }} onMouseEnter={() => setActive(i)}
+              className={cn("grid cursor-pointer gap-0.5 rounded-md px-2.5 py-1.5 text-sm", i === active && "bg-accent")}>
+              <span className="font-medium">/{r.shortcut}</span>
+              <span className="line-clamp-2 text-xs text-muted-foreground">{r.body}</span>
+            </li>
+          ))}
+        </ul>
+      )}
       {error && <p role="alert" className="text-sm text-danger">{error}</p>}
       {file && (
         <div className="flex min-w-0 items-center gap-2 rounded-md border bg-muted/40 py-1 pl-3 text-sm">
@@ -101,16 +127,37 @@ export function Composer({ conversationId, unread, disabledReason }: { conversat
         {!recording && (
           <Textarea
             ref={ref}
-            rows={2}
+            rows={1}
             maxLength={4096}
             name="mensagem"
             autoComplete="off"
             aria-label={file ? "Legenda do arquivo" : "Mensagem"}
-            placeholder={file ? "Legenda (opcional)…" : "Escreva a resposta…"}
-            className="max-h-40 min-h-11 flex-1 resize-y"
+            placeholder={file ? "Legenda (opcional)…" : quickReplies.length ? "Mensagem ou /atalho…" : "Mensagem…"}
+            className="field-sizing-content max-h-40 min-h-10 flex-1 resize-none py-2"
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => { setText(e.target.value); setClosed(false); setActive(0); }}
+            role={matches.length ? "combobox" : undefined}
+            aria-expanded={matches.length ? true : undefined}
+            aria-controls={matches.length ? "respostas-rapidas" : undefined}
+            aria-activedescendant={matches.length ? `rr-${matches[active]?.id}` : undefined}
             onKeyDown={(e) => {
+              if (matches.length) {
+                if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                  e.preventDefault();
+                  setActive((i) => (i + (e.key === "ArrowDown" ? 1 : matches.length - 1)) % matches.length);
+                  return;
+                }
+                if ((e.key === "Enter" || e.key === "Tab") && !e.shiftKey) {
+                  e.preventDefault();
+                  pickReply(matches[active] ?? matches[0]);
+                  return;
+                }
+                if (e.key === "Escape") {
+                  e.preventDefault();
+                  setClosed(true);
+                  return;
+                }
+              }
               if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
                 e.preventDefault();
                 send();

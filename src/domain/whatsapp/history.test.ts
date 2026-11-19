@@ -29,7 +29,7 @@ describe("historyMessage", () => {
   const ts = 1_763_400_000;
   it("mensagem de contato com o nome e o telefone alternativo", () => {
     const m = historyMessage({ id: "false_123@lid_3EB0AA", timestamp: ts, fromMe: false, body: "Oi!", _data: { pushName: "Marina", key: { remoteJidAlt: "5511987654321@s.whatsapp.net" } } }, false);
-    expect(m).toEqual({ wamid: "false_123@lid_3EB0AA", from_me: false, author: null, author_name: "Marina", body: "Oi!", kind: "text", sent_at: new Date(ts * 1000).toISOString(), alt: "5511987654321@s.whatsapp.net", pushName: "Marina" });
+    expect(m).toEqual({ wamid: "3EB0AA", from_me: false, author: null, author_name: "Marina", body: "Oi!", kind: "text", sent_at: new Date(ts * 1000).toISOString(), alt: "5511987654321@s.whatsapp.net", pushName: "Marina" });
   });
   it("mídia sem legenda entra como mídia; em grupo guarda quem escreveu", () => {
     const m = historyMessage({ id: "x1", timestamp: ts, fromMe: false, hasMedia: true, participant: "5548999990000@c.us", _data: { pushName: "Caio" } }, true);

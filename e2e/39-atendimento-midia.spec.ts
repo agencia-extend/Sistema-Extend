@@ -138,14 +138,14 @@ test("1. foto recebida aparece na conversa; quem não atende não abre o arquivo
   });
   const res = await request.post(`/api/whatsapp/webhook/${connId}`, { data: msg, headers: { "content-type": "application/json", "x-webhook-hmac": createHmac("sha512", hookSecret).update(msg).digest("hex") } });
   expect(res.status()).toBe(200);
-  const { data: saved } = await admin.from("whatsapp_messages").select("id, media_path, media_mime").eq("connection_id", connId).eq("wamid", `false_${phone}@c.us_F${stamp}`).single();
+  const { data: saved } = await admin.from("whatsapp_messages").select("id, media_path, media_mime").eq("connection_id", connId).eq("wamid", `F${stamp}`).single();
   expect(saved!.media_mime).toBe("image/png");
   expect(saved!.media_path).toContain(orgId);
 
   await login(page, "Ana");
   await page.goto("/atendimento");
   await expect(page.getByRole("list", { name: "Conversas" }).getByRole("link").filter({ hasText: contact })).toContainText("[foto]");
-  await page.goto(`/atendimento/${convId}`);
+  await page.goto(`/atendimento?conversa=${convId}`);
   const img = page.getByRole("list", { name: "Mensagens" }).getByRole("img", { name: "Foto enviada na conversa" });
   await expect(img).toBeVisible();
   await expect.poll(() => img.evaluate((el) => (el as HTMLImageElement).naturalWidth)).toBe(1);
@@ -158,7 +158,7 @@ test("1. foto recebida aparece na conversa; quem não atende não abre o arquivo
 test("2. anexa um PDF com legenda e envia", async ({ page }) => {
   test.skip(skipReal, "Já existe um WhatsApp real conectado.");
   await login(page, "Ana");
-  await page.goto(`/atendimento/${convId}`);
+  await page.goto(`/atendimento?conversa=${convId}`);
   await attach(page, { name: "proposta-extend.pdf", mimeType: "application/pdf", buffer: Buffer.from("%PDF-1.4\n% teste\n%%EOF\n") },
     () => expect(page.getByText("proposta-extend.pdf")).toBeVisible({ timeout: 1000 }));
   await page.getByLabel("Legenda do arquivo").fill("Segue a proposta 😊");
@@ -175,7 +175,7 @@ test("2. anexa um PDF com legenda e envia", async ({ page }) => {
 test("3. grava um áudio e envia como mensagem de voz", async ({ page }) => {
   test.skip(skipReal, "Já existe um WhatsApp real conectado.");
   await login(page, "Ana");
-  await page.goto(`/atendimento/${convId}`);
+  await page.goto(`/atendimento?conversa=${convId}`);
   await page.getByRole("button", { name: "Gravar áudio" }).click();
   await expect(page.getByRole("status").filter({ hasText: "Gravando" })).toBeVisible();
   await page.waitForTimeout(1500);

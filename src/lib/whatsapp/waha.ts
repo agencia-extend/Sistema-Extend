@@ -1,5 +1,6 @@
 import "server-only";
 import { createHmac, timingSafeEqual } from "node:crypto";
+import { messageIdFromResponse } from "@/domain/whatsapp/events";
 
 // WAHA: WhatsApp por QR Code num servidor próprio (hoje a máquina local; depois a VPS). Não é a API oficial.
 // Adaptado do HubSystem (src/lib/waha.ts), só com o que a Extend usa.
@@ -16,7 +17,7 @@ export class WahaError extends Error {
   }
 }
 
-const EVENTS = ["message.any", "session.status"];
+const EVENTS = ["message.any", "message.ack", "session.status"];
 
 // Túneis gratuitos mostram uma página de aviso sem este cabeçalho.
 const tunnelHeaders = (url: string): Record<string, string> => (new URL(url).hostname.endsWith(".ngrok-free.dev") ? { "ngrok-skip-browser-warning": "1" } : {});
@@ -182,10 +183,14 @@ export async function wahaDownload(conn: Pick<WahaConn, "url" | "key">, mediaUrl
   return body;
 }
 
-/** Id da mensagem na resposta de envio (o formato varia por motor). */
-export function sentMessageId(raw: { id?: unknown } | null | undefined): string | null {
-  const id = raw?.id as string | { _serialized?: string } | undefined;
-  return (typeof id === "string" ? id : id?._serialized) || null;
+/** Id cru da mensagem na resposta de envio (o mesmo que o webhook grava). */
+export const sentMessageId = (raw: unknown): string | null => messageIdFromResponse(raw);
+
+/** Foto de perfil de contato ou grupo (link assinado do WhatsApp, que expira). null = sem foto ou privada. */
+export async function wahaProfilePicture(conn: WahaConn, jid: string) {
+  const r = await call<{ profilePictureURL?: string | null }>(conn, `/api/contacts/profile-picture?contactId=${encodeURIComponent(jid)}&session=${encodeURIComponent(conn.session)}`, { timeoutMs: 8000 });
+  const url = r.profilePictureURL ?? null;
+  return url && url.startsWith("https://") && url.length <= 1000 ? url : null;
 }
 
 /** Assinatura do webhook: HMAC-SHA512 do corpo bruto com o segredo da sessão. */

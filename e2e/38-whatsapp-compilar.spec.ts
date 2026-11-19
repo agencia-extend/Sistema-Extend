@@ -129,7 +129,7 @@ test("1. o túnel anuncia o servidor e a pessoa só clica para ver o QR Code", a
 
   await login(page, ana.email);
   await page.goto("/atendimento");
-  await expect(page.getByRole("status").filter({ hasText: "não está conectado agora" })).toBeVisible();
+  await expect(page.getByRole("status").filter({ hasText: "está desconectado" })).toBeVisible();
   await page.getByRole("button", { name: "Conectar WhatsApp" }).click();
   const dialog = page.getByRole("dialog", { name: "Conectar o WhatsApp da Extend" });
   await expect(dialog.getByRole("img", { name: "QR Code para conectar o WhatsApp" })).toBeVisible({ timeout: 60_000 });
@@ -166,16 +166,17 @@ test("2. compilar conversas traz a conversa e o grupo para o Atendimento", async
   await page.goto("/atendimento");
   const item = page.getByRole("list", { name: "Conversas" }).getByRole("link").filter({ hasText: contact });
   await expect(item).toContainText("Vocês fazem gestão de Instagram?");
-  await expect(item).toContainText("Aguardando");
+  await expect(item).toContainText("Espera há");
   await expect(page.getByRole("region", { name: "Trazer conversas antigas" })).toHaveCount(0);
 
   await page.getByRole("link", { name: /^Grupos/ }).click();
   const g = page.getByRole("list", { name: "Conversas" }).getByRole("link").filter({ hasText: groupName });
   await expect(g).toContainText("Dra. Paula: Post aprovado, pode publicar.");
   await g.click();
-  await expect(page.getByRole("heading", { name: groupName, level: 1 })).toBeVisible();
+  await expect(page.getByRole("heading", { name: groupName, level: 2 })).toBeVisible();
   await expect(page.getByRole("list", { name: "Mensagens" })).toContainText("Dra. Paula");
-  const side = page.getByRole("complementary", { name: "Detalhes da conversa" });
+  const open = page.getByRole("button", { name: "Detalhes da conversa" });
+  const side = (await open.isVisible()) ? (await open.click(), page.getByRole("dialog")) : page.getByRole("complementary", { name: "Detalhes da conversa" });
   await expect(side).toContainText("Grupo sem cliente.");
   await expect(side.getByRole("button", { name: "Criar lead no funil" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)).toBe(true);

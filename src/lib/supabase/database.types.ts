@@ -3283,16 +3283,42 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
-                },"wa_conversations": {
+                },"wa_conversation_tags": {
                   Row: {
-                    "assignee_id": string | null,"chat_id": string,"connection_id": string,"contact_name": string,"created_at": string,"id": string,"imported_at": string | null,"kind": string,"last_inbound_at": string | null,"last_message_at": string | null,"last_preview": string | null,"lead_id": string | null,"organization_id": string,"phone": string | null,"status": string,"unread_count": number,"waiting_reply": boolean
+                    "conversation_id": string,"tag_id": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "assignee_id"?: string | null,"chat_id": string,"connection_id": string,"contact_name"?: string,"created_at"?: string,"id"?: string,"imported_at"?: string | null,"kind"?: string,"last_inbound_at"?: string | null,"last_message_at"?: string | null,"last_preview"?: string | null,"lead_id"?: string | null,"organization_id": string,"phone"?: string | null,"status"?: string,"unread_count"?: number,"waiting_reply"?: boolean
+                    "conversation_id": string,"tag_id": string
                   }
                   Update: {
-                    "assignee_id"?: string | null,"chat_id"?: string,"connection_id"?: string,"contact_name"?: string,"created_at"?: string,"id"?: string,"imported_at"?: string | null,"kind"?: string,"last_inbound_at"?: string | null,"last_message_at"?: string | null,"last_preview"?: string | null,"lead_id"?: string | null,"organization_id"?: string,"phone"?: string | null,"status"?: string,"unread_count"?: number,"waiting_reply"?: boolean
+                    "conversation_id"?: string,"tag_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "wa_conversation_tags_conversation_id_fkey"
+      columns: ["conversation_id"]
+isOneToOne: false
+      referencedRelation: "wa_conversations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "wa_conversation_tags_tag_id_fkey"
+      columns: ["tag_id"]
+isOneToOne: false
+      referencedRelation: "wa_tags"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"wa_conversations": {
+                  Row: {
+                    "ad_at": string | null,"ad_ctwa_clid": string | null,"ad_headline": string | null,"ad_source_id": string | null,"ad_source_url": string | null,"assignee_id": string | null,"avatar_checked_at": string | null,"avatar_url": string | null,"chat_id": string,"connection_id": string,"contact_name": string,"created_at": string,"deleted_at": string | null,"id": string,"imported_at": string | null,"kind": string,"last_inbound_at": string | null,"last_message_at": string | null,"last_preview": string | null,"lead_id": string | null,"organization_id": string,"phone": string | null,"status": string,"unread_count": number,"waiting_reply": boolean
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad_at"?: string | null,"ad_ctwa_clid"?: string | null,"ad_headline"?: string | null,"ad_source_id"?: string | null,"ad_source_url"?: string | null,"assignee_id"?: string | null,"avatar_checked_at"?: string | null,"avatar_url"?: string | null,"chat_id": string,"connection_id": string,"contact_name"?: string,"created_at"?: string,"deleted_at"?: string | null,"id"?: string,"imported_at"?: string | null,"kind"?: string,"last_inbound_at"?: string | null,"last_message_at"?: string | null,"last_preview"?: string | null,"lead_id"?: string | null,"organization_id": string,"phone"?: string | null,"status"?: string,"unread_count"?: number,"waiting_reply"?: boolean
+                  }
+                  Update: {
+                    "ad_at"?: string | null,"ad_ctwa_clid"?: string | null,"ad_headline"?: string | null,"ad_source_id"?: string | null,"ad_source_url"?: string | null,"assignee_id"?: string | null,"avatar_checked_at"?: string | null,"avatar_url"?: string | null,"chat_id"?: string,"connection_id"?: string,"contact_name"?: string,"created_at"?: string,"deleted_at"?: string | null,"id"?: string,"imported_at"?: string | null,"kind"?: string,"last_inbound_at"?: string | null,"last_message_at"?: string | null,"last_preview"?: string | null,"lead_id"?: string | null,"organization_id"?: string,"phone"?: string | null,"status"?: string,"unread_count"?: number,"waiting_reply"?: boolean
                   }
                   Relationships: [
                     {
@@ -3353,6 +3379,78 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"wa_quick_replies": {
+                  Row: {
+                    "body": string,"id": string,"organization_id": string,"shortcut": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "body": string,"id"?: string,"organization_id"?: string,"shortcut": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "body"?: string,"id"?: string,"organization_id"?: string,"shortcut"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "wa_quick_replies_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "wa_quick_replies_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"wa_settings": {
+                  Row: {
+                    "organization_id": string,"radar_minutes": number,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "organization_id": string,"radar_minutes"?: number,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "organization_id"?: string,"radar_minutes"?: number,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "wa_settings_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: true
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "wa_settings_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"wa_tags": {
+                  Row: {
+                    "color": string,"created_at": string,"id": string,"name": string,"organization_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "color"?: string,"created_at"?: string,"id"?: string,"name": string,"organization_id"?: string
+                  }
+                  Update: {
+                    "color"?: string,"created_at"?: string,"id"?: string,"name"?: string,"organization_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "wa_tags_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"whatsapp_connections": {
                   Row: {
                     "api_key_enc": string,"base_url": string,"connected_by": string | null,"created_at": string,"id": string,"last_error": string | null,"last_event_at": string | null,"me_id": string | null,"me_name": string | null,"organization_id": string,"session": string,"status": string,"updated_at": string,"webhook_secret_enc": string
@@ -3407,14 +3505,14 @@ isOneToOne: false
                   ]
                 },"whatsapp_messages": {
                   Row: {
-                    "author": string | null,"author_name": string | null,"body": string | null,"chat_id": string,"connection_id": string,"created_at": string,"from_me": boolean,"id": string,"kind": string,"media_mime": string | null,"media_name": string | null,"media_path": string | null,"sent_at": string,"wamid": string
+                    "ack": string | null,"author": string | null,"author_name": string | null,"body": string | null,"chat_id": string,"connection_id": string,"created_at": string,"from_me": boolean,"id": string,"kind": string,"media_mime": string | null,"media_name": string | null,"media_path": string | null,"sent_at": string,"wamid": string
                   }
                   ComputedFields: never
                   Insert: {
-                    "author"?: string | null,"author_name"?: string | null,"body"?: string | null,"chat_id": string,"connection_id": string,"created_at"?: string,"from_me"?: boolean,"id"?: string,"kind"?: string,"media_mime"?: string | null,"media_name"?: string | null,"media_path"?: string | null,"sent_at": string,"wamid": string
+                    "ack"?: string | null,"author"?: string | null,"author_name"?: string | null,"body"?: string | null,"chat_id": string,"connection_id": string,"created_at"?: string,"from_me"?: boolean,"id"?: string,"kind"?: string,"media_mime"?: string | null,"media_name"?: string | null,"media_path"?: string | null,"sent_at": string,"wamid": string
                   }
                   Update: {
-                    "author"?: string | null,"author_name"?: string | null,"body"?: string | null,"chat_id"?: string,"connection_id"?: string,"created_at"?: string,"from_me"?: boolean,"id"?: string,"kind"?: string,"media_mime"?: string | null,"media_name"?: string | null,"media_path"?: string | null,"sent_at"?: string,"wamid"?: string
+                    "ack"?: string | null,"author"?: string | null,"author_name"?: string | null,"body"?: string | null,"chat_id"?: string,"connection_id"?: string,"created_at"?: string,"from_me"?: boolean,"id"?: string,"kind"?: string,"media_mime"?: string | null,"media_name"?: string | null,"media_path"?: string | null,"sent_at"?: string,"wamid"?: string
                   }
                   Relationships: [
                     {
@@ -3620,10 +3718,19 @@ isOneToOne: false
 "decide_approval":
 { Args: { "p_comment": string,"p_decision": string,"p_ip": string,"p_name": string,"p_token_hash": string }; Returns: string
                            },
+"delete_conversation":
+{ Args: { "p_id": string,"p_restore"?: boolean }; Returns: undefined
+                           },
 "delete_marketing_date":
 { Args: { "p_id": string }; Returns: undefined
                            },
+"delete_quick_reply":
+{ Args: { "p_id": string }; Returns: undefined
+                           },
 "delete_report_template":
+{ Args: { "p_id": string }; Returns: undefined
+                           },
+"delete_wa_tag":
 { Args: { "p_id": string }; Returns: undefined
                            },
 "duplicate_role":
@@ -3792,6 +3899,9 @@ isOneToOne: false
 "save_proposal":
 { Args: { "p": Json }; Returns: string
                            },
+"save_quick_reply":
+{ Args: { "p_body": string,"p_id": string,"p_shortcut": string }; Returns: string
+                           },
 "save_recording":
 { Args: { "p": Json }; Returns: string
                            },
@@ -3800,6 +3910,9 @@ isOneToOne: false
                            },
 "save_social_profile":
 { Args: { "p_client": string,"p_id": string }; Returns: undefined
+                           },
+"save_wa_tag":
+{ Args: { "p_color": string,"p_id": string,"p_name": string }; Returns: string
                            },
 "save_whatsapp_group":
 { Args: { "p_alerts": boolean,"p_client": string,"p_id": string,"p_reports": boolean }; Returns: undefined
@@ -3839,6 +3952,12 @@ isOneToOne: false
 "set_conversation_status":
 { Args: { "p_id": string,"p_status": string }; Returns: undefined
                            },
+"set_conversation_tags":
+{ Args: { "p_id": string,"p_tags": (string)[] }; Returns: undefined
+                           },
+"set_inbox_settings":
+{ Args: { "p_radar_minutes": number }; Returns: undefined
+                           },
 "set_onboarding_recipients":
 { Args: { "p_ids": (string)[] }; Returns: undefined
                            },
@@ -3875,6 +3994,12 @@ isOneToOne: false
 { Args: { "p_user": string }; Returns: {
               "permission_key": string,"scope": Database["public"]['Enums']["permission_scope"]
             }[]
+                           },
+"wa_ad_referral":
+{ Args: { "p_chat": string,"p_connection": string,"p_ctwa": string,"p_headline": string,"p_source_id": string,"p_url": string }; Returns: string
+                           },
+"wa_conversation_phone":
+{ Args: { "p_chat": string,"p_connection": string,"p_phone": string }; Returns: undefined
                            },
 "wa_import_chat":
 { Args: { "p_chat": string,"p_connection": string,"p_kind": string,"p_messages": Json,"p_name": string,"p_phone": string }; Returns: number

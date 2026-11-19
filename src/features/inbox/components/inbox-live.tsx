@@ -16,7 +16,7 @@ export function InboxLive() {
     };
     const channel = supabase
       .channel("atendimento")
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "whatsapp_messages" }, soon)
+      .on("postgres_changes", { event: "*", schema: "public", table: "whatsapp_messages" }, soon)
       .on("postgres_changes", { event: "*", schema: "public", table: "wa_conversations" }, soon)
       .subscribe();
     return () => {

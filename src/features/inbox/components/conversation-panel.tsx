@@ -1,14 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition } from "react";
-import { LoaderCircle, UserPlus } from "lucide-react";
+import { useId, useState, useTransition } from "react";
+import { ExternalLink, LoaderCircle, Megaphone, RotateCcw, Trash2, UserPlus } from "lucide-react";
+import { ConfirmDialog } from "@/components/app/confirm-dialog";
+import type { AdOrigin, Tag } from "@/features/inbox/queries";
+import { TagPicker } from "./tag-picker";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FormField } from "@/components/app/form-field";
 import { formatBRL } from "@/domain/shared/money";
-import { assignConversation, createLeadFromConversation, setConversationStatus, unlinkConversationLead } from "@/features/inbox/actions";
+import { assignConversation, createLeadFromConversation, deleteConversation, setConversationStatus, unlinkConversationLead } from "@/features/inbox/actions";
 import { leadNameSchema } from "@/features/inbox/schemas";
 import { handleResult } from "@/lib/action-feedback";
 
@@ -16,9 +19,10 @@ const NONE = "__ninguem";
 type Lead = { id: string; name: string; company: string | null; valueCents: number | null; stageName: string | null; stageColor: string | null } | null;
 
 /** Responsável, encerrar/reabrir e o lead do Comercial ligado à conversa. */
-export function ConversationPanel({ id, status, assigneeId, agents, lead, hasLead, suggestedName, canReply, canCreateLead, group = null }: {
+export function ConversationPanel({ id, status, assigneeId, agents, lead, hasLead, suggestedName, canReply, canCreateLead, group = null, tags, tagIds, ad, canManage, deleted }: {
   id: string; status: "aberta" | "encerrada"; assigneeId: string | null; agents: { id: string; name: string }[]; lead: Lead; hasLead: boolean;
   suggestedName: string; canReply: boolean; canCreateLead: boolean;
+  tags: Tag[]; tagIds: string[]; ad: AdOrigin | null; canManage: boolean; deleted: boolean;
   /** Conversa de grupo: no lugar do lead, o cliente ligado ao grupo (Configurações › WhatsApp). */
   group?: { clientId: string | null; clientName: string | null } | null;
 }) {
@@ -26,6 +30,8 @@ export function ConversationPanel({ id, status, assigneeId, agents, lead, hasLea
   const [name, setName] = useState(suggestedName);
   const [error, setError] = useState<string | null>(null);
   const [assignee, setAssignee] = useState(assigneeId ?? NONE);
+  const uid = useId();
+  const h = (k: string) => `${uid}-${k}`;
 
   const createLead = () => {
     const parsed = leadNameSchema.safeParse(name);
@@ -40,8 +46,8 @@ export function ConversationPanel({ id, status, assigneeId, agents, lead, hasLea
 
   return (
     <div className="grid content-start gap-5">
-      <section aria-labelledby="cv-resp" className="grid gap-2">
-        <h2 id="cv-resp" className="text-sm font-semibold">Responsável</h2>
+      <section aria-labelledby={h("resp")} className="grid gap-2">
+        <h2 id={h("resp")} className="text-sm font-semibold">Responsável</h2>
         <Select value={assignee} disabled={!canReply || pending}
           onValueChange={(v) => { setAssignee(v); run(async () => { if (!handleResult(await assignConversation({ id, userId: v === NONE ? null : v }))) setAssignee(assigneeId ?? NONE); }); }}>
           <SelectTrigger className="w-full" aria-label="Responsável pela conversa"><SelectValue /></SelectTrigger>
@@ -52,9 +58,24 @@ export function ConversationPanel({ id, status, assigneeId, agents, lead, hasLea
         </Select>
       </section>
 
+      <section aria-labelledby={h("tags")} className="grid gap-2">
+        <h2 id={h("tags")} className="text-sm font-semibold">Etiquetas</h2>
+        <TagPicker key={tagIds.join(",")} conversationId={id} tags={tags} selected={tagIds} canEdit={canReply} />
+      </section>
+
+      {ad && (
+        <section aria-labelledby={h("ad")} className="grid gap-1.5 rounded-lg border border-info/30 bg-info-soft/40 p-3 text-sm">
+          <h2 id={h("ad")} className="flex items-center gap-1.5 font-semibold"><Megaphone className="size-4 text-info" aria-hidden="true" /> Veio de anúncio</h2>
+          {(ad.adName || ad.headline) && <p className="break-words">{ad.adName ?? ad.headline}</p>}
+          {ad.campaignName && <p className="text-xs text-muted-foreground">Campanha: {ad.campaignName}</p>}
+          {!ad.adName && ad.sourceId && <p className="text-xs text-muted-foreground">Anúncio {ad.sourceId} (ainda não sincronizado)</p>}
+          {ad.url && <a href={ad.url} target="_blank" rel="noopener noreferrer" className="inline-flex w-fit items-center gap-1 text-xs font-medium text-info hover:underline">Ver o anúncio <ExternalLink className="size-3" aria-hidden="true" /></a>}
+        </section>
+      )}
+
       {group ? (
-        <section aria-labelledby="cv-cliente" className="grid gap-2">
-          <h2 id="cv-cliente" className="text-sm font-semibold">Cliente do grupo</h2>
+        <section aria-labelledby={h("cliente")} className="grid gap-2">
+          <h2 id={h("cliente")} className="text-sm font-semibold">Cliente do grupo</h2>
           {group.clientId && group.clientName ? (
             <Link href={`/clientes/${group.clientId}`} className="text-sm font-medium break-words hover:underline">{group.clientName}</Link>
           ) : group.clientId ? (
@@ -64,8 +85,8 @@ export function ConversationPanel({ id, status, assigneeId, agents, lead, hasLea
           )}
         </section>
       ) : (
-      <section aria-labelledby="cv-lead" className="grid gap-2">
-        <h2 id="cv-lead" className="text-sm font-semibold">Lead no Comercial</h2>
+      <section aria-labelledby={h("lead")} className="grid gap-2">
+        <h2 id={h("lead")} className="text-sm font-semibold">Lead no Comercial</h2>
         {lead ? (
           <div className="grid gap-1 rounded-lg border p-3 text-sm">
             <Link href={`/comercial/leads/${lead.id}`} className="font-medium break-words hover:underline">{lead.name}</Link>
@@ -99,12 +120,25 @@ export function ConversationPanel({ id, status, assigneeId, agents, lead, hasLea
       </section>
       )}
 
-      {canReply && (
+      {canReply && !deleted && (
         <Button variant="outline" disabled={pending} className="w-fit"
           onClick={() => run(async () => void handleResult(await setConversationStatus({ id, status: status === "aberta" ? "encerrada" : "aberta" })))}>
           {status === "aberta" ? "Encerrar conversa" : "Reabrir conversa"}
         </Button>
       )}
+      {canManage && (deleted ? (
+        <Button variant="outline" disabled={pending} className="w-fit" onClick={() => run(async () => void handleResult(await deleteConversation({ id, restore: true })))}>
+          <RotateCcw aria-hidden="true" /> Restaurar conversa
+        </Button>
+      ) : (
+        <ConfirmDialog
+          trigger={<Button variant="ghost" className="w-fit text-danger hover:text-danger" disabled={pending}><Trash2 aria-hidden="true" /> {group ? "Apagar grupo da lista" : "Apagar conversa"}</Button>}
+          title={group ? "Apagar este grupo da lista?" : "Apagar esta conversa?"}
+          description="Ela some do Atendimento para todos. As mensagens ficam guardadas e a conversa volta se chegar mensagem nova. Dá para restaurar na aba Apagadas."
+          confirmLabel="Apagar"
+          onConfirm={async () => { handleResult(await deleteConversation({ id, restore: false })); }}
+        />
+      ))}
     </div>
   );
 }

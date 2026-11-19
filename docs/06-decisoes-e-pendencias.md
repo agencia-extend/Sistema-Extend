@@ -677,3 +677,29 @@ RF-REL-01 e RF-REL-06.
 - se o texto foi e o PDF falhou, o envio vale e a mensagem avisa.
 
 **Testes:** `46_relatorios_agenda_pdf.test.sql` (12); Vitest da agenda em `domain/ads/report`; `e2e/41` (passo 4): agendar pela tela, o job manda texto e PDF uma vez só, a aba Relatórios lista e baixa, quem não vê anúncios recebe 404.
+
+## Atendimento completo como no HubSystem (18/11/2026)
+RF-WPP-03 (busca, etiquetas, respostas rápidas, apagar), RF-WPP-06 (origem do anúncio) e RF-WPP-07 (radar). Migration `20261118000500_atendimento_completo.sql`.
+
+**Tela** (`/atendimento`, uma só, como no HubSystem):
+- computador: lista à esquerda e conversa à direita (`?conversa=`); nas telas largas os detalhes ficam numa terceira coluna, nas médias e no celular numa gaveta (botão de detalhes no topo da conversa);
+- celular: a conversa abre em tela cheia com "voltar"; o endereço antigo `/atendimento/{id}` (avisos já enviados) abre a tela nova;
+- abas Abertas, Aguardando, Radar, Minhas, Grupos, Encerradas e Apagadas (só quem administra), com contagem; busca por nome, telefone ou última mensagem e filtros de responsável e etiqueta, tudo na URL;
+- balões no estilo do WhatsApp com separador de dia, hora e confirmação (✓ enviada, ✓✓ entregue, ✓✓ azul lida, ! erro, pelo evento `message.ack` do WAHA); a coluna abre na mensagem mais nova sem script;
+- foto do contato e do grupo buscada no WhatsApp depois que a tela abre (`src/lib/whatsapp/avatars.ts`, conferida de novo a cada 3 dias), com iniciais quando não há.
+
+**Respostas rápidas e etiquetas** (`wa_quick_replies`, `wa_tags`, `wa_conversation_tags`): criadas em Atendimento › Ajustes por quem administra o atendimento (`inbox.manage`); na conversa, "/" abre a lista (setas, Enter ou Tab, Esc fecha) e `{nome}` vira o primeiro nome; quem atende põe e tira etiquetas.
+
+**Radar** (`wa_settings.radar_minutes`, 5 min a 24 h, padrão 15): contato sem resposta há mais que o tempo, do que espera há mais tempo.
+
+**Apagar** (`delete_conversation`, quem administra): some da lista de todos, as mensagens ficam; mensagem nova do contato traz de volta; restaurar na aba Apagadas.
+
+**Anúncio Clique-para-WhatsApp** (`wa_ad_referral`, só o servidor): o `externalAdReply` da primeira mensagem guarda o anúncio na conversa e, sem lead, cria o lead na primeira etapa do funil padrão com origem anúncio, `utm_source=meta`, `utm_medium=clique_whatsapp`, campanha e anúncio quando já sincronizados. Os detalhes mostram "Veio de anúncio".
+
+**Id oculto (@lid)**: o telefone vem do evento (`remoteJidAlt`/`senderPn`) ou do WAHA (`/lids`), e a conversa liga o lead com o mesmo telefone (`wa_conversation_phone`).
+
+**Ids das mensagens**: sempre o id curto (como no HubSystem), para o eco do envio e as confirmações acharem a mesma mensagem.
+
+**Testes:** `47_atendimento_completo.test.sql` (19); Vitest de `domain/inbox` e `domain/whatsapp/events`; `e2e/42-atendimento-completo.spec.ts` (ajustes, anúncio vira lead, @lid, radar, busca, etiqueta, resposta rápida, leitura confirmada ao vivo, apagar e restaurar, endereço antigo, voltar no celular); `e2e/37`, `38` e `39` atualizados para a tela nova.
+
+**Túnel**: o WAHA da Extend (`extend-waha`, porta 3032) já roda; falta ligar o túnel (`docker compose --profile tunnel up -d` em `infra/waha`) para o site publicado falar com ele. Diferente do HubSystem (ngrok com endereço fixo numa conta), a Extend usa o túnel da Cloudflare sem conta, que avisa o sistema sozinho quando o endereço muda.

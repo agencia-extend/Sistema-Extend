@@ -3,13 +3,15 @@ import { decrypt } from "@/lib/crypto";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { WahaError, validWahaSignature, wahaDownload } from "@/lib/whatsapp/waha";
 import { baseMime, incomingPath } from "@/domain/whatsapp/media";
+import { ackAdvances, ackStatus, altPhone, bareMessageId, referralFromRaw, type Ack } from "@/domain/whatsapp/events";
+import { wahaLidPhone } from "@/lib/whatsapp/waha";
 
 export const maxDuration = 60;
 
 // Eventos do WAHA (RF-WPP-01/03): situação da conexão e mensagens. Assinados com HMAC-SHA512 pelo segredo da conexão.
 export const dynamic = "force-dynamic";
 
-type Payload = { id?: string; from?: string; to?: string; fromMe?: boolean; participant?: string; body?: string; timestamp?: number; hasMedia?: boolean; type?: string; media?: { url?: string; mimetype?: string; filename?: string } | null; _data?: { notifyName?: string; pushName?: string } };
+type Payload = { id?: string; from?: string; to?: string; fromMe?: boolean; participant?: string; body?: string; timestamp?: number; hasMedia?: boolean; type?: string; media?: { url?: string; mimetype?: string; filename?: string } | null; ack?: number; _data?: { notifyName?: string; pushName?: string; key?: unknown; message?: unknown } };
 type Event = { event?: string; session?: string; me?: { id?: string; pushName?: string } | null; payload?: Payload & { status?: string } };
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -50,11 +52,21 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
     return NextResponse.json({ ok: true });
   }
 
+  // Confirmação de entrega e leitura das mensagens enviadas (✓, ✓✓, ✓✓ azul).
+  if (ev.event === "message.ack" && ev.payload?.id) {
+    const status = ackStatus(ev.payload.ack);
+    if (!status) return NextResponse.json({ ok: true, ignored: "ack" });
+    const wamid = bareMessageId(String(ev.payload.id));
+    const { data: msg } = await db.from("whatsapp_messages").select("id, ack").eq("connection_id", conn.id).eq("wamid", wamid).eq("from_me", true).maybeSingle();
+    if (msg && ackAdvances((msg.ack as Ack | null) ?? null, status)) await db.from("whatsapp_messages").update({ ack: status }).eq("id", msg.id);
+    return NextResponse.json({ ok: true });
+  }
+
   if ((ev.event === "message.any" || ev.event === "message") && ev.payload?.id) {
     const p = ev.payload;
     const chat = p.fromMe ? p.to : p.from;
     if (!chat || chat.endsWith("@broadcast") || chat.endsWith("@newsletter")) return NextResponse.json({ ok: true, ignored: "chat" });
-    const wamid = String(p.id).slice(0, 200);
+    const wamid = bareMessageId(String(p.id));
     // Mídia: o arquivo do WAHA expira, então vai para o armazenamento do sistema (uma vez só por mensagem).
     let media: { media_path: string | null; media_mime: string | null; media_name: string | null } = { media_path: null, media_mime: null, media_name: null };
     if (p.hasMedia && p.media?.url) {
@@ -82,8 +94,31 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
       body: p.body ? String(p.body).slice(0, 8000) : null,
       kind: p.hasMedia ? "media" : "text",
       ...media,
+      ack: p.fromMe ? (ackStatus(p.ack) ?? "enviada") : null,
       sent_at: p.timestamp ? new Date(p.timestamp * 1000).toISOString() : now,
     }, { onConflict: "connection_id,wamid", ignoreDuplicates: true });
+    if (!chat.endsWith("@g.us")) {
+      // Id oculto (@lid): o telefone vem no evento ou o servidor do WhatsApp conhece; liga o lead pelo telefone.
+      if (chat.endsWith("@lid")) {
+        let phone = altPhone(p._data);
+        if (!phone) {
+          try {
+            const pn = await wahaLidPhone({ url: conn.base_url.replace(/\/+$/, ""), key: decrypt(conn.api_key_enc), session: conn.session }, chat);
+            phone = pn ? (/^(\d{10,15})/.exec(pn)?.[1] ?? null) : null;
+          } catch {
+            phone = null;
+          }
+        }
+        if (phone) await db.rpc("wa_conversation_phone", { p_connection: conn.id, p_chat: chat.slice(0, 200), p_phone: phone });
+      }
+      // RF-WPP-06: conversa que veio de anúncio Clique-para-WhatsApp vira lead no funil.
+      const ad = p.fromMe ? null : referralFromRaw(p._data?.message);
+      if (ad) {
+        await db.rpc("wa_ad_referral", {
+          p_connection: conn.id, p_chat: chat.slice(0, 200), p_source_id: ad.sourceId as string, p_headline: ad.headline as string, p_url: ad.url as string, p_ctwa: ad.ctwaClid as string,
+        });
+      }
+    }
     await db.from("whatsapp_connections").update({ last_event_at: now }).eq("id", conn.id);
     return NextResponse.json({ ok: true });
   }

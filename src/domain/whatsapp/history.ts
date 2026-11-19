@@ -1,3 +1,5 @@
+import { bareMessageId } from "./events";
+
 // "Compilar conversas" (como no HubSystem): o que vem do WAHA vira linha do banco. Sem rede.
 
 export type ChatKind = "contato" | "grupo" | "ignorar";
@@ -50,7 +52,7 @@ export function historyMessage(raw: unknown, group: boolean): (HistoryMessage & 
   const fromMe = m.fromMe === true;
   const pushName = fromMe ? null : str(data?.pushName) ?? str(data?.notifyName);
   return {
-    wamid: id.slice(0, 200),
+    wamid: bareMessageId(id),
     from_me: fromMe,
     author: group && !fromMe ? (str(m.participant) ?? str(key?.participant)) : null,
     author_name: pushName ? pushName.slice(0, 200) : null,

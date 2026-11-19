@@ -54,6 +54,16 @@ async function login(page: Page, who: string) {
   await page.waitForURL("**/inicio**");
 }
 
+/** Detalhes da conversa: ao lado no computador largo, numa gaveta no celular. */
+async function details(page: Page) {
+  const open = page.getByRole("button", { name: "Detalhes da conversa" });
+  if (await open.isVisible()) {
+    await open.click();
+    return page.getByRole("dialog");
+  }
+  return page.getByRole("complementary", { name: "Detalhes da conversa" });
+}
+
 async function makeUser(key: string, role: string) {
   const email = `${key.toLowerCase()}.atd.${stamp}@extend.test`;
   const { data: r } = await admin.from("roles").select("id").eq("key", role).single();
@@ -101,14 +111,14 @@ test("1. mensagem chega, a pessoa abre, tenta responder, cria o lead e encerra",
   await page.goto("/atendimento");
   const item = page.getByRole("list", { name: "Conversas" }).getByRole("link").filter({ hasText: contact });
   await expect(item).toContainText("Oi! Quero saber dos planos de tráfego.");
-  await expect(item).toContainText("Aguardando");
+  await expect(item).toContainText("Espera há");
   await expect(item.getByLabel("1 não lidas")).toBeVisible();
   await page.getByRole("link", { name: /^Minhas/ }).click();
   await expect(page.getByRole("list", { name: "Conversas" }).getByRole("link").filter({ hasText: contact })).toBeVisible();
 
   await item.click();
-  await page.waitForURL(`**/atendimento/${convId}`);
-  await expect(page.getByRole("heading", { name: contact, level: 1 })).toBeVisible();
+  await page.waitForURL(`**/atendimento?*conversa=${convId}*`);
+  await expect(page.getByRole("heading", { name: contact, level: 2 })).toBeVisible();
   await expect(page.getByRole("list", { name: "Mensagens" })).toContainText("Oi! Quero saber dos planos de tráfego.");
   await expect.poll(async () => (await admin.from("wa_conversations").select("unread_count").eq("id", convId).single()).data!.unread_count).toBe(0);
 
@@ -118,14 +128,15 @@ test("1. mensagem chega, a pessoa abre, tenta responder, cria o lead e encerra",
   await expect(page.getByText("O WhatsApp da Extend não está conectado no servidor. Conecte pelo QR Code no Atendimento.")).toBeVisible({ timeout: 20_000 });
 
   // Lead no funil a partir da conversa.
-  await expect(page.getByLabel("Nome do lead")).toHaveValue(contact);
-  await page.getByRole("button", { name: "Criar lead no funil" }).click();
+  const panel = await details(page);
+  await expect(panel.getByLabel("Nome do lead")).toHaveValue(contact);
+  await panel.getByRole("button", { name: "Criar lead no funil" }).click();
   await expect(page.getByText("Lead criado no Comercial, no início do funil.")).toBeVisible();
-  await expect(page.getByRole("complementary", { name: "Detalhes da conversa" }).getByRole("link", { name: contact })).toBeVisible();
+  await expect(panel.getByRole("link", { name: contact })).toBeVisible();
   const { data: lead } = await admin.from("leads").select("source, owner_id").eq("phone", phone).single();
   expect(lead).toEqual({ source: "whatsapp", owner_id: people.Ana.id });
 
-  await page.getByRole("button", { name: "Encerrar conversa" }).click();
+  await panel.getByRole("button", { name: "Encerrar conversa" }).click();
   await expect(page.getByText("Conversa encerrada.")).toBeVisible();
   await page.goto("/atendimento?aba=encerradas");
   await expect(page.getByRole("list", { name: "Conversas" }).getByRole("link").filter({ hasText: contact })).toBeVisible();
