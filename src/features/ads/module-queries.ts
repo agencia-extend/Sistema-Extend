@@ -170,3 +170,38 @@ export async function getModuleAds(f: AdsFilters, today: string): Promise<Module
     .sort((x, y) => y.totals.spend_cents - x.totals.spend_cents || x.name.localeCompare(y.name, "pt-BR"))
     .slice(0, 300);
 }
+
+export type ModuleAdSet = {
+  id: string; name: string; status: string | null; optimizationGoal: string | null; dailyBudgetCents: number | null; lifetimeBudgetCents: number | null;
+  campaignName: string | null; accountName: string; clientId: string | null; clientName: string | null; totals: Totals; kind: ResultKind; kpis: Kpis;
+};
+
+/** Aba Conjuntos: conjuntos no ar ou com gasto no período, com orçamento, campanha e números (nível "adset"). */
+export async function getModuleAdSets(f: AdsFilters, today: string): Promise<{ sets: ModuleAdSet[]; hasData: boolean }> {
+  const supabase = await createClient();
+  const accounts = scopedAccounts(await getModuleAccounts(today), f);
+  if (!accounts.length) return { sets: [], hasData: false };
+  const ids = accounts.map((a) => a.id);
+  const byAcc = new Map(accounts.map((a) => [a.id, a]));
+  const [{ data: sets }, { data: ins }, { count }] = await Promise.all([
+    supabase.from("ad_sets").select("id, ad_account_id, external_id, name, effective_status, optimization_goal, daily_budget_cents, lifetime_budget_cents, ad_campaigns(name, objective)").in("ad_account_id", ids),
+    supabase.from("ad_insights_daily").select("*").in("ad_account_id", ids).eq("level", "adset").gte("date", f.from).lte("date", f.to).limit(20000),
+    supabase.from("ad_insights_daily").select("id", { count: "exact", head: true }).in("ad_account_id", ids).eq("level", "adset"),
+  ]);
+  const rows = (sets ?? [])
+    .filter((s) => statusMatches(s.effective_status, f.status))
+    .map((s): ModuleAdSet => {
+      const a = byAcc.get(s.ad_account_id)!;
+      const camp = (Array.isArray(s.ad_campaigns) ? s.ad_campaigns[0] : s.ad_campaigns) as { name: string; objective: string | null } | null;
+      const totals = sumDays((ins ?? []).filter((r) => r.ad_account_id === s.ad_account_id && r.object_external_id === s.external_id) as never);
+      const kind = resultKind(camp?.objective, totals);
+      return {
+        id: s.id, name: s.name, status: s.effective_status, optimizationGoal: s.optimization_goal,
+        dailyBudgetCents: s.daily_budget_cents === null ? null : n(s.daily_budget_cents), lifetimeBudgetCents: s.lifetime_budget_cents === null ? null : n(s.lifetime_budget_cents),
+        campaignName: camp?.name ?? null, accountName: a.name, clientId: a.clientId, clientName: a.clientName, totals, kind, kpis: kpis(totals, kind),
+      };
+    })
+    .filter((s) => s.totals.spend_cents > 0 || s.status === "ACTIVE")
+    .sort((x, y) => y.totals.spend_cents - x.totals.spend_cents || x.name.localeCompare(y.name, "pt-BR"));
+  return { sets: rows, hasData: (count ?? 0) > 0 };
+}

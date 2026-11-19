@@ -61,11 +61,12 @@ test.beforeAll(async () => {
   if (e2) throw e2;
   accountId = acc.id;
   const { data: camp } = await admin.from("ad_campaigns").insert({ ad_account_id: accountId, external_id: "cp1", name: "Mensagens Clareamento", objective: "OUTCOME_ENGAGEMENT", effective_status: "ACTIVE", daily_budget_cents: 3000 }).select("id").single();
-  await admin.from("ads").insert({ ad_account_id: accountId, campaign_id: camp!.id, external_id: "ad1", name: "Vídeo antes e depois", effective_status: "ACTIVE" });
+  const { data: set } = await admin.from("ad_sets").insert({ ad_account_id: accountId, campaign_id: camp!.id, external_id: "as1", name: "Mulheres 25-45 Floripa", effective_status: "ACTIVE", daily_budget_cents: 2500 }).select("id").single();
+  await admin.from("ads").insert({ ad_account_id: accountId, campaign_id: camp!.id, ad_set_id: set!.id, external_id: "ad1", name: "Vídeo antes e depois", effective_status: "ACTIVE" });
   // 7 dias de R$ 20,00 com 4 conversas por dia; hoje sem gasto.
   const rows = [];
   for (let i = 1; i <= 7; i++) {
-    for (const [level, obj] of [["account", `act_9${stamp.slice(-9)}`], ["campaign", "cp1"], ["ad", "ad1"]] as const)
+    for (const [level, obj] of [["account", `act_9${stamp.slice(-9)}`], ["campaign", "cp1"], ["adset", "as1"], ["ad", "ad1"]] as const)
       rows.push({ ad_account_id: accountId, level, object_external_id: obj, date: day(i), spend_cents: 2000, impressions: 1000, clicks: 30, link_clicks: 20, messages: 4 });
   }
   const { error: e3 } = await admin.from("ad_insights_daily").insert(rows);
@@ -110,6 +111,14 @@ test("1. módulo Anúncios: clientes, visão geral comparada, campanhas e troca 
   await page.getByRole("group", { name: "Período" }).getByRole("button", { name: "Hoje" }).click();
   await expect(page).toHaveURL(/periodo=hoje/);
   await expect(page.getByRole("table", { name: "Campanhas" }).getByRole("row", { name: /Mensagens Clareamento/ })).toContainText("R$ 0,00"); // no ar, sem gasto hoje
+  await page.getByRole("navigation", { name: "Seções de anúncios" }).getByRole("link", { name: "Conjuntos" }).click();
+  await page.waitForURL(/\/anuncios\/conjuntos/);
+  const set = page.getByRole("table", { name: "Conjuntos" }).getByRole("row", { name: /Mulheres 25-45 Floripa/ });
+  await expect(set).toContainText("R$ 25,00/dia");
+  await expect(set).toContainText("R$ 0,00"); // hoje sem gasto
+  await page.getByRole("group", { name: "Período" }).getByRole("button", { name: "30 dias" }).click();
+  await expect(page).toHaveURL(/periodo=30d/);
+  await expect(page.getByRole("table", { name: "Conjuntos" }).getByRole("row", { name: /Mulheres 25-45 Floripa/ })).toContainText("28 conversas");
   await page.getByRole("navigation", { name: "Seções de anúncios" }).getByRole("link", { name: "Anúncios", exact: true }).click();
   await expect(page.getByRole("table", { name: "Anúncios" }).getByRole("row", { name: /Vídeo antes e depois/ })).toBeVisible();
 });

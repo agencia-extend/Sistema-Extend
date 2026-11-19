@@ -89,17 +89,20 @@ export async function syncMetaAccount(acc: AccountRow, token: string): Promise<S
   const until = day(Date.now());
   const first = !acc.synced_at;
   let rows = 0;
-  const fields = "date_start,campaign_id,ad_id,spend,impressions,reach,clicks,actions,action_values,video_thruplay_watched_actions";
-  for (const [level, days] of [["account", first ? FIRST_DAYS : RECENT_DAYS], ["campaign", first ? FIRST_DAYS : RECENT_DAYS], ["ad", first ? FIRST_AD_DAYS : RECENT_DAYS]] as const) {
+  // Conjuntos entraram depois: a conta que ainda não tem números por conjunto traz o histórico deles uma vez.
+  const { count: adsetRows } = await createAdminClient().from("ad_insights_daily").select("id", { count: "exact", head: true }).eq("ad_account_id", acc.id).eq("level", "adset");
+  const firstAdset = first || !adsetRows;
+  const fields = "date_start,campaign_id,adset_id,ad_id,spend,impressions,reach,clicks,actions,action_values,video_thruplay_watched_actions";
+  for (const [level, days] of [["account", first ? FIRST_DAYS : RECENT_DAYS], ["campaign", first ? FIRST_DAYS : RECENT_DAYS], ["adset", firstAdset ? FIRST_AD_DAYS : RECENT_DAYS], ["ad", first ? FIRST_AD_DAYS : RECENT_DAYS]] as const) {
     const since = day(Date.now() - (days - 1) * DAY);
     const range = encodeURIComponent(JSON.stringify({ since, until }));
-    const ins = await all<InsightRow & { campaign_id?: string; ad_id?: string }>(
+    const ins = await all<InsightRow & { campaign_id?: string; adset_id?: string; ad_id?: string }>(
       graph(`/${acc.external_id}/insights?level=${level}&time_increment=1&time_range=${range}&fields=${fields}&limit=500&${tk(token)}`),
       50_000,
     );
     await upsert("ad_insights_daily", ins.map((r) => {
       const { date, ...m } = parseInsight(r);
-      return { ad_account_id: acc.id, level, object_external_id: level === "account" ? acc.external_id : level === "campaign" ? r.campaign_id! : r.ad_id!, date, ...m };
+      return { ad_account_id: acc.id, level, object_external_id: level === "account" ? acc.external_id : level === "campaign" ? r.campaign_id! : level === "adset" ? r.adset_id! : r.ad_id!, date, ...m };
     }), "ad_account_id,level,object_external_id,date");
     rows += ins.length;
   }
