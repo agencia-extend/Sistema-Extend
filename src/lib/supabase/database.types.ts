@@ -3866,6 +3866,9 @@ isOneToOne: false
               "crm": boolean,"full_name": string,"id": string
             }[]
                            },
+"agency_totals":
+{ Args: { "p_since": string,"p_until": string }; Returns: Json
+                           },
 "apply_playbook":
 { Args: { "p_client": string,"p_playbook": string,"p_start": string }; Returns: string
                            },

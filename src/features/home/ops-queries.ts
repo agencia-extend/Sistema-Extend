@@ -8,6 +8,8 @@ function one<T>(v: T | T[] | null | undefined): T | null {
 }
 
 export type Meeting = { id: string; title: string; startsAt: string; clientId: string | null; clientName: string | null; href: string };
+/** Números da agência (RF-DSH-01): clientes por situação, mídia gerenciada no período e alertas abertos. */
+export type Agency = { active: number; onboarding: number; paused: number; spendCents: number; openAlerts: number };
 export type ClientHealth = { id: string; name: string; delivered: number; contracted: number; late: number };
 
 /** Dados do painel operacional. A RLS decide o que cada pessoa enxerga. */
@@ -19,14 +21,25 @@ export async function opsData(period: OpsPeriod) {
   const today = todayKey(now);
   const sel = "id, title, type, status, priority, due_at, completed_at, assignee_id, client_id, clients(name), profiles!tasks_assignee_id_fkey(full_name)";
 
-  const [open, done, events, meetings, months] = await Promise.all([
+  const sinceDay = new Date(Date.parse(since) - 3 * 3600_000).toISOString().slice(0, 10);
+  const [open, done, events, meetings, months, totals] = await Promise.all([
     supabase.from("tasks").select(sel).is("deleted_at", null).not("status", "in", "(concluido,cancelado)").limit(3000),
     supabase.from("tasks").select(sel).is("deleted_at", null).eq("status", "concluido").gte("completed_at", since).limit(3000),
     supabase.from("calendar_events").select("id, title, starts_at, client_id, clients(name)").eq("kind", "reuniao").gte("starts_at", now.toISOString()).lte("starts_at", week).order("starts_at").limit(8),
     supabase.from("client_meetings").select("id, title, held_at, client_id, clients(name)").gte("held_at", now.toISOString()).lte("held_at", week).order("held_at").limit(8),
     supabase.from("client_months").select("client_id, starts_on").lte("starts_on", today).gte("ends_on", today),
+    // Totais da agência inteira (o banco confere "Ver painéis"); mídia gerenciada = contas ligadas a um cliente.
+    supabase.rpc("agency_totals", { p_since: sinceDay, p_until: today }),
   ]);
-  for (const r of [open, done, events, meetings, months]) if (r.error) throw r.error;
+  for (const r of [open, done, events, meetings, months, totals]) if (r.error) throw r.error;
+  const t = (totals.data ?? {}) as Record<string, number | string>;
+  const agency: Agency = {
+    active: Number(t.active ?? 0),
+    onboarding: Number(t.onboarding ?? 0),
+    paused: Number(t.paused ?? 0),
+    spendCents: Number(t.spendCents ?? 0),
+    openAlerts: Number(t.openAlerts ?? 0),
+  };
 
   const map = (rows: unknown[]): OpsTask[] =>
     (rows as Record<string, unknown>[]).map((t) => ({
@@ -71,6 +84,7 @@ export async function opsData(period: OpsPeriod) {
   return {
     tasks: [...map(open.data ?? []), ...map(done.data ?? [])],
     meetings: upcoming,
+    agency,
     health: [...health.values()].sort((a, b) => a.delivered / a.contracted - b.delivered / b.contracted || b.late - a.late).slice(0, 12),
   };
 }

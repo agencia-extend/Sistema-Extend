@@ -3,7 +3,8 @@ import { AlertTriangle, CalendarClock, CheckCircle2 } from "lucide-react";
 import { OPS_PERIOD_LABEL, summarize, type OpsPeriod } from "@/domain/ops";
 import { TASK_TYPE_LABEL } from "@/domain/tasks";
 import { formatDate, formatDateTime } from "@/domain/shared/dates";
-import { opsData } from "@/features/home/ops-queries";
+import { formatBRL } from "@/domain/shared/money";
+import { opsData, type Agency } from "@/features/home/ops-queries";
 import { cn } from "@/lib/utils";
 
 const chip = (active: boolean) => cn("chip rounded-full border px-3 text-sm", active ? "border-brand bg-accent font-medium text-accent-foreground" : "bg-card hover:bg-muted");
@@ -51,6 +52,8 @@ export async function OpsPanel({ period, personId }: { period: OpsPeriod; person
           </nav>
         )}
       </div>
+
+      {!personId && <AgencyRow agency={data.agency} period={period} />}
 
       <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-3 xl:grid-cols-5">
         {kpis.map(([label, value, tone, href]) => (
@@ -147,6 +150,31 @@ export async function OpsPanel({ period, personId }: { period: OpsPeriod; person
           )}
         </div>
       </div>
+    </section>
+  );
+}
+
+const ADS_PERIOD: Record<OpsPeriod, string> = { hoje: "hoje", semana: "7d", mes: "mes", todos: "30d" };
+
+/** Agência inteira (RF-DSH-01): cada número abre a lista que o compõe. */
+function AgencyRow({ agency, period }: { agency: Agency; period: OpsPeriod }) {
+  const items: [string, string, string, string][] = [
+    ["Clientes ativos", agency.active.toLocaleString("pt-BR"), "", "/clientes?status=ativo"],
+    ["Em onboarding", agency.onboarding.toLocaleString("pt-BR"), "", "/clientes?status=onboarding"],
+    ["Pausados", agency.paused.toLocaleString("pt-BR"), agency.paused ? "text-warning" : "", "/clientes?status=pausado"],
+    [`Mídia gerenciada (${OPS_PERIOD_LABEL[period].toLowerCase()})`, formatBRL(agency.spendCents), "", `/anuncios?periodo=${ADS_PERIOD[period]}`],
+    ["Alertas de anúncios abertos", agency.openAlerts.toLocaleString("pt-BR"), agency.openAlerts ? "text-danger" : "", "/anuncios/alertas"],
+  ];
+  return (
+    <section aria-label="Agência">
+      <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-xl border bg-border sm:grid-cols-3 xl:grid-cols-5">
+        {items.map(([label, value, tone, href]) => (
+          <Link key={label} href={href} className="grid gap-1 bg-card p-4 hover:bg-muted/50 last:max-sm:col-span-2">
+            <dt className="text-sm text-muted-foreground">{label}</dt>
+            <dd className={cn("font-heading text-2xl font-semibold tabular break-words", tone)}>{value}</dd>
+          </Link>
+        ))}
+      </dl>
     </section>
   );
 }

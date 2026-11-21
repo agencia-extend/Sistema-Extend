@@ -779,3 +779,12 @@ RF-TAR-11, com a recomendação da D7 (só quadros ativos). Migration `202611190
 - **Limite do Trello:** a exportação traz só as 1.000 ações mais recentes do quadro; em quadros muito antigos, comentários antigos podem faltar (a tela avisa).
 - **Testes:** `52_importar_trello.test.sql` (16), `src/domain/tasks/trello.test.ts` (6) e `e2e/47-importar-trello.spec.ts`.
 - **Pendente com a Extend:** exportar os JSON dos quadros ativos e importar cada um no cliente certo.
+
+## Números da agência no painel Operacional (20/11/2026)
+RF-DSH-01. No Início, quem tem "Ver painéis" vê acima dos números de produção a linha **Agência**: clientes ativos, em onboarding e pausados (abrem a lista de clientes filtrada), **mídia gerenciada** no período escolhido (soma do investimento das contas de anúncio ligadas a um cliente; abre o módulo Anúncios no mesmo período) e **alertas de anúncios abertos** (abre Alertas). Some quando o painel está filtrado por pessoa.
+- Os totais vêm da função `agency_totals` (migration `20261120000100_numeros_agencia.sql`), que confere "Ver painéis" no banco e devolve só totais: a coordenação vê o investimento da agência inteira sem ganhar acesso às contas de cada cliente.
+- Testes: `53_numeros_agencia.test.sql` (5) e o passo 5 de `e2e/04-rotinas-modelos.spec.ts`.
+
+## WhatsApp (20/11/2026)
+- O WAHA da Extend (`extend-waha`) voltou a rodar neste computador e os roteiros do WhatsApp (30, 37, 38, 39 e 42) passaram contra ele (28 testes): conectar, QR Code, eventos assinados, compilação, mídia e Atendimento.
+- Ainda não há número conectado. Falta, do lado do Henrique: ligar o túnel (`docker compose --profile tunnel up -d` em `infra/waha`) e ler o QR Code em Atendimento › Conectar WhatsApp. Na VPS (HostGator), o túnel sai e entra o proxy com HTTPS (`infra/waha/README.md`, "Na VPS").

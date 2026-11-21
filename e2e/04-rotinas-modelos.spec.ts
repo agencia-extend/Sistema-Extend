@@ -137,8 +137,14 @@ test("4. social media não vê Rotinas e modelos no menu nem abre a página", as
 test("5. painel operacional: a coordenação vê e filtra pela Madu; a Madu não vê o painel", async ({ page }) => {
   await login(page, people.Joana.email, pw);
   await expect(page.getByRole("heading", { name: "Operacional" })).toBeVisible();
+  // Agência inteira (RF-DSH-01): cada número abre a lista que o compõe.
+  const agency = page.getByRole("region", { name: "Agência" });
+  await expect(agency.getByRole("link", { name: /Clientes ativos/ })).toHaveAttribute("href", "/clientes?status=ativo");
+  await expect(agency.getByRole("link", { name: /Mídia gerenciada \(este mês\)/ })).toContainText(/R\$/);
+  await expect(agency.getByRole("link", { name: /Alertas de anúncios abertos/ })).toHaveAttribute("href", "/anuncios/alertas");
   await page.getByRole("navigation", { name: "Pessoa" }).getByRole("link", { name: /^Madu/ }).click();
   await expect(page.getByText(`Demandas de ${people.Madu.name}.`)).toBeVisible();
+  await expect(page.getByRole("region", { name: "Agência" })).toHaveCount(0);
   await page.getByRole("navigation", { name: "Período" }).getByRole("link", { name: "Tudo" }).click();
   await expect(page.getByRole("link", { name: /Concluídas \(tudo\)/ })).toContainText(/[1-9]/);
 
