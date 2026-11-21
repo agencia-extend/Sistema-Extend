@@ -23,17 +23,24 @@ import { ClientFacebook } from "@/features/integrations/components/client-facebo
 import { listPlanClients, listPlans } from "@/features/ads/plan-queries";
 import { PlanDialog } from "@/features/ads/components/plans/plan-dialog";
 import { PlanList } from "@/features/ads/components/plans/plan-list";
+import { clientLeadsData, isLeadPeriod, leadRange } from "@/features/ads/leads/queries";
+import { LeadQuality } from "@/features/ads/components/leads/lead-quality";
+import { ImportLeadsDialog } from "@/features/ads/components/leads/import-leads-dialog";
+import { ReviewLinkDialog } from "@/features/ads/components/leads/review-link-dialog";
 
 export const metadata: Metadata = { title: "Tráfego do cliente" };
 
-/** Aba Tráfego: Facebook do cliente (contas fora do BM), checklists (RF-OTI-01/02), verbas aprovadas pelo cliente (RF-T2-03), registro de alterações (RF-OTI-03) e reprovações da Meta (RF-T2-02) e links com UTM (RF-ADS-11). */
-export default async function TrafegoPage({ params }: { params: Promise<{ id: string }> }) {
+/** Aba Tráfego: Facebook do cliente (contas fora do BM), qualidade dos leads (RF-T2-01), checklists (RF-OTI-01/02), verbas aprovadas pelo cliente (RF-T2-03), registro de alterações (RF-OTI-03) e reprovações da Meta (RF-T2-02) e links com UTM (RF-ADS-11). */
+export default async function TrafegoPage({ params, searchParams }: { params: Promise<{ id: string }>; searchParams: Promise<{ leads?: string }> }) {
   const user = await requirePermission(["ads.read", "optimization.manage"]);
   const { id } = await params;
   const canManage = Boolean(user.permissions["optimization.manage"]);
   const seesAds = Boolean(user.permissions["ads.read"] || user.permissions["ads.manage"]);
   const today = todayKey(new Date());
-  const [client, changes, budgets, checks, rejections, library, utms, facebook, plans, planClients] = await Promise.all([
+  const sp = await searchParams;
+  const leadPeriod = isLeadPeriod(sp.leads) ? sp.leads : "30";
+  const [leadData, client, changes, budgets, checks, rejections, library, utms, facebook, plans, planClients] = await Promise.all([
+    clientLeadsData(id, leadRange(leadPeriod, today)),
     getClient(id),
     listChanges(id),
     listBudgets(id),
@@ -90,6 +97,19 @@ export default async function TrafegoPage({ params }: { params: Promise<{ id: st
             description={planClient.length ? "Monte o plano antes de subir a campanha: objetivo, orçamento, público, período e criativos. Com o nome padrão, ele se liga sozinho à campanha quando ela aparecer na conta." : "A equipe de tráfego monta aqui os planos de campanha deste cliente."}
           />
         )}
+      </Section>
+
+      <Section
+        id="leads"
+        title="Qualidade dos leads"
+        action={canManage && (
+          <div className="flex flex-wrap gap-2">
+            <ImportLeadsDialog clientId={id} />
+            <ReviewLinkDialog clientId={id} clientName={client.name} link={leadData.link} />
+          </div>
+        )}
+      >
+        <LeadQuality clientId={id} period={leadPeriod} summary={leadData.summary} leads={leadData.leads} allTime={leadData.allTime} canManage={canManage} />
       </Section>
 
       <Section

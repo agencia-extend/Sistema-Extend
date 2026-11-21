@@ -989,6 +989,50 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"client_leads": {
+                  Row: {
+                    "ad_name": string | null,"campaign_ext_id": string | null,"campaign_id": string | null,"campaign_name": string | null,"client_id": string,"created_at": string,"created_by": string | null,"email": string | null,"external_key": string,"form_name": string | null,"id": string,"import_batch": string | null,"lead_at": string,"name": string | null,"organization_id": string,"phone": string | null,"quality": string | null,"quality_note": string | null,"rated_at": string | null,"rated_by": string | null,"rated_by_name": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "ad_name"?: string | null,"campaign_ext_id"?: string | null,"campaign_id"?: string | null,"campaign_name"?: string | null,"client_id": string,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"external_key": string,"form_name"?: string | null,"id"?: string,"import_batch"?: string | null,"lead_at": string,"name"?: string | null,"organization_id": string,"phone"?: string | null,"quality"?: string | null,"quality_note"?: string | null,"rated_at"?: string | null,"rated_by"?: string | null,"rated_by_name"?: string | null
+                  }
+                  Update: {
+                    "ad_name"?: string | null,"campaign_ext_id"?: string | null,"campaign_id"?: string | null,"campaign_name"?: string | null,"client_id"?: string,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"external_key"?: string,"form_name"?: string | null,"id"?: string,"import_batch"?: string | null,"lead_at"?: string,"name"?: string | null,"organization_id"?: string,"phone"?: string | null,"quality"?: string | null,"quality_note"?: string | null,"rated_at"?: string | null,"rated_by"?: string | null,"rated_by_name"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "client_leads_campaign_id_fkey"
+      columns: ["campaign_id"]
+isOneToOne: false
+      referencedRelation: "ad_campaigns"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_leads_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_leads_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_leads_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "client_leads_rated_by_fkey"
+      columns: ["rated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"client_materials": {
                   Row: {
                     "category": string,"client_id": string,"created_at": string,"created_by": string,"file_id": string | null,"id": string,"notes": string | null,"title": string,"url": string | null
@@ -1724,6 +1768,32 @@ isOneToOne: false
       columns: ["organization_id"]
 isOneToOne: false
       referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"lead_review_links": {
+                  Row: {
+                    "client_id": string,"created_at": string,"created_by": string | null,"id": string,"last_used_at": string | null,"revoked_at": string | null,"token_hash": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"last_used_at"?: string | null,"revoked_at"?: string | null,"token_hash": string
+                  }
+                  Update: {
+                    "client_id"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"last_used_at"?: string | null,"revoked_at"?: string | null,"token_hash"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "lead_review_links_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "lead_review_links_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
       referencedColumns: ["id"]
     }
                   ]
@@ -3941,6 +4011,9 @@ isOneToOne: false
 "create_lead_from_conversation":
 { Args: { "p_id": string,"p_name": string }; Returns: string
                            },
+"create_lead_review_link":
+{ Args: { "p_client": string,"p_token_hash": string }; Returns: undefined
+                           },
 "creative_linkable_ads":
 { Args: { "p_library": string }; Returns: {
               "account_name": string,"ad_id": string,"campaign_name": string,"effective_status": string,"name": string
@@ -4101,6 +4174,9 @@ isOneToOne: false
               "missing": (string)[],"name": string,"platform": string,"profile_id": string,"username": string
             }[]
                            },
+"rate_client_lead":
+{ Args: { "p_lead": string,"p_name": string,"p_note": string,"p_quality": string,"p_token_hash": string }; Returns: string
+                           },
 "rate_limit_blocked":
 { Args: { "p_bucket": string,"p_max": number,"p_window_seconds": number }; Returns: boolean
                            },
@@ -4135,6 +4211,9 @@ isOneToOne: false
                            },
 "revoke_client_connect_link":
 { Args: { "p_id": string }; Returns: undefined
+                           },
+"revoke_lead_review_link":
+{ Args: { "p_client": string }; Returns: undefined
                            },
 "save_ad_account":
 { Args: { "p_client": string,"p_enabled": boolean,"p_id": string }; Returns: undefined
