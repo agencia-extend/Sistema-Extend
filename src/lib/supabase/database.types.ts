@@ -3377,6 +3377,114 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"team_placeholder_clients": {
+                  Row: {
+                    "client_id": string,"placeholder_id": string,"sector_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "client_id": string,"placeholder_id": string,"sector_id": string
+                  }
+                  Update: {
+                    "client_id"?: string,"placeholder_id"?: string,"sector_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "team_placeholder_clients_client_id_fkey"
+      columns: ["client_id"]
+isOneToOne: false
+      referencedRelation: "clients"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "team_placeholder_clients_placeholder_id_fkey"
+      columns: ["placeholder_id"]
+isOneToOne: false
+      referencedRelation: "team_placeholders"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "team_placeholder_clients_sector_id_fkey"
+      columns: ["sector_id"]
+isOneToOne: false
+      referencedRelation: "sectors"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"team_placeholder_tasks": {
+                  Row: {
+                    "as_participant": boolean,"placeholder_id": string,"task_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "as_participant"?: boolean,"placeholder_id": string,"task_id": string
+                  }
+                  Update: {
+                    "as_participant"?: boolean,"placeholder_id"?: string,"task_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "team_placeholder_tasks_placeholder_id_fkey"
+      columns: ["placeholder_id"]
+isOneToOne: false
+      referencedRelation: "team_placeholders"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "team_placeholder_tasks_task_id_fkey"
+      columns: ["task_id"]
+isOneToOne: false
+      referencedRelation: "tasks"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"team_placeholders": {
+                  Row: {
+                    "aliases": (string)[],"created_at": string,"dismissed_at": string | null,"dismissed_by": string | null,"id": string,"invitation_id": string | null,"linked_at": string | null,"linked_by": string | null,"name": string,"note": string | null,"organization_id": string,"profile_id": string | null,"sector_id": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "aliases"?: (string)[],"created_at"?: string,"dismissed_at"?: string | null,"dismissed_by"?: string | null,"id"?: string,"invitation_id"?: string | null,"linked_at"?: string | null,"linked_by"?: string | null,"name": string,"note"?: string | null,"organization_id": string,"profile_id"?: string | null,"sector_id"?: string | null
+                  }
+                  Update: {
+                    "aliases"?: (string)[],"created_at"?: string,"dismissed_at"?: string | null,"dismissed_by"?: string | null,"id"?: string,"invitation_id"?: string | null,"linked_at"?: string | null,"linked_by"?: string | null,"name"?: string,"note"?: string | null,"organization_id"?: string,"profile_id"?: string | null,"sector_id"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "team_placeholders_dismissed_by_fkey"
+      columns: ["dismissed_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "team_placeholders_invitation_id_fkey"
+      columns: ["invitation_id"]
+isOneToOne: false
+      referencedRelation: "invitations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "team_placeholders_linked_by_fkey"
+      columns: ["linked_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "team_placeholders_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "team_placeholders_profile_id_fkey"
+      columns: ["profile_id"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "team_placeholders_sector_id_fkey"
+      columns: ["sector_id"]
+isOneToOne: false
+      referencedRelation: "sectors"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"traffic_checks": {
                   Row: {
                     "client_id": string,"created_at": string,"decisions": NonNullable<Json>,"done_at": string,"done_by": string | null,"id": string,"items": NonNullable<Json>,"kind": string,"notes": string | null,"organization_id": string,"period_on": string,"problems": number
@@ -4110,6 +4218,9 @@ isOneToOne: false
 "delete_wa_tag":
 { Args: { "p_id": string }; Returns: undefined
                            },
+"dismiss_team_placeholder":
+{ Args: { "p_dismiss": boolean,"p_placeholder": string }; Returns: undefined
+                           },
 "duplicate_role":
 { Args: { "p_name": string,"p_role": string }; Returns: string
                            },
@@ -4149,6 +4260,9 @@ isOneToOne: false
                            },
 "link_creative_ad":
 { Args: { "p_ad": string,"p_library": string }; Returns: undefined
+                           },
+"link_team_placeholder":
+{ Args: { "p_placeholder": string,"p_profile": string }; Returns: number
                            },
 "mark_all_notifications_read":
 { Args: Record<PropertyKey, never>; Returns: number
@@ -4376,6 +4490,9 @@ isOneToOne: false
                            },
 "set_task_status":
 { Args: { "p_position"?: number,"p_status": string,"p_task": string }; Returns: undefined
+                           },
+"set_team_placeholder_invitation":
+{ Args: { "p_invitation": string,"p_placeholder": string }; Returns: undefined
                            },
 "start_timer":
 { Args: { "p_task": string }; Returns: undefined

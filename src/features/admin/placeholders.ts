@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { ok } from "@/domain/shared/result";
 import { dismissPlaceholderSchema, linkPlaceholderSchema } from "./schemas";
 
-// Pessoas do Trello a cadastrar (20261125000100_pessoas_do_trello.sql): ligar um nome a quem já tem acesso ou tirá-lo da lista.
+// Pessoas do Trello a cadastrar (20261125000300_pessoas_do_trello.sql): ligar um nome a quem já tem acesso ou tirá-lo da lista.
 
 const USERS = "/configuracoes/usuarios";
 
