@@ -182,6 +182,8 @@ Use um perfil do Facebook que seja **administrador do portfólio empresarial (BM
    - **Contas de anúncio:** escolha o cliente de cada conta e ligue **Entra no sistema**.
 4. **Cada pessoa:** em **Meu perfil › Conexões**, clique em **Continuar com o Google**. Aparece no Google Agenda dela uma agenda "Sistema Extend" com os eventos do sistema.
 
+5. **Prospectador (opcional, tem custo por uso):** no projeto do Google Cloud da Extend, ative a **Places API (New)**, crie uma chave de API restrita a essa API e defina um limite de gasto (orçamento com alerta). Coloque no `.env.local` `GOOGLE_PLACES_API_KEY=` e, se quiser outro limite de buscas por mês, `PROSPECTOR_MONTHLY_LIMIT=` (padrão 300; cada 20 empresas conta 1). Sem a chave, a aba Comercial › Prospectador não aparece.
+
 Nesta fase, o app da Meta ainda está em desenvolvimento. O token do usuário do sistema lê os ativos do BM da Extend. Contas que pertencem aos clientes podem só aparecer depois do acesso avançado (fase 4); a tela de Integrações mostra o motivo, se acontecer.
 
 ---
@@ -189,7 +191,7 @@ Nesta fase, o app da Meta ainda está em desenvolvimento. O token do usuário do
 ## Fase 3 — Completar o sistema (desenvolvedor)
 
 Com as contas conectadas e dados reais:
-- **Sincronização:** os números das contas escolhidas chegam a cada 3 horas.
+- **Sincronização:** os números das contas escolhidas chegam a cada 3 horas, da Meta e do Google Ads (feito em 25/11/2026; o Google só falta conferir com a MCC conectada).
 - **Painel do tráfego:** gasto, impressões, alcance, cliques, leads, conversões e custo por resultado, por cliente e por campanha.
 - **Números por criativo:** aparecem na biblioteca e no criativo, para a equipe de mídias.
 - **Páginas e Instagram:** a lista das páginas que a agência administra, com o vínculo a cada cliente (`pages_show_list`) e os últimos posts da página ao lado do cronograma (`pages_read_engagement`).

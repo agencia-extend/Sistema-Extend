@@ -51,7 +51,6 @@ export async function getTrafficPanel(
   let q = supabase
     .from("ad_accounts")
     .select("id, name, external_id, client_id, account_status_code, is_prepay, funds_cents, funding_display, synced_at, sync_error, clients(name)")
-    .eq("provider", "meta")
     .eq("is_enabled", true);
   if (clientId) q = q.eq("client_id", clientId);
   if (server) q = q.eq("organization_id", server.organizationId);

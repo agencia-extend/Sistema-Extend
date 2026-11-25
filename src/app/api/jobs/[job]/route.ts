@@ -2,7 +2,7 @@ import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { sendPush } from "@/lib/push";
-import { syncMetaAccounts } from "@/lib/ads/meta-sync";
+import { syncAdAccounts } from "@/lib/ads/sync";
 import { forwardAdAlerts } from "@/lib/whatsapp/alerts";
 import { sendScheduledReports } from "@/lib/whatsapp/reports";
 import { syncSocial } from "@/lib/social/meta-social";
@@ -36,8 +36,8 @@ async function notificationsJob() {
 
 const JOBS: Record<string, () => Promise<unknown>> = {
   notifications: notificationsJob,
-  // Anúncios da Meta (RF-ADS-03): as contas mais atrasadas primeiro, dentro de ~45 s; o resto na próxima.
-  "ads-sync": () => syncMetaAccounts({ trigger: "cron", budgetMs: 45_000 }),
+  // Anúncios da Meta e do Google Ads (RF-ADS-03): as contas mais atrasadas primeiro, dentro de ~45 s; o resto na próxima.
+  "ads-sync": () => syncAdAccounts({ trigger: "cron", budgetMs: 45_000 }),
   // Alertas de anúncios no grupo interno do WhatsApp (RF-ALE-02).
   "whatsapp-alerts": forwardAdAlerts,
   // Relatórios de anúncios no grupo de relatórios, na frequência e no horário de cada cliente (RF-REL-01).

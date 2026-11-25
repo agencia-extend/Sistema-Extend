@@ -2,7 +2,6 @@ import { z } from "zod";
 
 const uuid = z.uuid("Identificador inválido.");
 const optText = (max: number) => z.string().trim().max(max, `Use no máximo ${max} caracteres.`).optional().or(z.literal(""));
-const optDate = z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida.").optional().or(z.literal(""));
 const cents = z.number().int().min(0).max(1e12).nullable().optional();
 
 export const handoffSchema = z.object({

@@ -5,6 +5,7 @@ import { requirePermission } from "@/lib/auth/dal";
 import { PageHeader } from "@/components/app/page-header";
 import { buttonVariants } from "@/components/ui/button";
 import { CommercialNav } from "./commercial-nav";
+import { placesConfigured } from "@/lib/crm/places";
 
 /** Comercial: funil em quadro, lista de leads, painel e importação. */
 export default async function ComercialLayout({ children }: { children: ReactNode }) {
@@ -21,7 +22,7 @@ export default async function ComercialLayout({ children }: { children: ReactNod
         }
         className="pb-2"
       />
-      <CommercialNav canImport={Boolean(user.permissions["crm.leads.manage"])} canProposals={Boolean(user.permissions["proposals.read"])} />
+      <CommercialNav canImport={Boolean(user.permissions["crm.leads.manage"])} canProposals={Boolean(user.permissions["proposals.read"])} canProspect={Boolean(user.permissions["prospector.use"]) && placesConfigured()} />
       <div className="px-4 pt-5 pb-10 sm:px-6">{children}</div>
     </>
   );

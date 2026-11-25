@@ -798,3 +798,19 @@ RF-T2-01 (prompt 11). São os leads que as campanhas do cliente geram, não o fu
 - **Regras no banco:** ver e importar só quem cuida das campanhas do cliente (`ads.read` ou `optimization.manage` no cliente; gravar com `optimization.manage`); avaliar pelo link só pelo servidor (`rate_client_lead`, com limite de tentativas por IP).
 - **Ficam para depois (dependem da Meta):** trazer os leads dos formulários direto da Meta (precisa da permissão `leads_retrieval` na conexão) e mandar o "lead qualificado" de volta pela Conversions API. Nada disso aparece na tela até existir.
 - **Testes:** `54_qualidade_leads.test.sql` (16), `src/domain/ads/client-leads.test.ts` (5) e `e2e/48-qualidade-leads.spec.ts`.
+
+## Revisão geral e o que faltava no código (25/11/2026)
+**Conferido:** tipos, lint (zero avisos), 251 testes de unidade, 762 testes de banco, build de produção, migrations todas aplicadas, produção no ar (`hub.agenciaextend.com.br`) com a última versão e sem erros registrados na Vercel.
+
+**Sincronização do Google Ads (RF-ADS-03/08, `src/lib/ads/google-sync.ts`):** a conexão e a descoberta da MCC já existiam; faltava trazer os dados. Agora a mesma rodada de 3 em 3 horas (e "Sincronizar agora") traz, das contas do Google ligadas a um cliente: situação da conta, campanhas (com orçamento), grupos de anúncios (gravados como conjuntos), anúncios (reprovação pela política vira "Reprovado") e números por dia de conta, campanha, grupo e anúncio (90 dias na primeira vez, 37 por grupo e anúncio; depois os últimos 3 dias). Tudo nas mesmas tabelas da Meta, então o painel, o módulo Anúncios, a aba do cliente, os planos de campanha, os relatórios, as metas e o checklist diário passam a mostrar as contas do Google sem tela nova.
+- **Resultado no Google:** a conversão (gravada como "lead", com o valor da conversão para o ROAS); sem conversões, o clique. Regra em `src/domain/ads/google.ts` (testada).
+- **Ficam só na Meta:** saldo pré-pago, restrição da conta, frequência/fadiga e ajustes de campanha pelo sistema (pausar, orçamento), porque dependem da API da Meta.
+- **Falta conferir com dados reais:** a MCC da Extend ainda não foi conectada (só existe a conexão da Meta). Depois de conectar em Configurações › Integrações e ligar as contas, conferir gasto, cliques e conversões de uma campanha com o Google Ads.
+- Palavras-chave e termos de pesquisa (parte do RF-ADS-08) ainda não têm tela.
+
+**Prospectador (RF-CRM-07):** Comercial › Prospectador (permissão `prospector.use`, papel Comercial e admin). Migration `20261125000100_prospectador.sql`.
+- Busca por nicho + cidade + UF no Google Places API (New) da Extend, até 20, 40 ou 60 empresas, com telefone, site, endereço, nota, avaliações, categoria e link do Maps.
+- **Score de oportunidade** (0 a 100, com o motivo de cada ponto, `src/domain/crm/prospector.ts`): sem site +35 (site em rede social/agregador +20), até 20 avaliações +20 (até 50 +10), nota abaixo de 4,2 +15 (sem nota +10), tem telefone +20; fechada definitivamente = 0. Pesos fixos por enquanto (não há tela para mudar).
+- "Levar ao funil": usa a mesma importação do Comercial (origem Prospecção, sem repetir telefone, com a observação do score e do Maps) e marca os locais como já importados; desfazer a importação libera os locais.
+- **Limite do mês:** `PROSPECTOR_MONTHLY_LIMIT` (padrão 300 páginas de 20); a tela mostra o uso. Cada busca fica registrada (1 ano).
+- **Pendente:** a chave `GOOGLE_PLACES_API_KEY` (tem custo por uso; passo 5 da fase 2 do `docs/11`). Sem ela a aba não aparece. Testes: `55_prospectador.test.sql` (8) e Vitest de `domain/crm/prospector`.

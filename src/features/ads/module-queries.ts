@@ -21,13 +21,12 @@ export const resultsOf = (t: Totals) => t.leads + t.messages + t.purchases;
 
 const n = (v: unknown) => Number(v ?? 0);
 
-/** Contas que a pessoa vê (Meta, incluídas no sistema), com saldo e previsão. Cache por requisição. */
+/** Contas que a pessoa vê (Meta e Google Ads, incluídas no sistema), com saldo e previsão. Cache por requisição. */
 export const getModuleAccounts = cache(async (today: string): Promise<ModuleAccount[]> => {
   const supabase = await createClient();
   const { data: accounts, error } = await supabase
     .from("ad_accounts")
     .select("id, name, client_id, account_status_code, is_prepay, funds_cents, funding_display, synced_at, sync_error, clients(name)")
-    .eq("provider", "meta")
     .eq("is_enabled", true);
   if (error) throw error;
   if (!accounts?.length) return [];

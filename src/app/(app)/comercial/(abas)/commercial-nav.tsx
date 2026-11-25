@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-export function CommercialNav({ canImport, canProposals }: { canImport: boolean; canProposals: boolean }) {
+export function CommercialNav({ canImport, canProposals, canProspect }: { canImport: boolean; canProposals: boolean; canProspect: boolean }) {
   const path = usePathname();
   const funil = useSearchParams().get("funil");
   const q = funil ? `?funil=${funil}` : "";
@@ -13,6 +13,7 @@ export function CommercialNav({ canImport, canProposals }: { canImport: boolean;
     { href: `/comercial/leads${q}`, label: "Leads", active: path === "/comercial/leads" },
     ...(canProposals ? [{ href: "/comercial/propostas", label: "Propostas", active: path === "/comercial/propostas" }] : []),
     { href: `/comercial/painel${q}`, label: "Painel", active: path === "/comercial/painel" },
+    ...(canProspect ? [{ href: `/comercial/prospectador${q}`, label: "Prospectador", active: path === "/comercial/prospectador" }] : []),
     ...(canImport ? [{ href: `/comercial/importar${q}`, label: "Importar", active: path === "/comercial/importar" }] : []),
   ];
   return (

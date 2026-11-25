@@ -93,7 +93,7 @@ async function adsRequest<T>(accessToken: string, path: string, init: RequestIni
   }
 }
 
-async function search<T>(accessToken: string, customerId: string, query: string, login: string | null): Promise<T[]> {
+export async function search<T>(accessToken: string, customerId: string, query: string, login: string | null): Promise<T[]> {
   const out: T[] = [];
   let pageToken: string | undefined;
   for (let guard = 0; guard < 50; guard++) {

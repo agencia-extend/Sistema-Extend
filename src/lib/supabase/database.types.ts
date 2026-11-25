@@ -2527,6 +2527,64 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"prospect_places": {
+                  Row: {
+                    "imported_at": string,"imported_by": string | null,"lead_import_id": string | null,"name": string,"organization_id": string,"place_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "imported_at"?: string,"imported_by"?: string | null,"lead_import_id"?: string | null,"name": string,"organization_id"?: string,"place_id": string
+                  }
+                  Update: {
+                    "imported_at"?: string,"imported_by"?: string | null,"lead_import_id"?: string | null,"name"?: string,"organization_id"?: string,"place_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "prospect_places_imported_by_fkey"
+      columns: ["imported_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "prospect_places_lead_import_id_fkey"
+      columns: ["lead_import_id"]
+isOneToOne: false
+      referencedRelation: "lead_imports"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "prospect_places_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"prospect_searches": {
+                  Row: {
+                    "city": string,"created_at": string,"created_by": string | null,"id": string,"organization_id": string,"pages": number,"query": string,"result_count": number,"uf": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "city": string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"organization_id"?: string,"pages"?: number,"query": string,"result_count"?: number,"uf": string
+                  }
+                  Update: {
+                    "city"?: string,"created_at"?: string,"created_by"?: string | null,"id"?: string,"organization_id"?: string,"pages"?: number,"query"?: string,"result_count"?: number,"uf"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "prospect_searches_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "prospect_searches_organization_id_fkey"
+      columns: ["organization_id"]
+isOneToOne: false
+      referencedRelation: "organizations"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"push_subscriptions": {
                   Row: {
                     "auth": string,"created_at": string,"endpoint": string,"id": string,"last_used_at": string | null,"p256dh": string,"user_agent": string | null,"user_id": string
@@ -4098,6 +4156,9 @@ isOneToOne: false
 "mark_conversation_read":
 { Args: { "p_id": string }; Returns: undefined
                            },
+"mark_prospect_places":
+{ Args: { "p_import": string,"p_places": Json }; Returns: number
+                           },
 "marketing_calendar_clients":
 { Args: Record<PropertyKey, never>; Returns: {
               "can_request": boolean,"id": string,"name": string
@@ -4165,6 +4226,9 @@ isOneToOne: false
                            },
 "proposal_viewed":
 { Args: { "p_ip": string,"p_token": string,"p_user_agent": string }; Returns: string
+                           },
+"prospector_month_usage":
+{ Args: Record<PropertyKey, never>; Returns: number
                            },
 "publish_onboarding_form":
 { Args: { "p_sections": Json }; Returns: number

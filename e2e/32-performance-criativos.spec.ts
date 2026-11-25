@@ -23,7 +23,6 @@ const people: Record<string, { id: string; email: string; name: string }> = {};
 let clientId = "";
 let accountId = "";
 let taskId = "";
-let libraryId = "";
 let ref = 0;
 const manualAd = `Sorriso manual ${stamp}`;
 
@@ -69,7 +68,7 @@ test.beforeAll(async () => {
   await admin.from("creative_requests").insert({ task_id: taskId, client_id: clientId, requested_by: people.Ana.id, campaign: "Clareamento", objective: "leads", format: "video", angle, audience: "Adultos 25-55", cta: "Agendar avaliação" });
   const { data: lib, error: le } = await admin.from("creative_library").insert({ task_id: taskId, client_id: clientId, campaign: "Clareamento", format: "video", angle }).select("id, ref_number").single();
   if (le) throw le;
-  libraryId = lib.id;
+  expect(lib.id).toBeTruthy();
   ref = Number(lib.ref_number);
   const ext = `act_9${stamp.slice(-9)}`;
   const { data: acc, error: ae } = await admin

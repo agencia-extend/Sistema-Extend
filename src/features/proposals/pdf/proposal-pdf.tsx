@@ -175,8 +175,8 @@ function ProposalPdf({ doc, images }: { doc: ProposalDoc; images: Record<string,
                 ) : null}
                 {sec.type === "imagem" ? (
                   <View>
-                    {/* eslint-disable-next-line jsx-a11y/alt-text -- Image do react-pdf não tem alt */}
                     {sec.imagePath && images[sec.imagePath] ? (
+                      // eslint-disable-next-line jsx-a11y/alt-text -- Image do react-pdf não tem alt
                       <Image src={images[sec.imagePath]} style={s.image} />
                     ) : null}
                     {sec.nodes.length > 0 ? <Rich nodes={sec.nodes} style={{ color: MUTED, fontSize: 9.5 }} /> : null}

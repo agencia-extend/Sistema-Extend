@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { defineAction, must } from "@/lib/actions";
 import { fail, ok } from "@/domain/shared/result";
-import { syncMetaAccounts } from "@/lib/ads/meta-sync";
+import { syncAdAccounts } from "@/lib/ads/sync";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { goalIdSchema, goalSchema, reportNowSchema, syncNowSchema } from "./schemas";
@@ -31,10 +31,10 @@ export const syncAdsNow = defineAction({ schema: syncNowSchema, permission: "ads
     accountIds = (data ?? []).map((a) => a.id);
   }
   if (!accountIds.length) return fail("business_rule", "Nenhuma conta ligada para sincronizar. Ligue as contas em Configurações › Integrações.");
-  const r = await syncMetaAccounts({ trigger: "manual", accountIds, budgetMs: 50_000 });
+  const r = await syncAdAccounts({ trigger: "manual", accountIds, budgetMs: 50_000 });
   revalidatePath("/anuncios", "layout");
   if (clientId) revalidatePath(`/clientes/${clientId}/anuncios`);
-  if (r.total === 0) return fail("business_rule", "As contas ligadas estão sem conexão ativa com a Meta. Reconecte em Configurações › Integrações ou na aba Tráfego do cliente.");
+  if (r.total === 0) return fail("business_rule", "As contas ligadas estão sem conexão ativa com a Meta ou o Google Ads. Reconecte em Configurações › Integrações ou na aba Tráfego do cliente.");
   const failed = r.results.filter((x) => !x.ok);
   if (failed.length) return fail("network", `${failed[0].account}: ${failed[0].error}`);
   const rest = r.total - r.done;

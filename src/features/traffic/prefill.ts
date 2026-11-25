@@ -22,7 +22,6 @@ export async function getCheckPrefill(clientId: string): Promise<CheckPrefill | 
     .from("ad_accounts")
     .select("id, external_id, name, is_prepay, funds_cents, account_status_code, synced_at, sync_error")
     .eq("client_id", clientId)
-    .eq("provider", "meta")
     .eq("is_enabled", true)
     .not("synced_at", "is", null);
   if (error) throw error;

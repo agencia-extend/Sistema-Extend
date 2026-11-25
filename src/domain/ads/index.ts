@@ -110,6 +110,8 @@ export const RESULT_LABEL: Record<ResultKind, { one: string; many: string; cost:
  */
 export function resultKind(objective: string | null | undefined, t?: Partial<Totals>): ResultKind {
   const o = (objective ?? "").toUpperCase();
+  // Google Ads (src/domain/ads/google.ts): conversões ficam em "leads"; sem conversões, o clique.
+  if (o.startsWith("GOOGLE")) return t?.leads ? "leads" : "link_clicks";
   if (o.includes("LEAD")) return "leads";
   if (o.includes("SALES") || o.includes("CONVERSIONS") || o.includes("PRODUCT_CATALOG")) return t?.purchases ? "purchases" : t?.leads ? "leads" : t?.messages ? "messages" : "purchases";
   if (o.includes("MESSAGES")) return "messages";
