@@ -8,7 +8,12 @@ export const inviteSchema = z.object({
   fullName: z.string().trim().min(2, "Informe o nome.").max(120),
   roleId: uuid,
   sectorIds: z.array(uuid).max(20).default([]),
+  /** Nome do Trello que este convite vai assumir (Pessoas do Trello a cadastrar). */
+  placeholderId: uuid.optional(),
 });
+
+export const linkPlaceholderSchema = z.object({ placeholderId: uuid, profileId: z.uuid("Escolha uma pessoa.") });
+export const dismissPlaceholderSchema = z.object({ placeholderId: uuid, dismiss: z.boolean() });
 
 export const invitationIdSchema = z.object({ id: uuid });
 

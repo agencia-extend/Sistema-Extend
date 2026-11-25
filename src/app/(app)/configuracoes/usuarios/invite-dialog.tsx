@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, type ReactNode } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, UserPlus } from "lucide-react";
@@ -17,18 +17,21 @@ import { SectorPicker } from "./sector-picker";
 
 type Option = { id: string; name: string };
 
-export function InviteDialog({ roles, sectors }: { roles: Option[]; sectors: Option[] }) {
+/** preset: convite para um nome do Trello (Pessoas do Trello a cadastrar), com nome e setor sugeridos. */
+type Preset = { placeholderId: string; fullName: string; sectorIds: string[] };
+
+export function InviteDialog({ roles, sectors, preset, trigger }: { roles: Option[]; sectors: Option[]; preset?: Preset; trigger?: ReactNode }) {
   const [open, setOpen] = useState(false);
   const [pending, startTransition] = useTransition();
   const form = useForm<z.input<typeof inviteSchema>>({
     resolver: zodResolver(inviteSchema),
-    defaultValues: { email: "", fullName: "", roleId: "", sectorIds: [] },
+    defaultValues: { email: "", fullName: preset?.fullName ?? "", roleId: "", sectorIds: preset?.sectorIds ?? [], placeholderId: preset?.placeholderId },
   });
 
   const onSubmit = form.handleSubmit((v) =>
     startTransition(async () => {
       if (handleResult(await inviteUser(v), form)) {
-        form.reset();
+        if (!preset) form.reset();
         setOpen(false);
       }
     }),
@@ -37,14 +40,19 @@ export function InviteDialog({ roles, sectors }: { roles: Option[]; sectors: Opt
   return (
     <Dialog open={open} onOpenChange={(v) => !pending && setOpen(v)}>
       <DialogTrigger asChild>
-        <Button>
-          <UserPlus aria-hidden="true" /> Convidar pessoa
-        </Button>
+        {trigger ?? (
+          <Button>
+            <UserPlus aria-hidden="true" /> Convidar pessoa
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Convidar pessoa</DialogTitle>
-          <DialogDescription>A pessoa recebe um e-mail com um link pessoal (válido por 7 dias) para criar a senha.</DialogDescription>
+          <DialogTitle>{preset ? `Convidar ${preset.fullName}` : "Convidar pessoa"}</DialogTitle>
+          <DialogDescription>
+            A pessoa recebe um e-mail com um link pessoal (válido por 7 dias) para criar a senha.
+            {preset && " Quando ela aceitar, os cards com este nome no Trello passam a ser dela."}
+          </DialogDescription>
         </DialogHeader>
         <form id="invite-form" onSubmit={onSubmit} noValidate className="grid gap-4">
           <FormField label="Nome" error={form.formState.errors.fullName?.message} required>

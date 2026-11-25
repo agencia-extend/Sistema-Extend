@@ -2,19 +2,22 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { Users } from "lucide-react";
 import { requirePermission } from "@/lib/auth/dal";
-import { listInvitations, listRoles, listSectors, listUsers } from "@/features/admin/queries";
+import { listInvitations, listPlaceholders, listRoles, listSectors, listUsers } from "@/features/admin/queries";
 import { PageBody, PageHeader } from "@/components/app/page-header";
 import { EmptyState } from "@/components/app/states";
 import { Badge } from "@/components/ui/badge";
 import { formatDateTime } from "@/domain/shared/dates";
 import { InviteDialog } from "./invite-dialog";
 import { InvitationActions } from "./invitation-actions";
+import { PlaceholderList } from "./placeholder-list";
 
 export const metadata: Metadata = { title: "Usuários" };
 
 export default async function UsuariosPage() {
   const me = await requirePermission("users.manage");
-  const [users, invitations, roles, sectors] = await Promise.all([listUsers(), listInvitations(), listRoles(), listSectors()]);
+  const [users, invitations, roles, sectors, placeholders] = await Promise.all([listUsers(), listInvitations(), listRoles(), listSectors(), listPlaceholders()]);
+  const sectorOptions = sectors.filter((s) => s.is_active).map((s) => ({ id: s.id, name: s.name }));
+  const toRegister = placeholders.filter((p) => !p.profile && !p.dismissed).length;
   const active = users.filter((u) => u.is_active);
   const inactive = users.filter((u) => !u.is_active && u.deactivated_at);
   const invitableRoles = roles.filter((r) => me.isAdmin || r.key !== "admin").map((r) => ({ id: r.id, name: r.name }));
@@ -24,7 +27,7 @@ export default async function UsuariosPage() {
       <PageHeader
         title="Usuários"
         description="Quem tem acesso ao sistema, com qual papel e em quais setores."
-        actions={<InviteDialog roles={invitableRoles} sectors={sectors.filter((s) => s.is_active).map((s) => ({ id: s.id, name: s.name }))} />}
+        actions={<InviteDialog roles={invitableRoles} sectors={sectorOptions} />}
       />
       <PageBody className="grid gap-8">
         <section aria-labelledby="ativos" className="grid gap-3">
@@ -37,6 +40,25 @@ export default async function UsuariosPage() {
             <UserList users={active} meId={me.id} />
           )}
         </section>
+
+        {placeholders.length > 0 && (
+          <section id="trello" aria-labelledby="trello-t" className="grid scroll-mt-20 gap-3">
+            <div className="grid gap-1">
+              <h2 id="trello-t" className="text-base font-semibold">
+                Pessoas do Trello a cadastrar <span className="font-normal text-muted-foreground tabular">({toRegister})</span>
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Nomes que estavam nos cards do Trello. Convide cada pessoa com o e-mail e o papel dela, ou ligue o nome a quem já tem acesso: os cards e os clientes passam para ela.
+              </p>
+            </div>
+            <PlaceholderList
+              rows={placeholders}
+              roles={invitableRoles}
+              sectors={sectorOptions}
+              users={active.map((u) => ({ id: u.id, name: u.full_name || u.email }))}
+            />
+          </section>
+        )}
 
         <section id="convites" aria-labelledby="convites-t" className="grid scroll-mt-20 gap-3">
           <h2 id="convites-t" className="text-base font-semibold">

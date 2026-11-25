@@ -141,3 +141,49 @@ export async function listSuccessors(userId: string): Promise<{ id: string; name
   if (error) throw error;
   return (data ?? []).map((p) => ({ id: p.id, name: p.full_name, crm: p.crm }));
 }
+
+export type PlaceholderRow = {
+  id: string;
+  name: string;
+  aliases: string[];
+  note: string | null;
+  sector: { id: string; name: string; color: string } | null;
+  invitation: { email: string; status: string } | null;
+  profile: { id: string; full_name: string } | null;
+  dismissed: boolean;
+  cards: number;
+  open: number;
+  clients: string[];
+};
+
+/** Pessoas do Trello a cadastrar: nomes que estavam nos cards importados e ainda não viraram conta. */
+export async function listPlaceholders(): Promise<PlaceholderRow[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("team_placeholders")
+    .select(
+      "id, name, aliases, note, dismissed_at, sectors(id, name, color), invitations(email, status), profiles!team_placeholders_profile_id_fkey(id, full_name), team_placeholder_tasks(tasks(status, deleted_at, clients(name)))",
+    )
+    .order("name");
+  if (error) throw error;
+  return (data ?? []).map((p) => {
+    const tasks = arr(p.team_placeholder_tasks as unknown as { tasks: { status: string; deleted_at: string | null; clients: { name: string } | null } | null }[])
+      .flatMap((t) => arr(t.tasks))
+      .filter((t) => !t.deleted_at);
+    const count = new Map<string, number>();
+    for (const t of tasks) if (t.clients?.name) count.set(t.clients.name, (count.get(t.clients.name) ?? 0) + 1);
+    return {
+      id: p.id,
+      name: p.name,
+      aliases: p.aliases,
+      note: p.note,
+      sector: (p.sectors as unknown as PlaceholderRow["sector"]) ?? null,
+      invitation: (p.invitations as unknown as PlaceholderRow["invitation"]) ?? null,
+      profile: (p.profiles as unknown as PlaceholderRow["profile"]) ?? null,
+      dismissed: Boolean(p.dismissed_at),
+      cards: tasks.length,
+      open: tasks.filter((t) => t.status !== "concluido" && t.status !== "cancelado").length,
+      clients: [...count.entries()].sort((a, b) => b[1] - a[1]).map(([n]) => n),
+    };
+  });
+}

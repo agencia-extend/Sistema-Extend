@@ -69,6 +69,8 @@ export const inviteUser = defineAction({ schema: inviteSchema, permission: "user
     return fail("unknown", "Não foi possível enviar o convite agora. Tente novamente.");
   }
   await admin.from("invitations").update({ user_id: data.user.id }).eq("id", inv.id);
+  // Convite para um nome do Trello: ao aceitar, os cards daquele nome passam para a pessoa.
+  if (input.placeholderId) must(await supabase.rpc("set_team_placeholder_invitation", { p_placeholder: input.placeholderId, p_invitation: inv.id }));
 
   revalidatePath("/configuracoes/usuarios");
   return ok(null, `Convite enviado para ${input.email}.`);
