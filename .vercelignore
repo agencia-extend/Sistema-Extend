@@ -5,3 +5,4 @@ test-results
 playwright-report
 .next
 node_modules
+.tmp-sync
