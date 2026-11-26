@@ -833,8 +833,8 @@ Depois da importação de 25/11 (70 clientes, 20 quadros, 54 materiais, 586 tare
 Conferido contra os prompts 04 a 12, as variáveis da Vercel e o estado real no banco. Funcionando: sincronização da Meta (35 rodadas/dia, sem falha), rotinas automáticas (sem falha em 7 dias), push, e-mail (Titan), alertas, relatórios, propostas, portal do cliente, exportação da biblioteca.
 
 **Para fazer (sem depender de ninguém), nesta ordem:**
-1. **Prontos para programar (RF-CON-04):** em Publicações, a lista dos conteúdos aprovados pelo cliente com arquivo e legenda, abrindo a programação já preenchida.
-2. **Quantidade mensal dos serviços em lote:** os 33 clientes ativos vieram do Trello sem quantidade de posts/vídeos por mês, o que deixa "Demanda do mês" e "Cronogramas do mês" sem o contratado. Uma tela única para preencher todos de uma vez.
+1. ~~**Prontos para programar (RF-CON-04):** em Publicações, a lista dos conteúdos aprovados pelo cliente com arquivo e legenda, abrindo a programação já preenchida.~~ Feito em 26/11/2026: seção no Estúdio de publicações (`listReadyToSchedule`, `e2e/49-prontos-programar.spec.ts`); aparece também enquanto nenhum perfil está ligado.
+2. ~~**Quantidade mensal dos serviços em lote:** os 33 clientes ativos vieram do Trello sem quantidade de posts/vídeos por mês, o que deixa "Demanda do mês" e "Cronogramas do mês" sem o contratado. Uma tela única para preencher todos de uma vez.~~ Feito em 26/11/2026: Clientes › Serviços em lote (`/clientes/servicos`, quem gerencia clientes). Vale a partir do próximo mês de cada cliente (padrão) ou já neste mês, criando as demandas do mês na hora (`set_client_service_now`, migration `20261126000200`, `58_servicos_em_lote.test.sql`, `e2e/50-servicos-em-lote.spec.ts`).
 3. **Liberação de contas por gestor (RF-PER-06):** a permissão `ads.access.manage` existe sem tela; hoje o acesso vem só da equipe do cliente.
 4. **Lead Ads e Conversions API (RF-T2-01, parte 2):** só depois da permissão `leads_retrieval` (ver abaixo).
 

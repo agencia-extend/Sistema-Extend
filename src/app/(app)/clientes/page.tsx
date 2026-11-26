@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { FileSpreadsheet, Handshake } from "lucide-react";
+import { FileSpreadsheet, Handshake, Layers } from "lucide-react";
 import { requirePermission } from "@/lib/auth/dal";
 import { listClients, listCatalog } from "@/features/clients/queries";
 import { PageBody, PageHeader } from "@/components/app/page-header";
@@ -23,6 +23,11 @@ export default async function ClientesPage() {
         description="Cada cliente com o que contratou, quem atende, quando o contrato termina e quanto do mês já foi entregue."
         actions={
           <>
+            {user.permissions["clients.manage"] && (
+              <Link href="/clientes/servicos" className={buttonVariants({ variant: "outline" })}>
+                <Layers aria-hidden="true" /> Serviços em lote
+              </Link>
+            )}
             {user.permissions["clients.import"] && (
               <Link href="/clientes/importar" className={buttonVariants({ variant: "outline" })}>
                 <FileSpreadsheet aria-hidden="true" /> Importar planilha

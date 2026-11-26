@@ -4469,6 +4469,9 @@ isOneToOne: false
 "set_client_service":
 { Args: { "p_client": string,"p_price_cents"?: number,"p_qty": number,"p_service": string }; Returns: undefined
                            },
+"set_client_service_now":
+{ Args: { "p_client": string,"p_qty": number,"p_service": string }; Returns: number
+                           },
 "set_client_status":
 { Args: { "p_client": string,"p_status": string }; Returns: undefined
                            },
