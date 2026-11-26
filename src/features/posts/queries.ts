@@ -97,3 +97,48 @@ export async function getContentForPost(taskId: string, clientId: string) {
   const tc = (Array.isArray(data.task_content) ? data.task_content[0] : data.task_content) as { format: string | null; caption: string | null; post_on: string | null } | null;
   return { taskId: data.id, title: data.title, format: tc?.format ?? null, caption: tc?.caption ?? "", postOn: tc?.post_on ?? null };
 }
+
+export type ReadyContent = {
+  taskId: string; title: string; clientId: string; clientName: string; type: string;
+  format: string | null; caption: string | null; finalUrl: string | null; postOn: string | null;
+};
+
+/**
+ * Prontos para programar (RF-CON-04): conteúdo aprovado pelo cliente (etapa com situação "aprovado"), sem link do post
+ * e sem programação ativa. A RLS limita aos clientes de quem vê.
+ */
+export async function listReadyToSchedule(clientId?: string | null): Promise<ReadyContent[]> {
+  const supabase = await createClient();
+  let q = supabase
+    .from("tasks")
+    .select("id, title, type, client_id, clients!inner(name, status), task_content(format, caption, final_url, post_on, post_url)")
+    .is("deleted_at", null)
+    .eq("status", "aprovado")
+    .in("type", ["video", "design", "conteudo", "post"])
+    .not("client_id", "is", null)
+    .eq("clients.status", "ativo")
+    .order("created_at")
+    .limit(200);
+  if (clientId) q = q.eq("client_id", clientId);
+  const { data, error } = await q;
+  if (error) throw error;
+  const rows = data ?? [];
+  const ids = rows.map((r) => r.id);
+  const busy = new Set<string>();
+  if (ids.length) {
+    const { data: s } = await supabase.from("post_schedules").select("task_id").in("task_id", ids).in("status", ["agendado", "publicando", "publicado"]);
+    for (const r of s ?? []) if (r.task_id) busy.add(r.task_id);
+  }
+  return rows
+    .map((r) => {
+      const tc = (Array.isArray(r.task_content) ? r.task_content[0] : r.task_content) as { format: string | null; caption: string | null; final_url: string | null; post_on: string | null; post_url: string | null } | null;
+      const c = (Array.isArray(r.clients) ? r.clients[0] : r.clients) as { name: string } | null;
+      return { r, tc, c };
+    })
+    .filter(({ r, tc }) => !busy.has(r.id) && !tc?.post_url)
+    .map(({ r, tc, c }) => ({
+      taskId: r.id, title: r.title, clientId: r.client_id!, clientName: c?.name ?? "", type: r.type,
+      format: tc?.format ?? null, caption: tc?.caption ?? null, finalUrl: tc?.final_url ?? null, postOn: tc?.post_on ?? null,
+    }))
+    .sort((a, b) => (a.postOn ?? "9999").localeCompare(b.postOn ?? "9999"));
+}

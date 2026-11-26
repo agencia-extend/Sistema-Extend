@@ -6,7 +6,8 @@ import { PageBody, PageHeader } from "@/components/app/page-header";
 import { EmptyState } from "@/components/app/states";
 import { buttonVariants } from "@/components/ui/button";
 import { todayKey } from "@/domain/media";
-import { getPublishTargets, listPosts } from "@/features/posts/queries";
+import { getPublishTargets, listPosts, listReadyToSchedule } from "@/features/posts/queries";
+import { ReadyList } from "@/features/posts/components/ready-list";
 import { listClientProfiles } from "@/features/social/queries";
 import { PostList } from "@/features/posts/components/post-list";
 import { CreateButtons } from "@/features/posts/components/create-buttons";
@@ -35,10 +36,11 @@ export default async function PublicacoesPage({ searchParams }: { searchParams: 
   const monthStart = `${month}-01`;
   const [y, m] = month.split("-").map(Number);
   const monthEnd = new Date(Date.UTC(y, m, 0)).toISOString().slice(0, 10);
-  const [monthPosts, recent, targets] = await Promise.all([
+  const [monthPosts, recent, targets, ready] = await Promise.all([
     listPosts({ from: shiftIso(monthStart, 0), to: shiftIso(monthEnd, 1) }),
     listPosts({ from: shiftIso(today, -30), to: shiftIso(today, 1) }),
     current?.clientId && canPublish ? getPublishTargets(current.clientId) : Promise.resolve([]),
+    current && !current.clientId ? Promise.resolve([]) : listReadyToSchedule(current?.clientId ?? null),
   ]);
   const mine = <T extends { profileId: string }>(rows: T[]) => (current ? rows.filter((r) => r.profileId === current.id) : rows);
   const posts = mine(monthPosts);
@@ -68,7 +70,15 @@ export default async function PublicacoesPage({ searchParams }: { searchParams: 
           <EmptyState icon={Share2} title="Nenhum perfil ligado a cliente"
             description="Ligue as páginas do Facebook e os Instagram aos clientes em Configurações › Integrações › Páginas e Instagram. Depois, eles aparecem aqui para programar."
             action={user.permissions["ads.connect"] ? <Link href="/configuracoes/integracoes" className={buttonVariants({ variant: "outline" })}>Abrir Integrações</Link> : undefined} />
-        ) : (
+        ) : null}
+        {profiles.length === 0 && ready.length > 0 && (
+          <section aria-labelledby="prontos-sem-perfil" className="grid gap-2">
+            <h2 id="prontos-sem-perfil" className="text-sm font-semibold">Prontos para programar <span className="font-normal text-muted-foreground tabular-nums">({ready.length})</span></h2>
+            <p className="-mt-1 text-xs text-muted-foreground">Aprovados pelo cliente. Para programar pelo sistema, ligue antes a página ou o Instagram do cliente.</p>
+            <ReadyList rows={ready} showClient canPublish={canPublish} />
+          </section>
+        )}
+        {profiles.length === 0 ? null : (
           <div className="grid gap-4 lg:grid-cols-[16rem_minmax(0,1fr)]">
             <ProfileRail profiles={profiles} current={current?.id ?? null} href={(perfil) => href({ perfil, dia: null })} />
             <div className="grid min-w-0 content-start gap-4">
@@ -92,6 +102,14 @@ export default async function PublicacoesPage({ searchParams }: { searchParams: 
                 )}
                 {!current && canPublish && <p className="text-sm text-muted-foreground sm:basis-full">Escolha um perfil à esquerda para programar um post, vídeo, reels ou stories.</p>}
               </section>
+
+              {ready.length > 0 && (
+                <section aria-labelledby="prontos" className="grid gap-2">
+                  <h2 id="prontos" className="text-sm font-semibold">Prontos para programar <span className="font-normal text-muted-foreground tabular-nums">({ready.length})</span></h2>
+                  <p className="-mt-1 text-xs text-muted-foreground">Aprovados pelo cliente e ainda sem programação. Programar abre o perfil do cliente com a legenda e a data do conteúdo.</p>
+                  <ReadyList rows={ready} showClient={!current} canPublish={canPublish} />
+                </section>
+              )}
 
               {errors.length > 0 && (
                 <section aria-labelledby="erros" className="grid gap-2">
