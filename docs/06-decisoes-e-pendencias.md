@@ -828,3 +828,22 @@ Depois da importação de 25/11 (70 clientes, 20 quadros, 54 materiais, 586 tare
 - **Correção:** Configurações › Usuários quebrava (ligação ambígua entre as pessoas do Trello e os setores).
 - **Varredura com os dados reais:** 879 telas (25/11) e mais 289 depois da arrumação, como administrador, sem erro.
 - **Testes:** `57_nome_pendente.test.sql` (7).
+
+## Levantamento geral do que falta (26/11/2026)
+Conferido contra os prompts 04 a 12, as variáveis da Vercel e o estado real no banco. Funcionando: sincronização da Meta (35 rodadas/dia, sem falha), rotinas automáticas (sem falha em 7 dias), push, e-mail (Titan), alertas, relatórios, propostas, portal do cliente, exportação da biblioteca.
+
+**Para fazer (sem depender de ninguém), nesta ordem:**
+1. **Prontos para programar (RF-CON-04):** em Publicações, a lista dos conteúdos aprovados pelo cliente com arquivo e legenda, abrindo a programação já preenchida.
+2. **Quantidade mensal dos serviços em lote:** os 33 clientes ativos vieram do Trello sem quantidade de posts/vídeos por mês, o que deixa "Demanda do mês" e "Cronogramas do mês" sem o contratado. Uma tela única para preencher todos de uma vez.
+3. **Liberação de contas por gestor (RF-PER-06):** a permissão `ads.access.manage` existe sem tela; hoje o acesso vem só da equipe do cliente.
+4. **Lead Ads e Conversions API (RF-T2-01, parte 2):** só depois da permissão `leads_retrieval` (ver abaixo).
+
+**Depende da Extend (credenciais, contas ou decisões):**
+- WhatsApp: ligar o túnel e ler o QR Code (nenhum número conectado ainda).
+- Google Ads: conectar com o código de 2 fatores (nenhuma conexão do Google; sem isso não há números do Google nem palavras-chave, RF-ADS-08).
+- Meta: permissões de publicação (`pages_manage_posts`, `instagram_basic`, `instagram_content_publish`) e de leads (`leads_retrieval`), e ligar páginas e Instagram aos clientes.
+- Prospectador: `GOOGLE_PLACES_API_KEY` e `PROSPECTOR_MONTHLY_LIMIT` não estão na Vercel (decisão de custo D8).
+- Sentry (monitor de erros do sistema): nenhum `SENTRY_DSN` configurado; precisa de uma conta Sentry da Extend.
+- Equipe: convidar as 17 pessoas do Trello (Configurações › Usuários).
+- Dados dos clientes que o Trello não tinha: contrato, mensalidade, CNPJ, contatos (dá para importar pela planilha "Controle de clientes").
+- Google Drive (D1) sem decisão; dados da empresa na Privacidade; nomenclatura com o Luiz; fluxos de etapas com a Jackeline (D3); mudança para a VPS (HostGator).
