@@ -162,7 +162,7 @@ export async function listPlaceholders(): Promise<PlaceholderRow[]> {
   const { data, error } = await supabase
     .from("team_placeholders")
     .select(
-      "id, name, aliases, note, dismissed_at, sectors(id, name, color), invitations(email, status), profiles!team_placeholders_profile_id_fkey(id, full_name), team_placeholder_tasks(tasks(status, deleted_at, clients(name)))",
+      "id, name, aliases, note, dismissed_at, sectors!team_placeholders_sector_id_fkey(id, name, color), invitations(email, status), profiles!team_placeholders_profile_id_fkey(id, full_name), team_placeholder_tasks(tasks(status, deleted_at, clients(name)))",
     )
     .order("name");
   if (error) throw error;
