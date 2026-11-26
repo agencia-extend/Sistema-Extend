@@ -814,3 +814,17 @@ RF-T2-01 (prompt 11). São os leads que as campanhas do cliente geram, não o fu
 - "Levar ao funil": usa a mesma importação do Comercial (origem Prospecção, sem repetir telefone, com a observação do score e do Maps) e marca os locais como já importados; desfazer a importação libera os locais.
 - **Limite do mês:** `PROSPECTOR_MONTHLY_LIMIT` (padrão 300 páginas de 20); a tela mostra o uso. Cada busca fica registrada (1 ano).
 - **Pendente:** a chave `GOOGLE_PLACES_API_KEY` (tem custo por uso; passo 5 da fase 2 do `docs/11`). Sem ela a aba não aparece. Testes: `55_prospectador.test.sql` (8) e Vitest de `domain/crm/prospector`.
+
+## Arrumação dos dados do Trello (26/11/2026)
+Depois da importação de 25/11 (70 clientes, 20 quadros, 54 materiais, 586 tarefas de setor), conferência e arrumação no banco de produção:
+- **Nome do Trello no card:** enquanto a pessoa não tem conta, o card, o detalhe da demanda, a visão do setor e o painel Operacional mostram "Nome · convite pendente" em vez de "Sem responsável" (coluna `tasks.pending_assignee`, migration `20261126000100_nome_pendente_no_card.sql`). São 957 demandas com nome. Ao aceitar o convite (ou ligar o nome a alguém em Configurações › Usuários), o card passa para a pessoa e o nome pendente some; nome descartado também some. O "Sem responsável" do painel não conta mais essas demandas.
+- **Equipe do cliente:** a Visão geral mostra quem o Trello cita na equipe do cliente ainda sem conta (ex.: "Luiz · convite pendente" no Tráfego), pela função `client_pending_team` (só para quem vê o cliente). Ao aceitar o convite, a pessoa entra na equipe sozinha.
+- **Contas e acessos:** os perfis de Instagram, TikTok e sites que estavam só como material e são de um cliente só viraram contas do cliente (9), o que liga os links rápidos e a aba Redes sociais.
+- **Links repetidos entre clientes** (quadros copiados de outro no Trello: Remax ← GWP, Ramon/Thairine ← Associação de Corretores, consultoria de perfil entre Noelma e NC Estética): ficaram, com a observação "o mesmo link está em …: confira se é deste cliente" (24 materiais). Não viraram conta oficial.
+- **Tarefa de setor com o cliente no título** ("Organizar edições Joice") ligada à Beauty Joice. As outras 10 sem cliente são internas da agência (planilhas, agendamentos) ou de quem não está no Controle de Clientes ("Carol Mattos") e ficam como internas.
+- **Quadro "230"** (vazio, criado à mão em 13/11) apagado.
+- **Mês do cliente:** a rotina das 3h10 foi rodada na hora para os 33 clientes ativos (só abre o mês; os serviços vieram sem quantidade mensal, então nenhum card foi criado e nada duplicou o Trello).
+- **Conferido e certo como está:** 346 cards concluídos em colunas por semana (Noelma, NC Estética, Gastrô) estavam entregues no Trello; serviços de clientes encerrados não aparecem em cronogramas, rotinas nem painéis; os cards "Acessos" não têm senhas.
+- **Correção:** Configurações › Usuários quebrava (ligação ambígua entre as pessoas do Trello e os setores).
+- **Varredura com os dados reais:** 879 telas (25/11) e mais 289 depois da arrumação, como administrador, sem erro.
+- **Testes:** `57_nome_pendente.test.sql` (7).

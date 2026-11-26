@@ -33,7 +33,7 @@ export function TaskFields({
   canAssign,
   blocker,
 }: {
-  task: { id: string; assigneeId: string | null; dueAt: string | null; priority: string; blockedBy: string | null; waitingNote: string; tags: Tag[]; repeatUnit: string | null; repeatEvery: number | null; repeatNextId: string | null };
+  task: { id: string; assigneeId: string | null; pendingAssignee: string | null; dueAt: string | null; priority: string; blockedBy: string | null; waitingNote: string; tags: Tag[]; repeatUnit: string | null; repeatEvery: number | null; repeatNextId: string | null };
   participants: string[];
   team: Opt[];
   tags: Tag[];
@@ -53,7 +53,7 @@ export function TaskFields({
   return (
     <Section title="Detalhes">
       <div className="grid gap-4 rounded-xl border bg-card p-4">
-        <FormField label="Responsável">
+        <FormField label="Responsável" hint={!task.assigneeId && task.pendingAssignee ? `No Trello: ${task.pendingAssignee}. O card passa para a pessoa quando ela aceitar o convite.` : undefined}>
           <Select value={task.assigneeId ?? NONE} disabled={!canAssign || pending} onValueChange={(v) => run(updateTask({ id: task.id, assigneeId: v === NONE ? null : v }))}>
             <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
             <SelectContent>

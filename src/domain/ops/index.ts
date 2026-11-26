@@ -13,6 +13,8 @@ export type OpsTask = {
   completedAt: string | null;
   assigneeId: string | null;
   assigneeName: string | null;
+  /** Pessoa do Trello sem conta ainda: não conta como "sem responsável". */
+  pendingAssignee?: string | null;
   clientId: string | null;
   clientName: string | null;
 };
@@ -82,7 +84,7 @@ export function summarize(tasks: OpsTask[], period: OpsPeriod, personId: string 
       review: open.filter((t) => t.status === "aguardando_aprovacao").length,
       done: doneInPeriod.length,
       late: open.filter(late).length,
-      unassigned: open.filter((t) => !t.assigneeId).length,
+      unassigned: open.filter((t) => !t.assigneeId && !t.pendingAssignee).length,
     },
     urgent,
     byType: [...types].map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count),

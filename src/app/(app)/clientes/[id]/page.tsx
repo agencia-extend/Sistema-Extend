@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { AlertTriangle, CalendarClock } from "lucide-react";
 import { requirePermission } from "@/lib/auth/dal";
-import { currentServices, getClient, getHandoff, listCatalog, listMonthTasks, listTeam, listTimeline, upcomingServices } from "@/features/clients/queries";
+import { currentServices, getClient, getHandoff, listCatalog, listMonthTasks, listPendingTeam, listTeam, listTimeline, upcomingServices } from "@/features/clients/queries";
 import { listSectors } from "@/features/admin/queries";
 import { deliveredPercent, type ClientStatus } from "@/domain/clients";
 import { formatDate, formatDateTime, formatRelative } from "@/domain/shared/dates";
@@ -25,7 +25,7 @@ export default async function ClientOverviewPage({ params }: { params: Promise<{
   const client = (await getClient(id))!;
   const now = new Date();
   const month = currentMonth(await listClientMonths(id));
-  const [catalog, team, sectors, tasks, timeline, handoff, runs] = await Promise.all([
+  const [catalog, team, sectors, tasks, timeline, handoff, runs, pendingTeam] = await Promise.all([
     listCatalog(),
     listTeam(),
     listSectors(),
@@ -33,6 +33,7 @@ export default async function ClientOverviewPage({ params }: { params: Promise<{
     listTimeline(id),
     user.permissions["clients.onboarding.read"] ? getHandoff(id) : Promise.resolve(null),
     listClientRuns(id),
+    listPendingTeam(id),
   ]);
   const canManage = Boolean(user.permissions["clients.manage"] || user.permissions["clients.onboarding.manage"]);
   const status = client.status as ClientStatus;
@@ -90,6 +91,7 @@ export default async function ClientOverviewPage({ params }: { params: Promise<{
           canManage={canManage}
           sectors={sectors.filter((s) => s.is_active).map((s) => ({ id: s.id, name: s.name, color: s.color }))}
           team={team}
+          pendingPeople={pendingTeam}
           members={(client.client_members ?? []).map((m) => ({
             sectorId: m.sector_id,
             profileId: m.profile_id,

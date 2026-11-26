@@ -13,11 +13,15 @@ type Person = { id: string; name: string; sectorIds: string[] };
 type Member = { sectorId: string; profileId: string; name: string };
 
 /** Responsáveis por setor (RF-CLI-04). Marcar = acesso ao cliente e às demandas dele. */
-export function TeamCard({ clientId, canManage, sectors, team, members }: { clientId: string; canManage: boolean; sectors: Sector[]; team: Person[]; members: Member[] }) {
+export function TeamCard({ clientId, canManage, sectors, team, members, pendingPeople = [] }: {
+  clientId: string; canManage: boolean; sectors: Sector[]; team: Person[]; members: Member[];
+  /** Citados no Trello, ainda sem conta: entram na equipe quando aceitarem o convite. */
+  pendingPeople?: { name: string; sectorId: string }[];
+}) {
   const [sector, setSector] = useState("");
   const [person, setPerson] = useState("");
   const [pending, startTransition] = useTransition();
-  const shown = sectors.filter((s) => members.some((m) => m.sectorId === s.id));
+  const shown = sectors.filter((s) => members.some((m) => m.sectorId === s.id) || pendingPeople.some((p) => p.sectorId === s.id));
   const candidates = team
     .filter((p) => !members.some((m) => m.sectorId === sector && m.profileId === p.id))
     .sort((a, b) => Number(b.sectorIds.includes(sector)) - Number(a.sectorIds.includes(sector)));
@@ -57,6 +61,13 @@ export function TeamCard({ clientId, canManage, sectors, team, members }: { clie
                           <X className="size-3.5" aria-hidden="true" />
                         </button>
                       )}
+                    </li>
+                  ))}
+                {pendingPeople
+                  .filter((p) => p.sectorId === s.id)
+                  .map((p) => (
+                    <li key={`pendente-${p.name}`} className="inline-flex items-center rounded-full border border-dashed px-2.5 py-0.5 text-sm text-muted-foreground" title="Citado no Trello. Entra na equipe quando aceitar o convite (Configurações › Usuários).">
+                      {p.name} · convite pendente
                     </li>
                   ))}
               </ul>

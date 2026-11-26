@@ -73,7 +73,9 @@ export function TaskCardView({ t, showClient = true, showStep = false }: { t: Ta
         )}
       </span>
       <span className="flex items-center justify-between gap-2">
-        <span className="min-w-0 truncate text-xs text-muted-foreground">{t.assigneeName ?? "Sem responsável"}</span>
+        <span className="min-w-0 truncate text-xs text-muted-foreground" title={!t.assigneeName && t.pendingAssignee ? "Pessoa do Trello: o card passa para ela quando aceitar o convite." : undefined}>
+          {t.assigneeName ?? (t.pendingAssignee ? `${t.pendingAssignee} · convite pendente` : "Sem responsável")}
+        </span>
         <DueBadge dueAt={t.dueAt} status={t.status} />
       </span>
     </Link>

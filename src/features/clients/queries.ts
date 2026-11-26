@@ -330,3 +330,11 @@ export async function listMaterials(clientId: string): Promise<MaterialRow[]> {
     };
   });
 }
+
+/** Equipe do cliente citada no Trello que ainda não tem conta (nome e setor). */
+export async function listPendingTeam(clientId: string): Promise<{ name: string; sectorId: string }[]> {
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc("client_pending_team", { p_client: clientId });
+  if (error) throw error;
+  return (data ?? []).map((r) => ({ name: r.name, sectorId: r.sector_id }));
+}

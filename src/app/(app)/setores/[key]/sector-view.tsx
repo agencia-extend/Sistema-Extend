@@ -46,8 +46,8 @@ export function SectorView({ tasks, stats, filters: f }: { tasks: TaskRow[]; sta
   );
   const byPerson = new Map<string, { name: string; open: number; late: number }>();
   for (const t of list) {
-    const k = t.assigneeId ?? "-";
-    const a = byPerson.get(k) ?? { name: t.assigneeName ?? "Sem responsável", open: 0, late: 0 };
+    const k = t.assigneeId ?? (t.pendingAssignee ? `pendente:${t.pendingAssignee}` : "-");
+    const a = byPerson.get(k) ?? { name: t.assigneeName ?? (t.pendingAssignee ? `${t.pendingAssignee} (convite pendente)` : "Sem responsável"), open: 0, late: 0 };
     if (!["concluido", "cancelado"].includes(t.status)) a.open++;
     if (dueState(t.dueAt, t.status) === "late") a.late++;
     byPerson.set(k, a);

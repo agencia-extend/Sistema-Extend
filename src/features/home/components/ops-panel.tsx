@@ -82,7 +82,7 @@ export async function OpsPanel({ period, personId }: { period: OpsPeriod; person
                       <span className={cn("text-xs tabular", late ? "font-medium text-danger" : "text-warning")}>
                         {late ? `Atrasada · ${formatDate(t.dueAt!)}` : t.priority === "urgente" ? "Urgente" : "Alta"}
                       </span>
-                      <span className="col-span-2 truncate text-xs text-muted-foreground">{[t.clientName ?? "Interna", t.assigneeName ?? "Sem responsável"].join(" · ")}</span>
+                      <span className="col-span-2 truncate text-xs text-muted-foreground">{[t.clientName ?? "Interna", t.assigneeName ?? (t.pendingAssignee ? `${t.pendingAssignee} (convite pendente)` : "Sem responsável")].join(" · ")}</span>
                     </Link>
                   </li>
                 );

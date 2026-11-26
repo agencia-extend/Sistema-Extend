@@ -7,7 +7,7 @@ function one<T>(v: T | T[] | null | undefined): T | null {
 }
 
 export const LIST_SELECT =
-  "id, title, type, status, priority, due_at, position, client_id, sector_id, assignee_id, workflow_step_id, board_id, board_column_id, blocked_by_task_id, slot_month, completed_at, created_at, repeat_unit, repeat_every, clients(name), profiles!tasks_assignee_id_fkey(full_name), workflow_steps(name, color, waits_client), task_tags(tags(id, name, color))";
+  "id, title, type, status, priority, due_at, position, client_id, sector_id, assignee_id, pending_assignee, workflow_step_id, board_id, board_column_id, blocked_by_task_id, slot_month, completed_at, created_at, repeat_unit, repeat_every, clients(name), profiles!tasks_assignee_id_fkey(full_name), workflow_steps(name, color, waits_client), task_tags(tags(id, name, color))";
 
 export type TaskRow = {
   id: string;
@@ -22,6 +22,8 @@ export type TaskRow = {
   sectorId: string | null;
   assigneeId: string | null;
   assigneeName: string | null;
+  /** Pessoa citada no Trello que ainda não tem conta (convite pendente). */
+  pendingAssignee: string | null;
   stepId: string | null;
   stepName: string | null;
   stepColor: string | null;
@@ -53,6 +55,7 @@ export function mapRow(t: Raw): TaskRow {
     sectorId: (t.sector_id as string) ?? null,
     assigneeId: (t.assignee_id as string) ?? null,
     assigneeName: one(t.profiles as { full_name: string } | null)?.full_name ?? null,
+    pendingAssignee: (t.pending_assignee as string) ?? null,
     stepId: (t.workflow_step_id as string) ?? null,
     stepName: step?.name ?? null,
     stepColor: step?.color ?? null,

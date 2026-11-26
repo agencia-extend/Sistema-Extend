@@ -19,7 +19,7 @@ export async function opsData(period: OpsPeriod) {
   const since = periodStart(period, now) ?? new Date(now.getTime() - 365 * 86_400_000).toISOString();
   const week = new Date(now.getTime() + 7 * 86_400_000).toISOString();
   const today = todayKey(now);
-  const sel = "id, title, type, status, priority, due_at, completed_at, assignee_id, client_id, clients(name), profiles!tasks_assignee_id_fkey(full_name)";
+  const sel = "id, title, type, status, priority, due_at, completed_at, assignee_id, pending_assignee, client_id, clients(name), profiles!tasks_assignee_id_fkey(full_name)";
 
   const sinceDay = new Date(Date.parse(since) - 3 * 3600_000).toISOString().slice(0, 10);
   const [open, done, events, meetings, months, totals] = await Promise.all([
@@ -52,6 +52,7 @@ export async function opsData(period: OpsPeriod) {
       completedAt: (t.completed_at as string) ?? null,
       assigneeId: (t.assignee_id as string) ?? null,
       assigneeName: one(t.profiles as { full_name: string } | null)?.full_name ?? null,
+      pendingAssignee: (t.pending_assignee as string) ?? null,
       clientId: (t.client_id as string) ?? null,
       clientName: one(t.clients as { name: string } | null)?.name ?? null,
     }));
